@@ -1,0 +1,43 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+# Build Results
+*.dll
+*.exe
+*.app
+*.log
+*.pdb
+*.cache
+*.mdb
+*.dbmdl
+*.bak
+*.backup
+*.log
+*.vspscc
+*.vssscc
+
+# Test Results
+TestResults/
+*.TestResults
+
+# Others
+_ReSharper*/
