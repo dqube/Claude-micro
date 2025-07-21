@@ -38,6 +38,7 @@
   <!-- Domain layer specific package references -->
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Domain'">
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <!-- Application layer specific package references -->

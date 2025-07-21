@@ -1,4 +1,5 @@
 using BuildingBlocks.Domain.DomainEvents;
+using BuildingBlocks.Infrastructure.Data.Converters;
 using Microsoft.EntityFrameworkCore;
 using PatientService.Domain.Entities;
 using PatientService.Domain.ValueObjects;
@@ -20,16 +21,26 @@ public class PatientDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new PatientConfiguration());
 
-        // Configure strongly typed IDs
-        modelBuilder.Entity<Patient>()
-            .Property(p => p.Id)
-            .HasConversion(
-                id => id.Value,
-                value => PatientId.From(value));
+        // Configure all strongly typed IDs automatically
+        modelBuilder.ConfigureStronglyTypedIds();
 
         // Ignore domain events for EF Core
         modelBuilder.Entity<Patient>()
             .Ignore(p => p.DomainEvents);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // This will be overridden by the options passed in the constructor
+            // but we include it here for completeness
+        }
+
+        // Enable strongly typed ID value converters
+        optionsBuilder.UseStronglyTypedIdConverters();
+        
+        base.OnConfiguring(optionsBuilder);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
