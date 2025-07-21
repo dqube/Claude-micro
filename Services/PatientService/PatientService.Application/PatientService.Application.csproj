@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>PatientService.Application</PackageId>
+    <Description>Patient Service application layer containing use cases and business logic</Description>
+    <PackageTags>patient;application;healthcare;cqrs</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks.Domain\BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks.Application\BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\PatientService.Domain\PatientService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
