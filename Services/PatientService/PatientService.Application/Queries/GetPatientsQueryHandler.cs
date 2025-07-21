@@ -47,13 +47,13 @@ public class GetPatientsQueryHandler : IQueryHandler<GetPatientsQuery, PagedResu
             DisplayName = patient.Name.DisplayName,
             Email = patient.Email.Value,
             PhoneNumber = patient.PhoneNumber?.Value,
-            Address = patient.Address != null ? new AddressDto
-            {
-                Street = patient.Address.Street,
-                City = patient.Address.City,
-                PostalCode = patient.Address.PostalCode,
-                Country = patient.Address.Country
-            } : null,
+            Address = patient.Address != null 
+                ? new AddressDto(
+                    patient.Address.Street,
+                    patient.Address.City,
+                    patient.Address.PostalCode,
+                    patient.Address.Country
+                ) : null,
             DateOfBirth = patient.DateOfBirth,
             Age = patient.CalculateAge(),
             Gender = patient.Gender.Name,

@@ -2,32 +2,31 @@ using BuildingBlocks.Application.DTOs;
 
 namespace PatientService.Application.DTOs;
 
-public class PatientDto : BaseDto
+public record PatientDto
 {
-    public Guid Id { get; set; }
-    public string MedicalRecordNumber { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string? MiddleName { get; set; }
-    public string FullName { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string? PhoneNumber { get; set; }
-    public AddressDto? Address { get; set; }
-    public DateTime DateOfBirth { get; set; }
-    public int Age { get; set; }
-    public string Gender { get; set; } = string.Empty;
-    public string? BloodType { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsMinor { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public Guid Id { get; init; }
+    public string MedicalRecordNumber { get; init; } = string.Empty;
+    public string FirstName { get; init; } = string.Empty;
+    public string LastName { get; init; } = string.Empty;
+    public string? MiddleName { get; init; }
+    public string FullName { get; init; } = string.Empty;
+    public string DisplayName { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string? PhoneNumber { get; init; }
+    public AddressDto? Address { get; init; }
+    public DateTime DateOfBirth { get; init; }
+    public int Age { get; init; }
+    public string Gender { get; init; } = string.Empty;
+    public string? BloodType { get; init; }
+    public bool IsActive { get; init; }
+    public bool IsMinor { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime? UpdatedAt { get; init; }
 }
 
-public class AddressDto
-{
-    public string Street { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string PostalCode { get; set; } = string.Empty;
-    public string Country { get; set; } = string.Empty;
-}
+public record AddressDto(
+    string Street,
+    string City,
+    string PostalCode,
+    string Country
+);

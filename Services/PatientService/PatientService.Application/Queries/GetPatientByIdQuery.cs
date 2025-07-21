@@ -5,7 +5,7 @@ namespace PatientService.Application.Queries;
 
 public class GetPatientByIdQuery : QueryBase<PatientDto>
 {
-    public Guid PatientId { get; }
+    public Guid PatientId { get; init; }
 
     public GetPatientByIdQuery(Guid patientId)
     {

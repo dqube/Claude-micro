@@ -5,16 +5,16 @@ namespace PatientService.Application.Commands;
 
 public class CreatePatientCommand : CommandBase<PatientDto>
 {
-    public string MedicalRecordNumber { get; }
-    public string FirstName { get; }
-    public string LastName { get; }
-    public string? MiddleName { get; }
-    public string Email { get; }
-    public string? PhoneNumber { get; }
-    public AddressDto? Address { get; }
-    public DateTime DateOfBirth { get; }
-    public string Gender { get; }
-    public string? BloodType { get; }
+    public string MedicalRecordNumber { get; init; }
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    public string? MiddleName { get; init; }
+    public string Email { get; init; }
+    public string? PhoneNumber { get; init; }
+    public AddressDto? Address { get; init; }
+    public DateTime DateOfBirth { get; init; }
+    public string Gender { get; init; }
+    public string? BloodType { get; init; }
 
     public CreatePatientCommand(
         string medicalRecordNumber,

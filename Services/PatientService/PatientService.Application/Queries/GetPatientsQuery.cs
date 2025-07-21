@@ -5,11 +5,11 @@ namespace PatientService.Application.Queries;
 
 public class GetPatientsQuery : PagedQuery<PatientDto>
 {
-    public string? SearchTerm { get; }
-    public bool? IsActive { get; }
-    public string? Gender { get; }
-    public int? MinAge { get; }
-    public int? MaxAge { get; }
+    public string? SearchTerm { get; init; }
+    public bool? IsActive { get; init; }
+    public string? Gender { get; init; }
+    public int? MinAge { get; init; }
+    public int? MaxAge { get; init; }
 
     public GetPatientsQuery(
         int page = 1,

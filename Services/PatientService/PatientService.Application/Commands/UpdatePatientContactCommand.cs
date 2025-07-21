@@ -4,9 +4,9 @@ namespace PatientService.Application.Commands;
 
 public class UpdatePatientContactCommand : CommandBase
 {
-    public Guid PatientId { get; }
-    public string Email { get; }
-    public string? PhoneNumber { get; }
+    public Guid PatientId { get; init; }
+    public string Email { get; init; }
+    public string? PhoneNumber { get; init; }
 
     public UpdatePatientContactCommand(Guid patientId, string email, string? phoneNumber = null)
     {
