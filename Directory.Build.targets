@@ -1,0 +1,82 @@
+<Project>
+
+  <!-- Define project reference paths -->
+  <PropertyGroup>
+    <DomainProject>$(MSBuildThisFileDirectory)BuildingBlocks.Domain\BuildingBlocks.Domain.csproj</DomainProject>
+    <ApplicationProject>$(MSBuildThisFileDirectory)BuildingBlocks.Application\BuildingBlocks.Application.csproj</ApplicationProject>
+    <InfrastructureProject>$(MSBuildThisFileDirectory)BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj</InfrastructureProject>
+    <APIProject>$(MSBuildThisFileDirectory)BuildingBlocks.API\BuildingBlocks.API.csproj</APIProject>
+  </PropertyGroup>
+
+  <!-- Domain layer - no dependencies on other layers -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Domain'">
+    <!-- Domain has no project dependencies -->
+  </ItemGroup>
+
+  <!-- Application layer - depends on Domain -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Application'">
+    <ProjectReference Include="$(DomainProject)" />
+  </ItemGroup>
+
+  <!-- Infrastructure layer - depends on Domain and Application -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Infrastructure'">
+    <ProjectReference Include="$(DomainProject)" />
+    <ProjectReference Include="$(ApplicationProject)" />
+  </ItemGroup>
+
+  <!-- API layer - depends on Domain and Application -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.API'">
+    <ProjectReference Include="$(DomainProject)" />
+    <ProjectReference Include="$(ApplicationProject)" />
+  </ItemGroup>
+
+  <!-- Common framework references -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Infrastructure' OR '$(MSBuildProjectName)' == 'BuildingBlocks.API'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Domain layer specific package references -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Domain'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <!-- Application layer specific package references -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Application'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Scrutor" />
+  </ItemGroup>
+
+  <!-- Infrastructure layer specific package references -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Infrastructure'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+    <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+  </ItemGroup>
+
+  <!-- API layer specific package references -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.API'">
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+</Project>
