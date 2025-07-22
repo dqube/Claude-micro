@@ -1,0 +1,16 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  BuildingBlocks.Domain -> /Users/mdevendran/dotnetarch/your-awesome-project/BuildingBlocks.Domain/bin/Debug/net9.0/BuildingBlocks.Domain.dll
+  PatientService.Domain -> /Users/mdevendran/dotnetarch/your-awesome-project/Services/PatientService/PatientService.Domain/bin/Debug/net9.0/PatientService.Domain.dll
+  BuildingBlocks.Application -> /Users/mdevendran/dotnetarch/your-awesome-project/BuildingBlocks.Application/bin/Debug/net9.0/BuildingBlocks.Application.dll
+  PatientService.Application -> /Users/mdevendran/dotnetarch/your-awesome-project/Services/PatientService/PatientService.Application/bin/Debug/net9.0/PatientService.Application.dll
+  BuildingBlocks.API -> /Users/mdevendran/dotnetarch/your-awesome-project/BuildingBlocks.API/bin/Debug/net9.0/BuildingBlocks.API.dll
+  BuildingBlocks.Infrastructure -> /Users/mdevendran/dotnetarch/your-awesome-project/BuildingBlocks.Infrastructure/bin/Debug/net9.0/BuildingBlocks.Infrastructure.dll
+  PatientService.Infrastructure -> /Users/mdevendran/dotnetarch/your-awesome-project/Services/PatientService/PatientService.Infrastructure/bin/Debug/net9.0/PatientService.Infrastructure.dll
+  PatientService.API -> /Users/mdevendran/dotnetarch/your-awesome-project/Services/PatientService/PatientService.API/bin/Debug/net9.0/PatientService.API.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.02
