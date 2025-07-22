@@ -18,7 +18,7 @@ public static class ApiServiceCollectionExtensions
         services.AddApiCore();
         
         // Add authentication
-        services.AddApiAuthentication(configuration);
+        services.AddApiAuthenticationServices(configuration);
         
         // Add OpenAPI documentation
         services.AddOpenApiWithAuthentication(configuration);
@@ -27,7 +27,7 @@ public static class ApiServiceCollectionExtensions
         services.AddFluentValidation();
         
         // Add CORS
-        services.AddApiCors(configuration);
+        services.AddApiCorsServices(configuration);
         
         // Add rate limiting (commented out due to package availability)
         // services.AddApiRateLimiting(configuration);
@@ -53,7 +53,7 @@ public static class ApiServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddApiAuthentication(
+    public static IServiceCollection AddApiAuthenticationServices(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -76,7 +76,7 @@ public static class ApiServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddApiCors(
+    public static IServiceCollection AddApiCorsServices(
         this IServiceCollection services,
         IConfiguration configuration)
     {

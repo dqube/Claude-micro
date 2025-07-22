@@ -22,6 +22,10 @@ public class CreatePatientCommandHandler : ICommandHandler<CreatePatientCommand,
 
     public async Task<PatientDto> HandleAsync(CreatePatientCommand request, CancellationToken cancellationToken)
     {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request), "CreatePatientCommand cannot be null");
+        }
         var patientId = PatientId.New();
         var mrn = new MedicalRecordNumber(request.MedicalRecordNumber);
         var name = new PatientName(request.FirstName, request.LastName, request.MiddleName);
@@ -72,7 +76,7 @@ public class CreatePatientCommandHandler : ICommandHandler<CreatePatientCommand,
             DisplayName = patient.Name.DisplayName,
             Email = patient.Email.Value,
             PhoneNumber = patient.PhoneNumber?.Value,
-            Address = patient.Address != null 
+            Address = patient.Address is not null 
                 ? new AddressDto(
                     patient.Address.Street,
                     patient.Address.City,
