@@ -89,27 +89,21 @@ BuildingBlocks.API/
 │       ├── ConfigurationExtensions.cs
 │       └── OptionsExtensions.cs
 ├── Extensions/
-│   ├── ServiceCollection/
-│   │   ├── ApiServiceCollectionExtensions.cs
-│   │   ├── AuthenticationExtensions.cs
-│   │   ├── CorsExtensions.cs
-│   │   ├── OpenApiExtensions.cs
-│   │   ├── VersioningExtensions.cs
-│   │   ├── RateLimitingExtensions.cs
-│   │   ├── HealthCheckExtensions.cs
-│   │   └── ValidationExtensions.cs
-│   ├── WebApplication/
-│   │   ├── ApiWebApplicationExtensions.cs
-│   │   ├── MiddlewareExtensions.cs
-│   │   ├── SecurityExtensions.cs
-│   │   ├── ErrorHandlingExtensions.cs
-│   │   ├── OpenApiExtensions.cs
-│   │   └── HealthCheckExtensions.cs
-│   └── HttpContext/
-│       ├── HttpContextExtensions.cs
-│       ├── ClaimsPrincipalExtensions.cs
-│       ├── RequestExtensions.cs
-│       └── ResponseExtensions.cs
+│   ├── ApiExtensions.cs
+│   ├── AuthenticationExtensions.cs
+│   ├── CorsExtensions.cs
+│   ├── OpenApiExtensions.cs
+│   ├── VersioningExtensions.cs
+│   ├── RateLimitingExtensions.cs
+│   ├── HealthCheckExtensions.cs
+│   ├── ValidationExtensions.cs
+│   ├── MiddlewareExtensions.cs
+│   ├── SecurityExtensions.cs
+│   ├── ErrorHandlingExtensions.cs
+│   ├── HttpContextExtensions.cs
+│   ├── ClaimsPrincipalExtensions.cs
+│   ├── RequestExtensions.cs
+│   └── ResponseExtensions.cs
 └── Utilities/
     ├── Helpers/
     │   ├── ResponseHelper.cs
