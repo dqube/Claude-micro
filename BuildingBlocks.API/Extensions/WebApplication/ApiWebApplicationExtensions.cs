@@ -5,32 +5,31 @@ using Microsoft.Extensions.Hosting;
 using BuildingBlocks.API.Middleware.ErrorHandling;
 using BuildingBlocks.API.Middleware.Logging;
 using BuildingBlocks.API.OpenApi.Configuration;
-using WebApp = Microsoft.AspNetCore.Builder.WebApplication;
 
-namespace BuildingBlocks.API.Extensions.ServiceCollection;
+namespace BuildingBlocks.API.Extensions.WebApp;
 
 public static class ApiWebApplicationExtensions
 {
-    public static WebApp UseBuildingBlocksApi(
-        this WebApp app,
+    public static WebApplication UseBuildingBlocksApi(
+        this WebApplication app,
         IConfiguration? configuration = null)
     {
         // Add essential middleware
-        app.UseApiMiddlewarePipeline();
+        app.UseApiMiddleware();
         
         // Add authentication and authorization
-        app.UseApiSecurityPipeline();
+        app.UseApiSecurity();
         
         // Add documentation
         app.UseScalarDocumentation(configuration);
         
         // Add health checks
-        app.UseApiHealthChecksPipeline();
+        app.UseApiHealthChecks();
 
         return app;
     }
 
-    public static WebApp UseApiMiddlewarePipeline(this WebApp app)
+    public static WebApplication UseApiMiddleware(this WebApplication app)
     {
         // CORS (must be before authentication)
         app.UseCors();
@@ -46,7 +45,7 @@ public static class ApiWebApplicationExtensions
         return app;
     }
 
-    public static WebApp UseApiSecurityPipeline(this WebApp app)
+    public static WebApplication UseApiSecurity(this WebApplication app)
     {
         app.UseAuthentication();
         app.UseAuthorization();
@@ -54,7 +53,7 @@ public static class ApiWebApplicationExtensions
         return app;
     }
 
-    public static WebApp UseApiHealthChecksPipeline(this WebApp app)
+    public static WebApplication UseApiHealthChecks(this WebApplication app)
     {
         app.MapHealthChecks("/health");
         
@@ -91,7 +90,7 @@ public static class ApiWebApplicationExtensions
         return app;
     }
 
-    public static WebApp UseDefaultSecurityHeaders(this WebApp app)
+    public static WebApplication UseSecurityHeaders(this WebApplication app)
     {
         if (!app.Environment.IsDevelopment())
         {
