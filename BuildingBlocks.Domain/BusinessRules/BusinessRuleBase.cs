@@ -7,6 +7,8 @@ public abstract class BusinessRuleBase : IBusinessRule
 
     protected static void CheckRule(IBusinessRule rule)
     {
+        ArgumentNullException.ThrowIfNull(rule);
+        
         if (rule.IsBroken())
         {
             throw new Exceptions.BusinessRuleValidationException(rule);

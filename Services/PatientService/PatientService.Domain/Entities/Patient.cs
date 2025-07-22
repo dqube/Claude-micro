@@ -20,7 +20,13 @@ public class Patient : AggregateRoot<PatientId>
     public DateTime? UpdatedAt { get; private set; }
 
     // Private constructor for EF Core
-    private Patient() : base(PatientId.New()) { }
+    private Patient() : base(PatientId.New()) 
+    { 
+        MedicalRecordNumber = new MedicalRecordNumber("TEMP-00000");
+        Name = new PatientName("Unknown", "Unknown");
+        Email = new Email("unknown@temp.com");
+        Gender = Gender.PreferNotToSay;
+    }
 
     public Patient(
         PatientId id,

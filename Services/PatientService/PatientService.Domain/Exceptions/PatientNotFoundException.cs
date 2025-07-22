@@ -5,6 +5,21 @@ namespace PatientService.Domain.Exceptions;
 
 public class PatientNotFoundException : DomainException
 {
+    public PatientNotFoundException()
+        : base("Patient was not found.")
+    {
+    }
+
+    public PatientNotFoundException(string message)
+        : base(message)
+    {
+    }
+
+    public PatientNotFoundException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+
     public PatientNotFoundException(PatientId patientId) 
         : base($"Patient with ID '{patientId}' was not found.")
     {

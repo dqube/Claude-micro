@@ -50,6 +50,24 @@ public class ValidationContext<T>
 
 public class ValidationException : Exception
 {
+    public ValidationException()
+        : base("Validation failed.")
+    {
+        Errors = new List<ValidationError>();
+    }
+
+    public ValidationException(string message)
+        : base(message)
+    {
+        Errors = new List<ValidationError>();
+    }
+
+    public ValidationException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+        Errors = new List<ValidationError>();
+    }
+
     public ValidationException(IEnumerable<ValidationError> failures)
         : base($"Validation failed: {string.Join(", ", failures.Select(f => f.ErrorMessage))}")
     {
