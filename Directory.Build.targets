@@ -68,6 +68,7 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Asp.Versioning.Http" />
@@ -75,9 +76,14 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <PackageReference Include="AspNetCore.HealthChecks.UI" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" />
     <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
   </ItemGroup>
 
 </Project>

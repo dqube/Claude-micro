@@ -41,10 +41,10 @@ public static class ValidationExtensions
                     g => g.Select(x => x.ErrorMessage).ToArray());
 
             var response = ApiResponseBuilder.ValidationError(errors, correlationId: correlationId);
-            return Results.BadRequest(response);
+            return Microsoft.AspNetCore.Http.Results.BadRequest(response);
         }
 
-        return Results.Empty;
+        return Microsoft.AspNetCore.Http.Results.Ok();
     }
 
     public static async Task<(bool IsValid, IResult? ErrorResult)> TryValidateAsync<T>(
@@ -63,7 +63,7 @@ public static class ValidationExtensions
                     g => g.Select(x => x.ErrorMessage).ToArray());
 
             var response = ApiResponseBuilder.ValidationError(errors, correlationId: correlationId);
-            return (false, Results.BadRequest(response));
+            return (false, Microsoft.AspNetCore.Http.Results.BadRequest(response));
         }
 
         return (true, null);
@@ -74,6 +74,6 @@ public static class ValidationExtensions
         string? correlationId = null)
     {
         var response = ApiResponseBuilder.ValidationError(errors, correlationId: correlationId);
-        return Results.BadRequest(response);
+        return Microsoft.AspNetCore.Http.Results.BadRequest(response);
     }
 }

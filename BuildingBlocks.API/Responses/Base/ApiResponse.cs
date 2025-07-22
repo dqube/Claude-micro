@@ -54,6 +54,12 @@ public class ErrorResponse : ApiResponse
 {
     [JsonPropertyName("errors")]
     public IDictionary<string, object>? Errors { get; set; }
+
+    [JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; set; }
+
+    [JsonPropertyName("details")]
+    public string? Details { get; set; }
 }
 
 public class ValidationErrorResponse : ApiResponse

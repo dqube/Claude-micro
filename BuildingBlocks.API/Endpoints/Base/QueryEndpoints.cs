@@ -21,7 +21,7 @@ public abstract class QueryEndpoints : EndpointBase
     /// <returns>Paged API response</returns>
     protected static IResult PagedResponse<T>(
         IEnumerable<T> data,
-        int totalCount,
+        long totalCount,
         int pageNumber,
         int pageSize,
         string? message = null,
@@ -34,12 +34,13 @@ public abstract class QueryEndpoints : EndpointBase
             Message = message ?? "Query completed successfully",
             CorrelationId = correlationId,
             Timestamp = DateTime.UtcNow,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-            HasNextPage = pageNumber * pageSize < totalCount,
-            HasPreviousPage = pageNumber > 1
+            Pagination = new PaginationInfo
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            }
         };
 
         return Results.Ok(response);
@@ -62,7 +63,7 @@ public abstract class QueryEndpoints : EndpointBase
     {
         return PagedResponse(
             Enumerable.Empty<T>(),
-            0,
+            0L,
             pageNumber,
             pageSize,
             message ?? "No data found",
@@ -105,7 +106,7 @@ public abstract class QueryEndpoints : EndpointBase
         string? message = null,
         string? correlationId = null)
     {
-        var items = data?.ToList() ?? new List<T>();
+        var items = data?.ToList() ?? [];
         return ApiResponse(items, message ?? $"Retrieved {items.Count} items", correlationId);
     }
 }
