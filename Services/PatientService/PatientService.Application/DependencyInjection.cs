@@ -10,10 +10,8 @@ public static class DependencyInjection
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        // Register handlers using BuildingBlocks extension methods with assembly parameter
-        services.AddCommandHandlers(assembly);
-        services.AddQueryHandlers(assembly);
-        services.AddEventHandlers(assembly);
+        // Register mediator with all handlers from this assembly
+        services.AddMediatorWithAssemblies(assembly);
 
         return services;
     }

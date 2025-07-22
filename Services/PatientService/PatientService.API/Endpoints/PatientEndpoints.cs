@@ -4,6 +4,7 @@ using PatientService.Application.DTOs;
 using PatientService.Application.Queries;
 using BuildingBlocks.Domain.Common;
 using BuildingBlocks.Application.CQRS.Queries;
+using BuildingBlocks.Application.Mediator;
 
 namespace PatientService.API.Endpoints;
 
@@ -53,7 +54,7 @@ public static class PatientEndpoints
     }
 
     private static async Task<IResult> GetPatientsAsync(
-        [FromServices] GetPatientsQueryHandler handler,
+        [FromServices] IMediator mediator,
         [AsParameters] GetPatientsRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -66,19 +67,19 @@ public static class PatientEndpoints
             request.MinAge,
             request.MaxAge);
 
-        var result = await handler.HandleAsync(query, cancellationToken);
+        var result = await mediator.QueryAsync<GetPatientsQuery, PagedResult<PatientDto>>(query, cancellationToken);
         return Results.Ok(result);
     }
 
     private static async Task<IResult> GetPatientByIdAsync(
         Guid id,
-        [FromServices] GetPatientByIdQueryHandler handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var query = new GetPatientByIdQuery(id);
-            var result = await handler.HandleAsync(query, cancellationToken);
+            var result = await mediator.QueryAsync<GetPatientByIdQuery, PatientDto>(query, cancellationToken);
             return Results.Ok(result);
         }
         catch (Exception ex) when (ex.Message.Contains("not found"))
@@ -89,7 +90,7 @@ public static class PatientEndpoints
 
     private static async Task<IResult> CreatePatientAsync(
         [FromBody] CreatePatientRequest request,
-        [FromServices] CreatePatientCommandHandler handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken = default)
     {
         try
@@ -106,7 +107,7 @@ public static class PatientEndpoints
                 request.Gender,
                 request.BloodType);
 
-            var result = await handler.HandleAsync(command, cancellationToken);
+            var result = await mediator.SendAsync<CreatePatientCommand, PatientDto>(command, cancellationToken);
             
             return Results.Created($"/api/patients/{result.Id}", result);
         }
@@ -119,13 +120,13 @@ public static class PatientEndpoints
     private static async Task<IResult> UpdatePatientContactAsync(
         Guid id,
         [FromBody] UpdateContactRequest request,
-        [FromServices] UpdatePatientContactCommandHandler handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var command = new UpdatePatientContactCommand(id, request.Email, request.PhoneNumber);
-            await handler.HandleAsync(command, cancellationToken);
+            await mediator.SendAsync<UpdatePatientContactCommand>(command, cancellationToken);
             
             return Results.NoContent();
         }

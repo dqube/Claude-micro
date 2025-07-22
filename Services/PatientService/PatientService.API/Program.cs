@@ -1,21 +1,32 @@
-using BuildingBlocks.Application.Extensions;
 using PatientService.API.Endpoints;
+using PatientService.API.Converters;
 using PatientService.Application;
 using PatientService.Domain;
 using PatientService.Infrastructure;
+using Scalar.AspNetCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddOpenApi();
+
+// Configure JSON options
+builder.Services.ConfigureHttpJsonOptions(options =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Patient Service API", Version = "v1" });
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.SerializerOptions.AllowTrailingCommas = true;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.SerializerOptions.Converters.Add(new CustomDateTimeConverter());
 });
 
 // Add layers
 builder.Services.AddDomain();
-PatientService.Application.DependencyInjection.AddApplication(builder.Services);
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add Health Checks
@@ -37,21 +48,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Patient Service API v1");
-        c.RoutePrefix = string.Empty; // Serve Swagger UI at root
-    });
+    app.MapOpenApi();
+    app.MapScalarApiReference();
     
     app.UseCors("AllowAll");
     
     // Ensure database is created in development
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<PatientService.Infrastructure.Persistence.PatientDbContext>();
-        context.Database.EnsureCreated();
-    }
+    // using (var scope = app.Services.CreateScope())
+    // {
+    //     var context = scope.ServiceProvider.GetRequiredService<PatientService.Infrastructure.Persistence.PatientDbContext>();
+    //     context.Database.EnsureCreated();
+    // }
 }
 
 app.UseHttpsRedirection();
@@ -63,7 +70,7 @@ app.MapPatientEndpoints();
 app.MapHealthChecks("/health");
 
 // Add root endpoint
-app.MapGet("/", () => Results.Redirect("/swagger"))
+app.MapGet("/", () => Results.Redirect("/scalar/v1"))
     .WithName("Root")
     .WithSummary("Redirect to API documentation")
     .ExcludeFromDescription();
