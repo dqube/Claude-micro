@@ -3,6 +3,7 @@ using BuildingBlocks.Application.CQRS.Commands;
 using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.CQRS.Events;
 using BuildingBlocks.Application.Behaviors;
+using System.Reflection;
 
 namespace BuildingBlocks.Application.Extensions;
 
@@ -69,6 +70,23 @@ public static class MediatorExtensions
         return services;
     }
 
+    public static IServiceCollection AddCommandHandlers(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        services.Scan(scan => scan
+            .FromAssemblies(assemblies)
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        services.Scan(scan => scan
+            .FromAssemblies(assemblies)
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
     public static IServiceCollection AddQueryHandlers(this IServiceCollection services)
     {
         services.Scan(scan => scan
@@ -80,10 +98,32 @@ public static class MediatorExtensions
         return services;
     }
 
+    public static IServiceCollection AddQueryHandlers(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        services.Scan(scan => scan
+            .FromAssemblies(assemblies)
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
     public static IServiceCollection AddEventHandlers(this IServiceCollection services)
     {
         services.Scan(scan => scan
             .FromAssemblyOf<IEvent>()
+            .AddClasses(classes => classes.AssignableTo(typeof(IEventHandler<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
+    public static IServiceCollection AddEventHandlers(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        services.Scan(scan => scan
+            .FromAssemblies(assemblies)
             .AddClasses(classes => classes.AssignableTo(typeof(IEventHandler<>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime());

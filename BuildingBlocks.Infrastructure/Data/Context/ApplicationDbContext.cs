@@ -19,11 +19,5 @@ public class ApplicationDbContext : DbContextBase
     private void ConfigureEntities(ModelBuilder modelBuilder)
     {
         // Add specific entity configurations here
-        // Example:
-        // modelBuilder.Entity<User>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-        //     entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-        // });
     }
 }

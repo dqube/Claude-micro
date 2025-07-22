@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 
 namespace BuildingBlocks.Infrastructure.Data.Converters;
@@ -29,7 +30,9 @@ public class StronglyTypedIdValueConverterSelector : ValueConverterSelector
             var stronglyTypedIdConverter = GetStronglyTypedIdConverter(modelClrType, providerClrType);
             if (stronglyTypedIdConverter != null)
             {
-                return baseConverters.Concat(new[] { stronglyTypedIdConverter });
+                var converters = baseConverters.ToList();
+                converters.Add(stronglyTypedIdConverter.Value);
+                return converters;
             }
         }
 

@@ -1,14 +1,8 @@
 using BuildingBlocks.Application.Extensions;
-using BuildingBlocks.Domain.Repository;
-using Microsoft.EntityFrameworkCore;
 using PatientService.API.Endpoints;
-using PatientService.Application.Commands;
-using PatientService.Application.EventHandlers;
-using PatientService.Application.Queries;
-using PatientService.Domain.Entities;
-using PatientService.Domain.ValueObjects;
-using PatientService.Infrastructure.Persistence;
-using PatientService.Infrastructure.Repositories;
+using PatientService.Application;
+using PatientService.Domain;
+using PatientService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,38 +13,13 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "Patient Service API", Version = "v1" });
 });
 
-// Add basic services we need - skip complex infra services for now
-//builder.Services.AddApplicationLayer();
-
-// Add Database Context
-builder.Services.AddDbContext<PatientDbContext>(options =>
-{
-    // For development, use InMemory database for simplicity
-    options.UseInMemoryDatabase("PatientServiceDb");
-    
-    // For production, use SQL Server
-    // options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-// Add Repositories
-builder.Services.AddScoped<IRepository<Patient, PatientId>, PatientRepository>();
-builder.Services.AddScoped<IReadOnlyRepository<Patient, PatientId>, PatientRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-// Add Command Handlers
-builder.Services.AddScoped<CreatePatientCommandHandler>();
-builder.Services.AddScoped<UpdatePatientContactCommandHandler>();
-
-// Add Query Handlers
-builder.Services.AddScoped<GetPatientByIdQueryHandler>();
-builder.Services.AddScoped<GetPatientsQueryHandler>();
-
-// Add Event Handlers
-builder.Services.AddScoped<PatientCreatedEventHandler>();
+// Add layers
+builder.Services.AddDomain();
+PatientService.Application.DependencyInjection.AddApplication(builder.Services);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add Health Checks
 builder.Services.AddHealthChecks();
-builder.Services.AddDbContext<PatientDbContext>();
 
 // Add CORS for development
 builder.Services.AddCors(options =>
@@ -80,7 +49,7 @@ if (app.Environment.IsDevelopment())
     // Ensure database is created in development
     using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<PatientDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<PatientService.Infrastructure.Persistence.PatientDbContext>();
         context.Database.EnsureCreated();
     }
 }

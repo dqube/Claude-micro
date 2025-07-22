@@ -54,9 +54,7 @@ Add the project reference to your application:
 
 ## Quick Start
 
-### 1. Register Application Services
-
-In your `Program.cs` or `Startup.cs`:
+Register application services in `Program.cs`:
 
 ```csharp
 using BuildingBlocks.Application.Extensions;
@@ -66,53 +64,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add all application layer services
 builder.Services.AddApplicationLayer();
 
-// Or add specific features
-builder.Services.AddValidation();
-builder.Services.AddLogging();
-builder.Services.AddPerformanceMonitoring();
-builder.Services.AddTransactionSupport();
-builder.Services.AddSecurityContext();
-builder.Services.AddCaching();
-
 var app = builder.Build();
 ```
 
-### 2. Add Caching Support
+## Core Components
+
+### CQRS Implementation
 
 ```csharp
-// Memory caching
-builder.Services.AddCaching();
-
-// Distributed caching with Redis
-builder.Services.AddDistributedCaching("localhost:6379");
-```
-
-### 3. Add Inbox/Outbox Pattern
-
-```csharp
-// Both inbox and outbox
-builder.Services.AddInboxOutboxSupport();
-
-// Or individually
-builder.Services.AddInboxSupport();
-builder.Services.AddOutboxSupport();
-```
-
-### 4. Add Saga Support
-
-```csharp
-// General saga support
-builder.Services.AddSagas();
-
-// Register specific saga
-builder.Services.AddSaga<OrderSaga, OrderSagaData>();
-```
-
-## Usage Examples
-
-### Creating Commands
-
-```csharp
+// Commands
 public record CreateOrderCommand(string CustomerId, List<OrderItem> Items) : ICommand<Guid>;
 
 public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Guid>
@@ -123,11 +83,8 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
         return Guid.NewGuid();
     }
 }
-```
 
-### Creating Queries
-
-```csharp
+// Queries
 public record GetOrderQuery(Guid OrderId) : IQuery<OrderDto>;
 
 public class GetOrderQueryHandler : IQueryHandler<GetOrderQuery, OrderDto>
@@ -140,27 +97,12 @@ public class GetOrderQueryHandler : IQueryHandler<GetOrderQuery, OrderDto>
 }
 ```
 
-### Using Pagination
+### Pagination Support
 
 ```csharp
 public record GetOrdersQuery : PagedQuery, IQuery<PagedResult<OrderDto>>
 {
     public string? Status { get; init; }
-}
-
-public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PagedResult<OrderDto>>
-{
-    public async Task<PagedResult<OrderDto>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
-    {
-        // Implementation with pagination
-        return new PagedResult<OrderDto>
-        {
-            Items = orders,
-            TotalCount = totalCount,
-            Page = request.Page,
-            PageSize = request.PageSize
-        };
-    }
 }
 ```
 
@@ -178,7 +120,7 @@ public class OrderCreatedEventHandler : IEventHandler<OrderCreatedEvent>
 }
 ```
 
-### Custom Validation
+### Validation
 
 ```csharp
 public class CreateOrderValidator : ValidatorBase<CreateOrderCommand>
@@ -197,97 +139,48 @@ public class CreateOrderValidator : ValidatorBase<CreateOrderCommand>
 }
 ```
 
-### Saga Implementation
+## Key Services
 
-```csharp
-public class OrderSaga : SagaBase<OrderSagaData>
-{
-    public OrderSaga(Guid id, OrderSagaData data) : base(id, data) { }
+### Pipeline Behaviors
+- **IPipelineBehavior**: Base behavior interface
+- **ValidationBehavior**: Request validation
+- **LoggingBehavior**: Request/response logging
+- **PerformanceBehavior**: Performance monitoring
+- **TransactionBehavior**: Transaction management
+- **CachingBehavior**: Response caching
+- **RetryBehavior**: Automatic retry logic
 
-    public override async Task StartAsync(CancellationToken cancellationToken = default)
-    {
-        // Start saga logic
-        Status = SagaStatus.Running;
-        await ProcessPayment();
-    }
+### Caching Services
+- **ICacheService**: Cache abstraction
+- **CacheKey**: Structured cache keys
+- **CachePolicy**: Cache expiration policies
+- **CacheSettings**: Configuration options
 
-    public override async Task CompensateAsync(CancellationToken cancellationToken = default)
-    {
-        // Compensation logic
-        Status = SagaStatus.Compensating;
-        await RefundPayment();
-    }
-}
-```
+### Messaging Services
+- **IMessageBus**: Message publishing
+- **IEventBus**: Event publishing
+- **IMessageHandler**: Message processing
+- **IEventHandler**: Event processing
 
-## Configuration
+### Inbox/Outbox Pattern
+- **InboxMessage/OutboxMessage**: Message entities
+- **IInboxService/IOutboxService**: Message processing
+- **InboxProcessor/OutboxProcessor**: Background processors
+- **InboxBackgroundService/OutboxBackgroundService**: Hosted services
 
-### Cache Settings
-
-```csharp
-public class CacheSettings
-{
-    public TimeSpan DefaultExpiration { get; set; } = TimeSpan.FromMinutes(30);
-    public bool EnableCaching { get; set; } = true;
-}
-```
-
-### Inbox/Outbox Options
-
-```csharp
-public class InboxOptions
-{
-    public TimeSpan ProcessingInterval { get; set; } = TimeSpan.FromSeconds(30);
-    public int BatchSize { get; set; } = 100;
-}
-
-public class OutboxOptions
-{
-    public TimeSpan ProcessingInterval { get; set; } = TimeSpan.FromSeconds(30);
-    public int BatchSize { get; set; } = 100;
-}
-```
-
-## Extension Methods
-
-### Complete Registration Example
-
-```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-// Core application services
-builder.Services.AddApplicationLayer();
-
-// Security
-builder.Services.AddSecurityContext();
-
-// Caching
-builder.Services.AddCaching();
-builder.Services.AddDistributedCaching(builder.Configuration.GetConnectionString("Redis"));
-
-// Messaging
-builder.Services.AddInboxOutboxSupport();
-
-// Sagas
-builder.Services.AddSagas();
-builder.Services.AddSaga<OrderSaga, OrderSagaData>();
-builder.Services.AddSaga<PaymentSaga, PaymentSagaData>();
-
-var app = builder.Build();
-
-// Use application security
-app.UseApplicationSecurity();
-```
+### Saga Pattern
+- **ISaga**: Saga interface
+- **SagaBase<T>**: Base saga implementation
+- **ISagaOrchestrator**: Saga orchestration
+- **SagaStep**: Individual saga steps
 
 ## Dependencies
 
 This library depends on:
 - **BuildingBlocks.Domain**: Domain layer abstractions
 - **Microsoft.Extensions.Caching.Memory**: Memory caching support
-- **Microsoft.Extensions.Caching.StackExchangeRedis**: Redis caching support
 - **Microsoft.Extensions.Hosting.Abstractions**: Background service support
 - **Microsoft.Extensions.Logging.Abstractions**: Logging support
-- **Scrutor**: Assembly scanning for automatic registration
 
 ## Architecture Integration
 
@@ -301,13 +194,3 @@ This library is designed to work as part of a clean architecture solution:
 ├── 📁 API/
 └── 📁 Tests/
 ```
-
-## Best Practices
-
-1. **Use CQRS**: Separate commands and queries for better separation of concerns
-2. **Pipeline Behaviors**: Leverage behaviors for cross-cutting concerns
-3. **Event-Driven**: Use events for loose coupling between bounded contexts
-4. **Validation**: Implement validation at the application layer
-5. **Caching**: Use caching behaviors for read-heavy operations
-6. **Sagas**: Use sagas for complex, long-running business processes
-7. **Inbox/Outbox**: Use for reliable message processing and eventual consistency

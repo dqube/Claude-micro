@@ -2,51 +2,41 @@
 
 A lightweight API layer building blocks library for ASP.NET Core applications using Minimal APIs.
 
-## ✅ Successfully Added to Solution
+## Features
 
-The BuildingBlocks.API project has been successfully added to the solution:
+### 🏗️ Minimal API Support
+- **Base Classes**: EndpointBase and CrudEndpoints for rapid API development
+- **Response Models**: Standardized API responses with consistent structure
+- **Validation**: Integrated request validation with detailed error responses
 
-```
-your-awesome-project.sln
-├── BuildingBlocks.Domain/         ✅ Core domain layer
-├── BuildingBlocks.Application/    ✅ Application layer  
-├── BuildingBlocks.Infrastructure/ ✅ Infrastructure layer
-└── BuildingBlocks.API/           ✅ API layer (newly added)
-```
+### 🔒 Authentication & Security
+- **JWT Authentication**: Bearer token authentication with configurable options
+- **API Key Authentication**: Simple API key-based authentication
+- **CORS**: Cross-origin resource sharing configuration
 
-## 🏗️ Architecture Overview
+### 🛡️ Middleware Pipeline
+- **Error Handling**: Global exception handling with structured error responses
+- **Request Logging**: Comprehensive request/response logging
+- **Correlation ID**: Request correlation tracking for distributed systems
 
-This API layer provides essential components for building modern web APIs:
+### 📚 Documentation
+- **OpenAPI**: Native .NET 9 OpenAPI integration
+- **Scalar**: Modern API documentation interface
+- **Configuration**: Flexible API documentation setup
 
-### Key Features Implemented:
+## Installation
 
-- **✅ Minimal API Support**: Base classes and extensions for minimal APIs
-- **✅ Middleware Pipeline**: Error handling, logging, correlation tracking
-- **✅ Response Models**: Standardized API responses with JSON serialization
-- **✅ Authentication**: JWT Bearer and API Key authentication
-- **✅ OpenAPI Integration**: Native .NET 9 OpenAPI with Scalar documentation
-- **✅ Validation**: FluentValidation integration
-- **✅ Service Registration**: Complete DI container setup
+Add the project reference to your API layer:
 
-### Project Structure:
-
-```
-BuildingBlocks.API/
-├── Endpoints/Base/              # Minimal API base classes
-├── Middleware/                  # Error handling, logging, security
-├── Responses/                   # API response models and builders
-├── Authentication/              # JWT and API key authentication
-├── OpenApi/                     # OpenAPI and Scalar configuration
-├── Validation/                  # FluentValidation extensions
-└── Extensions/                  # Service registration and middleware setup
+```xml
+<ProjectReference Include="..\BuildingBlocks.API\BuildingBlocks.API.csproj" />
 ```
 
-## 🚀 Usage
+## Quick Start
 
-### Basic Setup
+Setup in `Program.cs`:
 
 ```csharp
-// In Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
 // Add API services
@@ -56,9 +46,13 @@ var app = builder.Build();
 
 // Configure API pipeline
 app.UseBuildingBlocksApi(builder.Configuration);
+
+app.Run();
 ```
 
-### Configuration
+## Configuration
+
+Configure `appsettings.json`:
 
 ```json
 {
@@ -82,28 +76,95 @@ app.UseBuildingBlocksApi(builder.Configuration);
 }
 ```
 
-## 🎯 Design Principles
+## Core Components
 
-- **Simplicity**: Focus on essential API functionality
-- **Clean Architecture**: Proper separation of concerns
-- **Modern .NET**: Uses .NET 9 native features
-- **No External Dependencies**: Minimal external package dependencies
-- **Extensible**: Easy to extend and customize
+### Endpoint Base Classes
 
-## 📋 Next Steps
+```csharp
+public class ProductEndpoints : CrudEndpoints<Product, ProductDto, Guid>
+{
+    public ProductEndpoints(IMediator mediator) : base(mediator) { }
+    
+    protected override string Tag => "Products";
+    protected override string Route => "/api/products";
+}
+```
 
-To complete the implementation:
+### API Responses
 
-1. **Fix Compilation Issues**: Some features need additional package references or namespace fixes
-2. **Add Integration Tests**: Create test project for API layer
-3. **Complete Documentation**: Add comprehensive usage examples
-4. **Performance Optimization**: Add caching and performance enhancements
+```csharp
+public class ProductController : EndpointBase
+{
+    public async Task<IResult> GetProduct(Guid id)
+    {
+        var product = await GetProductAsync(id);
+        
+        if (product == null)
+            return ApiResponse.NotFound("Product not found");
+            
+        return ApiResponse.Success(product);
+    }
+}
+```
 
-## 🔧 Status
+### Validation
 
-- ✅ Project created and added to solution
-- ✅ Core architecture implemented
-- ⚠️ Build issues need resolution (namespace conflicts, missing extensions)
-- 🚧 Ready for refinement and completion
+```csharp
+public class CreateProductRequest
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}
 
-The foundation is solid and the architecture is clean. The remaining work involves fixing compilation issues and adding the finishing touches.
+// Validation is automatically applied using FluentValidation
+public class CreateProductValidator : AbstractValidator<CreateProductRequest>
+{
+    public CreateProductValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Price).GreaterThan(0);
+    }
+}
+```
+
+## Key Services
+
+### Authentication
+- **JWT Authentication**: Bearer token validation
+- **API Key Authentication**: Simple key-based auth
+- **Authentication Extensions**: Easy setup methods
+
+### Middleware
+- **GlobalExceptionMiddleware**: Centralized error handling
+- **RequestLoggingMiddleware**: Request/response logging
+- **CorrelationIdMiddleware**: Request correlation tracking
+
+### OpenAPI
+- **OpenApiConfiguration**: API documentation setup
+- **ScalarConfiguration**: Modern documentation UI
+- **API Documentation**: Automated endpoint documentation
+
+### Response Handling
+- **ApiResponse**: Standardized response wrapper
+- **ApiResponseBuilder**: Fluent response building
+- **Error Responses**: Consistent error formatting
+
+## Dependencies
+
+This library depends on:
+- **BuildingBlocks.Domain**: Domain layer abstractions
+- **BuildingBlocks.Application**: Application layer interfaces
+- **Microsoft.AspNetCore.Authentication.JwtBearer**: JWT authentication
+- **FluentValidation.AspNetCore**: Request validation
+- **Scalar.AspNetCore**: API documentation
+
+## Architecture Integration
+
+```
+📁 YourApplication/
+├── 📁 Domain/ (BuildingBlocks.Domain)
+├── 📁 Application/ (BuildingBlocks.Application)
+├── 📁 Infrastructure/ (BuildingBlocks.Infrastructure)
+├── 📁 API/ (BuildingBlocks.API) ← This library
+└── 📁 Tests/
+```
