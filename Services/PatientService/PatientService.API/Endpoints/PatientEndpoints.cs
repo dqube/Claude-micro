@@ -4,7 +4,7 @@ using PatientService.Application.DTOs;
 using PatientService.Application.Queries;
 using BuildingBlocks.Domain.Common;
 using BuildingBlocks.Application.CQRS.Queries;
-using BuildingBlocks.Application.Mediator;
+using BuildingBlocks.Application.CQRS.Mediator;
 
 namespace PatientService.API.Endpoints;
 

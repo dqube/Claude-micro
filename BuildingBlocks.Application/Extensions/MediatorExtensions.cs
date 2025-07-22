@@ -5,7 +5,7 @@ using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.CQRS.Events;
 using BuildingBlocks.Application.Behaviors;
 using BuildingBlocks.Application.Dispatchers;
-using BuildingBlocks.Application.Mediator;
+using BuildingBlocks.Application.CQRS.Mediator;
 
 namespace BuildingBlocks.Application.Extensions
 {
@@ -127,7 +127,7 @@ namespace BuildingBlocks.Application.Extensions
         public static IServiceCollection AddMediatorOnly(this IServiceCollection services)
         {
             // Register mediator (assumes dispatchers are already registered)
-            services.AddScoped<IMediator, BuildingBlocks.Application.Mediator.Mediator>();
+            services.AddScoped<IMediator, BuildingBlocks.Application.CQRS.Mediator.Mediator>();
             return services;
         }
 

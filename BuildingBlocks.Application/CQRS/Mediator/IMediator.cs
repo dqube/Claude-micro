@@ -4,7 +4,7 @@ using BuildingBlocks.Application.CQRS.Messages;
 using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.Messaging;
 
-namespace BuildingBlocks.Application.Mediator;
+namespace BuildingBlocks.Application.CQRS.Mediator;
 
 public interface IMediator
 {

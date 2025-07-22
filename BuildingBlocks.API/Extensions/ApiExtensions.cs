@@ -61,7 +61,7 @@ public static class ApiExtensions
         }
         
         // OpenAPI documentation
-        services.AddScalarApiReference();
+        services.AddScalarDocumentation();
         
         return services;
     }
@@ -135,7 +135,7 @@ public static class ApiExtensions
         
         if (options.IncludeDocumentation)
         {
-            services.AddScalarApiReference();
+            services.AddScalarDocumentation();
         }
         
         return services;

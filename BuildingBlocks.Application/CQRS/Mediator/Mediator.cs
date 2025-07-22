@@ -5,7 +5,7 @@ using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.Dispatchers;
 using BuildingBlocks.Application.Messaging;
 
-namespace BuildingBlocks.Application.Mediator;
+namespace BuildingBlocks.Application.CQRS.Mediator;
 
 public class Mediator : IMediator
 {
