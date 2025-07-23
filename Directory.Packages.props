@@ -34,7 +34,7 @@
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
 
     <!-- Documentation -->
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.4" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="1.2.48" />
 
     <!-- Logging -->
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
