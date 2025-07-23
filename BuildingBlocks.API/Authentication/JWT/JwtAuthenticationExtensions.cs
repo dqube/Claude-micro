@@ -12,6 +12,7 @@ public static class JwtAuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var jwtSettings = configuration.GetSection("Authentication:Jwt");
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is required");
         var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is required");

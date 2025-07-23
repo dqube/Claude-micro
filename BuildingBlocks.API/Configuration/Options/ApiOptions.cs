@@ -7,12 +7,10 @@ public class ApiOptions
     public string Title { get; set; } = "API";
     public string Version { get; set; } = "v1";
     public string Description { get; set; } = "API Description";
-    public string ContactName { get; set; } = string.Empty;
-    public string ContactEmail { get; set; } = string.Empty;
-    public string ContactUrl { get; set; } = string.Empty;
+    public Uri? ContactUrl { get; set; }
+    public Uri? LicenseUrl { get; set; }
+    public Uri? TermsOfServiceUrl { get; set; }
     public string LicenseName { get; set; } = string.Empty;
-    public string LicenseUrl { get; set; } = string.Empty;
-    public string TermsOfServiceUrl { get; set; } = string.Empty;
     public bool IncludeXmlComments { get; set; } = true;
     public bool EnableScalar { get; set; } = true;
 }
