@@ -1,15 +1,14 @@
+using BuildingBlocks.API.Authentication.ApiKey;
+using BuildingBlocks.API.Authentication.JWT;
+using BuildingBlocks.API.Configuration.Extensions;
+using BuildingBlocks.API.Configuration.Options;
+using BuildingBlocks.API.Health.Extensions;
+using BuildingBlocks.API.OpenApi.Extensions;
+using BuildingBlocks.API.Versioning.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using BuildingBlocks.API.Authentication.JWT;
-using BuildingBlocks.API.Authentication.ApiKey;
-using BuildingBlocks.API.Configuration.Extensions;
-using BuildingBlocks.API.Configuration.Options;
-using BuildingBlocks.API.Health.Extensions;
-using BuildingBlocks.API.OpenApi.Configuration;
-using BuildingBlocks.API.Versioning.Extensions;
 using Scalar.AspNetCore;
 
 namespace BuildingBlocks.API.Extensions;
@@ -69,7 +68,7 @@ public static class ApiExtensions
         services.AddAuthorization();
         
         // OpenAPI documentation
-        services.AddScalarDocumentation();
+        services.AddOpenApiDocumentation(configuration);
         
         return services;
     }
@@ -151,7 +150,7 @@ public static class ApiExtensions
         
         if (options.IncludeDocumentation)
         {
-            services.AddScalarDocumentation();
+            services.AddOpenApiDocumentation(configuration);
         }
         
         return services;
@@ -165,6 +164,8 @@ public static class ApiExtensions
     /// <returns>The web application for method chaining</returns>
     public static WebApplication UseBuildingBlocksApi(this WebApplication app, IConfiguration configuration)
     {
+        app.UseOpenApiDocumentation();
+
         // Development-specific middleware
         if (app.Environment.IsDevelopment())
         {
@@ -176,39 +177,34 @@ public static class ApiExtensions
         }
         
         // Security headers
-        app.UseApiSecurityHeaders();
+      // app.UseApiSecurityHeaders();
         
         // CORS
-        app.UseCors();
-        
+       app.UseCors();
+
         // Rate limiting (conditional based on configuration)
         var rateLimitSection = configuration.GetSection("RateLimiting");
         if (rateLimitSection.Exists() && rateLimitSection.GetValue<bool>("Enabled", true))
         {
             app.UseRateLimiter();
         }
-        
+
         // Authentication & Authorization
         app.UseAuthentication();
         app.UseAuthorization();
-        
-        // Request correlation and logging
+
+        //Request correlation and logging
         app.UseCorrelationId();
         app.UseRequestLogging();
-        
-        // API versioning
-        app.UseApiVersioning();
-        
-        // Health checks
-        app.MapHealthChecks("/health");
-        
-        // OpenAPI documentation
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi("/openapi/{documentName}.json");
-            app.MapScalarApiReference();
-        }
-        
+
+        //API versioning
+         app.UseApiVersioning();
+
+        //Health checks
+         app.MapHealthChecks("/health");
+
+
+
         return app;
     }
     

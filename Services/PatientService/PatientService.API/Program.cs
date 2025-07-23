@@ -1,14 +1,16 @@
-using PatientService.API.Endpoints;
+using BuildingBlocks.API.Extensions;
+using BuildingBlocks.API.OpenApi.Extensions;
 using PatientService.API.Converters;
+using PatientService.API.Endpoints;
 using PatientService.Application;
 using PatientService.Domain;
 using PatientService.Infrastructure;
-using BuildingBlocks.API.Extensions;
+using Scalar.AspNetCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddOpenApiDocumentation(builder.Configuration);
 // Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, etc.)
 builder.Services.AddBuildingBlocksApi(builder.Configuration);
 
@@ -22,8 +24,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddDomain();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
+builder.Services.AddHealthChecks();
 var app = builder.Build();
+// OpenAPI documentation
 
 // Use BuildingBlocks.API middleware pipeline (includes error handling, security, CORS, etc.)
 app.UseBuildingBlocksApi(builder.Configuration);

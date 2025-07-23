@@ -27,24 +27,24 @@ public static class HealthCheckExtensions
 
     public static IServiceCollection AddDatabaseHealthCheck(this IServiceCollection services, string connectionString, string name = "database")
     {
-        services.AddHealthChecks()
-            .AddSqlServer(connectionString, name: name);
+        //services.AddHealthChecks()
+        //    .AddSqlServer(connectionString, name: name);
 
         return services;
     }
 
     public static IServiceCollection AddRedisHealthCheck(this IServiceCollection services, string connectionString, string name = "redis")
     {
-        services.AddHealthChecks()
-            .AddRedis(connectionString, name: name);
+        //services.AddHealthChecks()
+        //    .AddRedis(connectionString, name: name);
 
         return services;
     }
 
     public static IServiceCollection AddUrlHealthCheck(this IServiceCollection services, string url, string name = "external_service")
     {
-        services.AddHealthChecks()
-            .AddUrlGroup(new Uri(url), name: name);
+        //services.AddHealthChecks()
+        //    .AddUrlGroup(new Uri(url), name: name);
 
         return services;
     }
