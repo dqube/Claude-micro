@@ -20,11 +20,13 @@ public class DistributedCacheService : ICacheService
 
     public async Task<T?> GetAsync<T>(ICacheKey key, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         return await GetAsync<T>(key.Key, cancellationToken);
     }
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         try
         {
             var cachedValue = await _distributedCache.GetStringAsync(key, cancellationToken);
@@ -53,11 +55,15 @@ public class DistributedCacheService : ICacheService
 
     public async Task SetAsync<T>(ICacheKey key, T value, CachePolicy? policy = null, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(value);
         await SetAsync(key.Key, value, policy, cancellationToken);
     }
 
     public async Task SetAsync<T>(string key, T value, CachePolicy? policy = null, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(value);
         try
         {
             var serializedValue = JsonSerializer.Serialize(value);
@@ -93,11 +99,13 @@ public class DistributedCacheService : ICacheService
 
     public async Task RemoveAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         await RemoveAsync(key.Key, cancellationToken);
     }
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         try
         {
             await _distributedCache.RemoveAsync(key, cancellationToken);
@@ -116,6 +124,7 @@ public class DistributedCacheService : ICacheService
 
     public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(pattern);
         // Distributed cache doesn't support pattern-based removal efficiently
         _logger.LogWarning("Pattern-based cache removal not efficiently supported in DistributedCache");
         return Task.CompletedTask;
@@ -123,11 +132,13 @@ public class DistributedCacheService : ICacheService
 
     public async Task<bool> ExistsAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return await ExistsAsync(key.Key, cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         try
         {
             var value = await _distributedCache.GetStringAsync(key, cancellationToken);
@@ -147,11 +158,13 @@ public class DistributedCacheService : ICacheService
 
     public Task RefreshAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return RefreshAsync(key.Key, cancellationToken);
     }
 
     public async Task RefreshAsync(string key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         try
         {
             await _distributedCache.RefreshAsync(key, cancellationToken);

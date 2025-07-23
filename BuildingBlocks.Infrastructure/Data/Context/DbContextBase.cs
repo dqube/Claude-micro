@@ -17,6 +17,8 @@ public abstract class DbContextBase : DbContext, IDbContext
 
     protected virtual void ApplyConfigurations(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+        
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
     }
 

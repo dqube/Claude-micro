@@ -5,7 +5,7 @@ using BuildingBlocks.Application.Outbox;
 
 namespace BuildingBlocks.Application.Services;
 
-public class OutboxBackgroundService : BackgroundService
+public partial class OutboxBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<OutboxBackgroundService> _logger;
@@ -23,7 +23,7 @@ public class OutboxBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Outbox background service started");
+        LogOutboxServiceStarted(_logger);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -38,24 +38,42 @@ public class OutboxBackgroundService : BackgroundService
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing outbox messages");
+                LogOutboxProcessingError(_logger, ex);
             }
             catch (TaskCanceledException ex) when (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogError(ex, "Error occurred while processing outbox messages");
+                LogOutboxProcessingError(_logger, ex);
             }
             catch (TimeoutException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing outbox messages");
+                LogOutboxProcessingError(_logger, ex);
             }
             catch (ArgumentException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing outbox messages");
+                LogOutboxProcessingError(_logger, ex);
             }
 
             await Task.Delay(_options.ProcessingInterval, stoppingToken);
         }
 
-        _logger.LogInformation("Outbox background service stopped");
+        LogOutboxServiceStopped(_logger);
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "Outbox background service started")]
+    private static partial void LogOutboxServiceStarted(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Error,
+        Message = "Error occurred while processing outbox messages")]
+    private static partial void LogOutboxProcessingError(ILogger logger, Exception exception);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Information,
+        Message = "Outbox background service stopped")]
+    private static partial void LogOutboxServiceStopped(ILogger logger);
 }

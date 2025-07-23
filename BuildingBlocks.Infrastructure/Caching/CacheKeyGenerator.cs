@@ -3,7 +3,7 @@ using BuildingBlocks.Application.Caching;
 
 namespace BuildingBlocks.Infrastructure.Caching;
 
-public class CacheKeyGenerator
+public static class CacheKeyGenerator
 {
     private const string Separator = ":";
 
@@ -21,11 +21,13 @@ public class CacheKeyGenerator
 
     public static string GenerateFromCacheKey(ICacheKey cacheKey)
     {
+        ArgumentNullException.ThrowIfNull(cacheKey);
         return cacheKey.Key;
     }
 
     public static string GenerateForEntity<TEntity>(object id)
     {
+        ArgumentNullException.ThrowIfNull(id);
         return Generate<TEntity>("entity", id.ToString()!);
     }
 
@@ -48,9 +50,9 @@ public class CacheKeyGenerator
             var value = property.GetValue(query);
             if (value != null)
             {
-                sb.Append(Separator);
+                sb.Append(':');
                 sb.Append(property.Name);
-                sb.Append(Separator);
+                sb.Append(':');
                 sb.Append(value.ToString());
             }
         }

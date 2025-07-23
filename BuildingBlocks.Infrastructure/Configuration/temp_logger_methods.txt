@@ -1,0 +1,17 @@
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Error,
+        Message = "Failed to get configuration section {sectionName}")]
+    private static partial void LogFailedToGetConfigurationSection(ILogger logger, Exception exception, string sectionName);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Information,
+        Message = "Configuration reloaded")]
+    private static partial void LogConfigurationReloaded(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Information,
+        Message = "Configuration validation completed")]
+    private static partial void LogConfigurationValidationCompleted(ILogger logger);

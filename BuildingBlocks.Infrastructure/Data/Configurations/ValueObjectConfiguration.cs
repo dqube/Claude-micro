@@ -27,8 +27,10 @@ public static class ValueObjectConfiguration
         
         return propertyBuilder
             .HasConversion(
+#pragma warning disable CS8604, CS8625 // Expression tree limitations with nullable reference types
                 vo => vo != null ? vo.ToString() : null,
                 value => value != null ? CreateValueObject<TValueObject>(value) : null);
+#pragma warning restore CS8604, CS8625
     }
 
     private static TValueObject CreateValueObject<TValueObject>(string value)

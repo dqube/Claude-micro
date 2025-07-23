@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Infrastructure.Configuration;
 
-public class ConfigurationService : IConfigurationService
+public partial class ConfigurationService : IConfigurationService
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<ConfigurationService> _logger;
@@ -23,7 +23,7 @@ public class ConfigurationService : IConfigurationService
 
     public T GetValue<T>(string key, T defaultValue = default!)
     {
-        return _configuration.GetValue<T>(key, defaultValue);
+        return _configuration.GetValue<T>(key, defaultValue) ?? defaultValue;
     }
 
     public string GetConnectionString(string name)
@@ -40,7 +40,7 @@ public class ConfigurationService : IConfigurationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get configuration section {SectionName}", sectionName);
+            LogFailedToGetConfigurationSection(_logger, ex, sectionName);
             section = new T();
             return false;
         }
@@ -51,12 +51,30 @@ public class ConfigurationService : IConfigurationService
         if (_configuration is IConfigurationRoot configRoot)
         {
             configRoot.Reload();
-            _logger.LogInformation("Configuration reloaded");
+            LogConfigurationReloaded(_logger);
         }
     }
 
     public void ValidateConfiguration()
     {
-        _logger.LogInformation("Configuration validation completed");
+        LogConfigurationValidationCompleted(_logger);
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Error,
+        Message = "Failed to get configuration section {sectionName}")]
+    private static partial void LogFailedToGetConfigurationSection(ILogger logger, Exception exception, string sectionName);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Information,
+        Message = "Configuration reloaded")]
+    private static partial void LogConfigurationReloaded(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Information,
+        Message = "Configuration validation completed")]
+    private static partial void LogConfigurationValidationCompleted(ILogger logger);
 }

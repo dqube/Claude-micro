@@ -48,7 +48,7 @@ public class Repository<TEntity, TId> : RepositoryBase<TEntity, TId>, IRepositor
     public virtual async Task RemoveByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
         var entity = await GetByIdAsync(id, cancellationToken);
-        if (entity != null)
+        if (entity is not null)
         {
             Remove(entity);
         }

@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace BuildingBlocks.Application.Inbox;
 
-public class InboxProcessor : IInboxProcessor
+public partial class InboxProcessor : IInboxProcessor
 {
     private readonly IInboxService _inboxService;
     private readonly IServiceProvider _serviceProvider;
@@ -35,13 +35,14 @@ public class InboxProcessor : IInboxProcessor
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to process inbox message {MessageId}", message.Id);
+                LogFailedToProcessInboxMessage(_logger, ex, message.Id);
             }
         }
     }
 
     public async Task ProcessMessageAsync(InboxMessage message, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(message);
         try
         {
             await _inboxService.MarkAsProcessingAsync(message.Id, cancellationToken);
@@ -58,11 +59,11 @@ public class InboxProcessor : IInboxProcessor
             
             await _inboxService.MarkAsProcessedAsync(message.Id, cancellationToken);
             
-            _logger.LogInformation("Successfully processed inbox message {MessageId} of type {MessageType}", message.Id, message.MessageType);
+            LogInboxMessageProcessedSuccessfully(_logger, message.Id, message.MessageType);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to process inbox message {MessageId}: {Error}", message.Id, ex.Message);
+            LogFailedToProcessInboxMessageWithError(_logger, ex, message.Id, ex.Message);
             await _inboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
@@ -79,7 +80,7 @@ public class InboxProcessor : IInboxProcessor
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to retry inbox message {MessageId}", message.Id);
+                LogFailedToRetryInboxMessage(_logger, ex, message.Id);
             }
         }
     }
@@ -87,7 +88,7 @@ public class InboxProcessor : IInboxProcessor
     public async Task CleanupExpiredMessagesAsync(CancellationToken cancellationToken = default)
     {
         await _inboxService.CleanupOldMessagesAsync(_options.RetentionPeriod, cancellationToken);
-        _logger.LogInformation("Cleaned up expired inbox messages older than {RetentionPeriod}", _options.RetentionPeriod);
+        LogCleanedUpExpiredInboxMessages(_logger, _options.RetentionPeriod);
     }
 
     private IInboxMessageHandler? GetMessageHandler(string messageType)
@@ -96,11 +97,41 @@ public class InboxProcessor : IInboxProcessor
         return handlers.FirstOrDefault(h => h.CanHandle(messageType));
     }
 
-    private object DeserializeMessage(string payload, string messageType)
+    private static object DeserializeMessage(string payload, string messageType)
     {
         // This would typically use a type registry to deserialize to the correct type
         return JsonSerializer.Deserialize<object>(payload) ?? new object();
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Error,
+        Message = "Failed to process inbox message {messageId}")]
+    private static partial void LogFailedToProcessInboxMessage(ILogger logger, Exception exception, Guid messageId);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Information,
+        Message = "Successfully processed inbox message {messageId} of type {messageType}")]
+    private static partial void LogInboxMessageProcessedSuccessfully(ILogger logger, Guid messageId, string messageType);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Error,
+        Message = "Failed to process inbox message {messageId}: {error}")]
+    private static partial void LogFailedToProcessInboxMessageWithError(ILogger logger, Exception exception, Guid messageId, string error);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = LogLevel.Error,
+        Message = "Failed to retry inbox message {messageId}")]
+    private static partial void LogFailedToRetryInboxMessage(ILogger logger, Exception exception, Guid messageId);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = LogLevel.Information,
+        Message = "Cleaned up expired inbox messages older than {retentionPeriod}")]
+    private static partial void LogCleanedUpExpiredInboxMessages(ILogger logger, TimeSpan retentionPeriod);
 }
 
 public class InboxOptions

@@ -14,11 +14,13 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
 
     public PatientRepository(PatientDbContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
         _context = context;
     }
 
     public async Task<Patient?> GetByIdAsync(PatientId id, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(id);
         return await _context.Patients
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
@@ -32,6 +34,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         Expression<Func<Patient, bool>> predicate, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return await _context.Patients.Where(predicate).ToListAsync(cancellationToken);
     }
 
@@ -39,6 +42,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         Expression<Func<Patient, bool>> predicate, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return await _context.Patients.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
@@ -46,6 +50,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         Expression<Func<Patient, bool>> predicate, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return await _context.Patients.SingleOrDefaultAsync(predicate, cancellationToken);
     }
 
@@ -53,6 +58,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         ISpecification<Patient> specification, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(specification);
         return await ApplySpecification(specification).ToListAsync(cancellationToken);
     }
 
@@ -60,6 +66,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         ISpecification<Patient> specification,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(specification);
         return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -72,6 +79,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         Expression<Func<Patient, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return await _context.Patients.CountAsync(predicate, cancellationToken);
     }
 
@@ -79,11 +87,13 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         ISpecification<Patient> specification,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(specification);
         return await ApplySpecification(specification).CountAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(PatientId id, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(id);
         return await _context.Patients.AnyAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -91,45 +101,53 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         Expression<Func<Patient, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         return await _context.Patients.AnyAsync(predicate, cancellationToken);
     }
 
     public async Task<Patient> AddAsync(Patient entity, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         var entry = await _context.Patients.AddAsync(entity, cancellationToken);
         return entry.Entity;
     }
 
     public async Task<IEnumerable<Patient>> AddRangeAsync(IEnumerable<Patient> entities, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(entities);
         await _context.Patients.AddRangeAsync(entities, cancellationToken);
         return entities;
     }
 
     public void Update(Patient entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         _context.Patients.Update(entity);
     }
 
     public void UpdateRange(IEnumerable<Patient> entities)
     {
+        ArgumentNullException.ThrowIfNull(entities);
         _context.Patients.UpdateRange(entities);
     }
 
     public void Delete(Patient entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         _context.Patients.Remove(entity);
     }
 
     public void DeleteRange(IEnumerable<Patient> entities)
     {
+        ArgumentNullException.ThrowIfNull(entities);
         _context.Patients.RemoveRange(entities);
     }
 
     public async Task<bool> DeleteByIdAsync(PatientId id, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(id);
         var patient = await GetByIdAsync(id, cancellationToken);
-        if (patient == null) return false;
+        if (patient is null) return false;
         
         Delete(patient);
         return true;
@@ -139,6 +157,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
         MedicalRecordNumber mrn,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(mrn);
         return await _context.Patients
             .FirstOrDefaultAsync(p => p.MedicalRecordNumber == mrn, cancellationToken);
     }
@@ -163,6 +182,7 @@ public class PatientRepository : IRepository<Patient, PatientId>, IReadOnlyRepos
 
     private IQueryable<Patient> ApplySpecification(ISpecification<Patient> specification)
     {
+        ArgumentNullException.ThrowIfNull(specification);
         var query = _context.Patients.AsQueryable();
 
         if (specification.Criteria != null)

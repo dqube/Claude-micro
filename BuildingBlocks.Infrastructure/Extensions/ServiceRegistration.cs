@@ -118,8 +118,7 @@ public static class ServiceRegistration
             services.AddDistributedMemoryCache();
         }
 
-        // Register cache utilities
-        services.AddSingleton<CacheKeyGenerator>();
+        // CacheKeyGenerator is now a static class - no registration needed
 
         return services;
     }
