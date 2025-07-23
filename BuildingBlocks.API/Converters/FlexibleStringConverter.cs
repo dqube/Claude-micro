@@ -14,8 +14,8 @@ public class FlexibleStringConverter : JsonConverter<string>
         return reader.TokenType switch
         {
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number when reader.TryGetInt64(out var longValue) => longValue.ToString(),
-            JsonTokenType.Number when reader.TryGetDouble(out var doubleValue) => doubleValue.ToString(),
+            JsonTokenType.Number when reader.TryGetInt64(out var longValue) => longValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            JsonTokenType.Number when reader.TryGetDouble(out var doubleValue) => doubleValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonTokenType.True => "true",
             JsonTokenType.False => "false",
             JsonTokenType.Null => null,
@@ -25,6 +25,7 @@ public class FlexibleStringConverter : JsonConverter<string>
 
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         if (value == null)
         {
             writer.WriteNullValue();
@@ -46,8 +47,8 @@ public class FlexibleNullableStringConverter : JsonConverter<string?>
         return reader.TokenType switch
         {
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number when reader.TryGetInt64(out var longValue) => longValue.ToString(),
-            JsonTokenType.Number when reader.TryGetDouble(out var doubleValue) => doubleValue.ToString(),
+            JsonTokenType.Number when reader.TryGetInt64(out var longValue) => longValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            JsonTokenType.Number when reader.TryGetDouble(out var doubleValue) => doubleValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonTokenType.True => "true",
             JsonTokenType.False => "false",
             JsonTokenType.Null => null,
@@ -57,6 +58,7 @@ public class FlexibleNullableStringConverter : JsonConverter<string?>
 
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         if (value == null)
         {
             writer.WriteNullValue();

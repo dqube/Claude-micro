@@ -25,6 +25,7 @@ public class CustomGuidConverter : JsonConverter<Guid>
 
     public override void Write(Utf8JsonWriter writer, Guid value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         writer.WriteStringValue(value.ToString("D")); // Standard format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     }
 }

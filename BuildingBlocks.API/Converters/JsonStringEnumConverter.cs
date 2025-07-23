@@ -24,6 +24,7 @@ public class CustomJsonStringEnumConverter : JsonConverterFactory
 
     public override bool CanConvert(Type typeToConvert)
     {
+        ArgumentNullException.ThrowIfNull(typeToConvert);
         return typeToConvert.IsEnum || (Nullable.GetUnderlyingType(typeToConvert)?.IsEnum ?? false);
     }
 
@@ -48,7 +49,7 @@ public class CustomJsonStringEnumConverter : JsonConverterFactory
         }
     }
 
-    private class EnumConverter<T> : JsonConverter<T> where T : struct, Enum
+    private sealed class EnumConverter<T> : JsonConverter<T> where T : struct, Enum
     {
         private readonly JsonNamingPolicy? _namingPolicy;
         private readonly bool _allowIntegerValues;
@@ -106,7 +107,8 @@ public class CustomJsonStringEnumConverter : JsonConverterFactory
         }
     }
 
-    private class NullableEnumConverter<T> : JsonConverter<T?> where T : struct, Enum
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via reflection in CreateConverter.")]
+private sealed class NullableEnumConverter<T> : JsonConverter<T?> where T : struct, Enum
     {
         private readonly EnumConverter<T> _enumConverter;
 
@@ -127,6 +129,7 @@ public class CustomJsonStringEnumConverter : JsonConverterFactory
 
         public override void Write(Utf8JsonWriter writer, T? value, JsonSerializerOptions options)
         {
+            ArgumentNullException.ThrowIfNull(writer);
             if (value.HasValue)
             {
                 _enumConverter.Write(writer, value.Value, options);

@@ -12,6 +12,21 @@ namespace BuildingBlocks.API.Extensions;
 
 public static class ErrorHandlingExtensions
 {
+    private static readonly Action<ILogger, string, Exception?> LogProductionError =
+        LoggerMessage.Define<string>(
+            LogLevel.Error,
+            new EventId(1002, nameof(LogProductionError)),
+            "Production error occurred. CorrelationId: {CorrelationId}");
+    private static readonly Action<ILogger, Exception, string, Exception?> LogUnhandledException =
+        LoggerMessage.Define<Exception, string>(
+            LogLevel.Error,
+            new EventId(1001, nameof(LogUnhandledException)),
+            "An unhandled exception occurred. CorrelationId: {CorrelationId}. Exception: {Exception}");
+    private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
     public static IServiceCollection AddApiErrorHandling(this IServiceCollection services)
     {
         services.AddProblemDetails();
@@ -39,8 +54,10 @@ public static class ErrorHandlingExtensions
                     var logger = context.RequestServices.GetService<ILogger<GlobalExceptionMiddleware>>();
                     var correlationId = CorrelationHelper.GetCorrelationId(context);
                     
-                    logger?.LogError(exceptionHandlerFeature.Error, 
-                        "An unhandled exception occurred. CorrelationId: {CorrelationId}", correlationId);
+                    if (logger != null)
+                    {
+                        LogUnhandledException(logger, exceptionHandlerFeature.Error, correlationId, null);
+                    }
 
                     context.Response.StatusCode = 500;
                     context.Response.ContentType = "application/json";
@@ -51,11 +68,7 @@ public static class ErrorHandlingExtensions
                         correlationId: correlationId);
 
                     await context.Response.WriteAsync(
-                        System.Text.Json.JsonSerializer.Serialize(errorResponse, new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-                            WriteIndented = true
-                        }));
+                        System.Text.Json.JsonSerializer.Serialize(errorResponse, _jsonOptions));
                 }
             });
         });
@@ -82,6 +95,7 @@ public static class ErrorHandlingExtensions
 
     public static WebApplication UseDevelopmentErrorHandling(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -111,10 +125,12 @@ public static class ErrorHandlingExtensions
                     "INTERNAL_SERVER_ERROR",
                     correlationId: correlationId);
 
-                logger?.LogError("Production error occurred. CorrelationId: {CorrelationId}", correlationId);
-
+                if (logger != null)
+                {
+                    LogProductionError(logger, correlationId, null);
+                }
                 await context.Response.WriteAsync(
-                    System.Text.Json.JsonSerializer.Serialize(errorResponse));
+                    System.Text.Json.JsonSerializer.Serialize(errorResponse, _jsonOptions));
             });
         });
 
@@ -134,11 +150,6 @@ public static class ErrorHandlingExtensions
     public static IResult HandleBadRequest(string message, string? correlationId = null)
     {
         return ResponseFactory.BadRequest(message, correlationId);
-    }
-
-    public static IResult HandleUnauthorized(string? message = null, string? correlationId = null)
-    {
-        return ResponseFactory.Unauthorized(message, correlationId);
     }
 
     public static IResult HandleForbidden(string? message = null, string? correlationId = null)

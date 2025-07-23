@@ -6,8 +6,15 @@ namespace BuildingBlocks.API.Health.Reporters;
 
 public static class JsonHealthReporter
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
     public static Task WriteResponse(HttpContext context, HealthReport report)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(report);
         context.Response.ContentType = "application/json";
 
         var response = new
@@ -24,14 +31,7 @@ public static class JsonHealthReporter
                 data = entry.Value.Data
             })
         };
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
-        return context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(response, _jsonOptions));
     }
 }
 
@@ -39,6 +39,8 @@ public static class SimpleHealthReporter
 {
     public static Task WriteResponse(HttpContext context, HealthReport report)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(report);
         context.Response.ContentType = "text/plain";
         return context.Response.WriteAsync(report.Status.ToString());
     }

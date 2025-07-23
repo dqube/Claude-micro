@@ -8,6 +8,16 @@ namespace BuildingBlocks.API.Middleware.ErrorHandling;
 
 public class GlobalExceptionMiddleware
 {
+    private static readonly Action<ILogger, Exception, string, Exception?> _logUnhandledException =
+        LoggerMessage.Define<Exception, string>(
+            LogLevel.Error,
+            new EventId(0, nameof(GlobalExceptionMiddleware)),
+            "An unhandled exception occurred. Exception: {Exception}. CorrelationId: {CorrelationId}");
+
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
@@ -19,13 +29,14 @@ public class GlobalExceptionMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
         try
         {
             await _next(context);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred. CorrelationId: {CorrelationId}", context.TraceIdentifier);
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -70,11 +81,7 @@ public class GlobalExceptionMiddleware
                 break;
         }
 
-        var jsonResponse = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
+        var jsonResponse = JsonSerializer.Serialize(errorResponse, _jsonOptions);
         await response.WriteAsync(jsonResponse);
     }
 }

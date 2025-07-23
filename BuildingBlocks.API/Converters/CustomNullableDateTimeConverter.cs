@@ -60,10 +60,12 @@ public class CustomNullableDateTimeConverter : JsonConverter<DateTime?>
     {
         if (value.HasValue)
         {
+            ArgumentNullException.ThrowIfNull(writer);
             writer.WriteStringValue(value.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }
         else
         {
+            ArgumentNullException.ThrowIfNull(writer);
             writer.WriteNullValue();
         }
     }

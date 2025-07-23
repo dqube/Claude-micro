@@ -8,8 +8,14 @@ namespace BuildingBlocks.API.Extensions;
 
 public static class ResponseExtensions
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
     public static void SetContentType(this HttpResponse response, string contentType)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.ContentType = contentType;
     }
 
@@ -30,11 +36,13 @@ public static class ResponseExtensions
 
     public static void AddHeader(this HttpResponse response, string name, string value)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.Headers.TryAdd(name, value);
     }
 
     public static void SetHeader(this HttpResponse response, string name, string value)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.Headers[name] = value;
     }
 
@@ -73,16 +81,10 @@ public static class ResponseExtensions
 
     public static async Task WriteJsonAsync<T>(this HttpResponse response, T value, int statusCode = 200)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.StatusCode = statusCode;
         response.SetJsonContentType();
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
-        await response.WriteAsync(JsonSerializer.Serialize(value, options));
+        await response.WriteAsync(JsonSerializer.Serialize(value, _jsonOptions));
     }
 
     public static async Task WriteApiResponseAsync<T>(this HttpResponse response, T data, string? message = null, string? correlationId = null, int statusCode = 200)
@@ -133,6 +135,7 @@ public static class ResponseExtensions
         await response.WriteJsonAsync(errorResponse, HttpConstants.StatusCodes.Conflict);
     }
 
+
     public static async Task WriteInternalServerErrorAsync(this HttpResponse response, string? message = null, string? correlationId = null)
     {
         var errorResponse = ResponseHelper.Error(
@@ -169,28 +172,41 @@ public static class ResponseExtensions
 
     public static async Task WriteNoContentAsync(this HttpResponse response)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.StatusCode = HttpConstants.StatusCodes.NoContent;
         await Task.CompletedTask;
     }
 
     public static void SetStatusCode(this HttpResponse response, int statusCode)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.StatusCode = statusCode;
     }
 
     public static void RedirectTo(this HttpResponse response, string url, bool permanent = false)
     {
+        ArgumentNullException.ThrowIfNull(response);
         response.StatusCode = permanent ? 301 : 302;
         response.AddLocationHeader(url);
     }
 
+    public static void RedirectTo(this HttpResponse response, Uri url, bool permanent = false)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+        ArgumentNullException.ThrowIfNull(url);
+        response.StatusCode = permanent ? 301 : 302;
+        response.AddLocationHeader(url.ToString());
+    }
+
     public static bool HasStarted(this HttpResponse response)
     {
+        ArgumentNullException.ThrowIfNull(response);
         return response.HasStarted;
     }
 
     public static void EnsureNotStarted(this HttpResponse response, string operationName)
     {
+        ArgumentNullException.ThrowIfNull(response);
         if (response.HasStarted)
         {
             throw new InvalidOperationException($"Cannot perform {operationName} after response has started");
@@ -217,6 +233,7 @@ public static class ResponseExtensions
 
     public static IDictionary<string, string> GetAllHeaders(this HttpResponse response)
     {
+        ArgumentNullException.ThrowIfNull(response);
         return response.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
     }
 }

@@ -10,6 +10,7 @@ public static class ConfigurationExtensions
         this IServiceCollection services, 
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
         services.Configure<CorsOptions>(configuration.GetSection(CorsOptions.SectionName));
         services.Configure<AuthenticationOptions>(configuration.GetSection(AuthenticationOptions.SectionName));
@@ -21,6 +22,7 @@ public static class ConfigurationExtensions
     public static T GetRequiredSection<T>(this IConfiguration configuration, string sectionName) 
         where T : class, new()
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(sectionName);
         if (!section.Exists())
         {
@@ -39,17 +41,20 @@ public static class ConfigurationExtensions
     public static T GetOptionalSection<T>(this IConfiguration configuration, string sectionName) 
         where T : class, new()
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(sectionName);
         return section.Exists() ? section.Get<T>() ?? new T() : new T();
     }
 
     public static bool SectionExists(this IConfiguration configuration, string sectionName)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         return configuration.GetSection(sectionName).Exists();
     }
 
     public static string GetConnectionStringOrThrow(this IConfiguration configuration, string name)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var connectionString = configuration.GetConnectionString(name);
         if (string.IsNullOrEmpty(connectionString))
         {
@@ -60,6 +65,7 @@ public static class ConfigurationExtensions
 
     public static string GetRequiredValue(this IConfiguration configuration, string key)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var value = configuration[key];
         if (string.IsNullOrEmpty(value))
         {
@@ -77,6 +83,7 @@ public static class OptionsExtensions
         string sectionName)
         where T : class
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         services.AddOptions<T>()
             .Bind(configuration.GetSection(sectionName))
             .ValidateDataAnnotations()
@@ -93,6 +100,7 @@ public static class OptionsExtensions
         string validationErrorMessage)
         where T : class
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         services.AddOptions<T>()
             .Bind(configuration.GetSection(sectionName))
             .Validate(validation, validationErrorMessage)

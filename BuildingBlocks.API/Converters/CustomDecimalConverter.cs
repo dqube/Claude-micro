@@ -35,6 +35,7 @@ public class CustomDecimalConverter : JsonConverter<decimal>
 
     public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         writer.WriteNumberValue(value);
     }
 }

@@ -195,6 +195,7 @@ public static class EndpointRouteBuilderExtensions
             group.RequireAuthorization();
 
         group.WithOpenApi();
+        ArgumentNullException.ThrowIfNull(configure);
         configure(group);
 
         return group;
@@ -210,7 +211,7 @@ public static class EndpointRouteBuilderExtensions
         this RouteHandlerBuilder builder,
         bool includeValidationErrors = true)
     {
-        builder.Produces(500, typeof(ProblemDetails));
+        builder.Produces<ProblemDetails>(500);
         
         if (includeValidationErrors)
         {
@@ -228,7 +229,7 @@ public static class EndpointRouteBuilderExtensions
     public static RouteHandlerBuilder WithAuthResponses(this RouteHandlerBuilder builder)
     {
         return builder
-            .Produces(401, typeof(ProblemDetails))
-            .Produces(403, typeof(ProblemDetails));
+            .Produces<ProblemDetails>(401)
+            .Produces<ProblemDetails>(403);
     }
 }

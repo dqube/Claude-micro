@@ -13,20 +13,34 @@ public class JwtBearerOptionsSetup : IConfigureOptions<JwtBearerOptions>
 
     public JwtBearerOptionsSetup(IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         _configuration = configuration;
     }
 
     public void Configure(JwtBearerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         var jwtSettings = _configuration.GetSection("Authentication:Jwt");
-        
+        if (jwtSettings == null)
+        {
+            throw new InvalidOperationException("JWT settings section 'Authentication:Jwt' is missing in configuration");
+        }
+
         var issuer = jwtSettings["Issuer"];
         var audience = jwtSettings["Audience"];
         var secretKey = jwtSettings["SecretKey"];
 
-        if (string.IsNullOrEmpty(secretKey))
+        if (string.IsNullOrWhiteSpace(secretKey))
         {
             throw new InvalidOperationException("JWT SecretKey is required in configuration");
+        }
+        if (string.IsNullOrWhiteSpace(issuer))
+        {
+            throw new InvalidOperationException("JWT Issuer is required in configuration");
+        }
+        if (string.IsNullOrWhiteSpace(audience))
+        {
+            throw new InvalidOperationException("JWT Audience is required in configuration");
         }
 
         var key = Encoding.UTF8.GetBytes(secretKey);
@@ -37,9 +51,9 @@ public class JwtBearerOptionsSetup : IConfigureOptions<JwtBearerOptions>
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = !string.IsNullOrEmpty(issuer),
+            ValidateIssuer = true,
             ValidIssuer = issuer,
-            ValidateAudience = !string.IsNullOrEmpty(audience),
+            ValidateAudience = true,
             ValidAudience = audience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
@@ -51,7 +65,7 @@ public class JwtBearerOptionsSetup : IConfigureOptions<JwtBearerOptions>
             {
                 if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                 {
-                    context.Response.Headers.Add("Token-Expired", "true");
+                    context.Response.Headers.Append("Token-Expired", "true");
                 }
                 return Task.CompletedTask;
             },

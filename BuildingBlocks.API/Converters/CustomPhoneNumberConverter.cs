@@ -13,7 +13,7 @@ public class CustomPhoneNumberConverter : JsonConverter<string>
         return reader.TokenType switch
         {
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number => reader.GetInt64().ToString(),
+            JsonTokenType.Number => reader.GetInt64().ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonTokenType.Null => null,
             _ => throw new JsonException($"Cannot convert token type {reader.TokenType} to phone number string")
         };
@@ -21,6 +21,7 @@ public class CustomPhoneNumberConverter : JsonConverter<string>
 
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         if (value == null)
         {
             writer.WriteNullValue();
@@ -42,7 +43,7 @@ public class CustomNullablePhoneNumberConverter : JsonConverter<string?>
         return reader.TokenType switch
         {
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number => reader.GetInt64().ToString(),
+            JsonTokenType.Number => reader.GetInt64().ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonTokenType.Null => null,
             _ => throw new JsonException($"Cannot convert token type {reader.TokenType} to phone number string")
         };
@@ -50,6 +51,7 @@ public class CustomNullablePhoneNumberConverter : JsonConverter<string?>
 
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         if (value == null)
         {
             writer.WriteNullValue();

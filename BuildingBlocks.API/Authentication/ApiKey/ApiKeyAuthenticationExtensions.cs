@@ -10,6 +10,7 @@ public static class ApiKeyAuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var apiKeySettings = configuration.GetSection("Authentication:ApiKey");
         var validApiKeys = apiKeySettings.GetSection("ValidKeys").Get<string[]>() ?? Array.Empty<string>();
 
