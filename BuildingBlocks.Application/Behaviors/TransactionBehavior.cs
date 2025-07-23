@@ -22,29 +22,38 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         RequestHandlerDelegate<TResponse> next, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(next);
         var requestName = typeof(TRequest).Name;
-        
-        _logger.LogInformation("Starting transaction for {RequestName}", requestName);
+
+        LogTransactionStart(_logger, requestName, null);
 
         try
         {
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
-            
+
             var response = await next();
-            
+
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-            
-            _logger.LogInformation("Transaction committed successfully for {RequestName}", requestName);
-            
+
+            LogTransactionCommit(_logger, requestName, null);
+
             return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Transaction failed for {RequestName}, rolling back", requestName);
-            
+            LogTransactionError(_logger, requestName, ex);
             await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-            
             throw;
         }
     }
+
+    private static readonly Action<ILogger, string, Exception?> LogTransactionStart =
+        LoggerMessage.Define<string>(LogLevel.Information, new EventId(1, "TransactionStart"), "Starting transaction for {RequestName}");
+
+    private static readonly Action<ILogger, string, Exception?> LogTransactionCommit =
+        LoggerMessage.Define<string>(LogLevel.Information, new EventId(2, "TransactionCommit"), "Transaction committed successfully for {RequestName}");
+
+    private static readonly Action<ILogger, string, Exception?> LogTransactionError =
+        LoggerMessage.Define<string>(LogLevel.Error, new EventId(3, "TransactionError"), "Transaction failed for {RequestName}, rolling back");
 }

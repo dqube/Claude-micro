@@ -17,45 +17,47 @@ public class RetryBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TR
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(next);
         var retryPolicy = request.GetRetryPolicy();
         var maxAttempts = retryPolicy.MaxAttempts;
         var baseDelay = retryPolicy.BaseDelay;
 
+        Exception? lastException = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
-                _logger.LogDebug("Executing request attempt {Attempt}/{MaxAttempts}", attempt, maxAttempts);
+                LogRequestAttempt(_logger, attempt, maxAttempts, null);
                 return await next();
             }
             catch (Exception ex) when (attempt < maxAttempts && ShouldRetry(ex, retryPolicy))
             {
+                lastException = ex;
                 var delay = CalculateDelay(attempt, baseDelay, retryPolicy.BackoffStrategy);
-                _logger.LogWarning(ex, "Request failed on attempt {Attempt}/{MaxAttempts}. Retrying in {Delay}ms", 
-                    attempt, maxAttempts, delay.TotalMilliseconds);
-                
+                LogRequestRetry(_logger, attempt, maxAttempts, delay.TotalMilliseconds, ex);
                 await Task.Delay(delay, cancellationToken);
             }
         }
 
-        _logger.LogError("Request failed after {MaxAttempts} attempts", maxAttempts);
-        return await next(); // Final attempt without retry
+        LogRequestFailed(_logger, maxAttempts, lastException);
+        throw new InvalidOperationException($"Request failed after {maxAttempts} attempts", lastException);
     }
 
-    private bool ShouldRetry(Exception exception, RetryPolicy retryPolicy)
+    private static bool ShouldRetry(Exception exception, RetryPolicy retryPolicy)
     {
-        if (retryPolicy.RetryableExceptions?.Any() == true)
+        if (retryPolicy.RetryableExceptions?.Length > 0)
         {
-            return retryPolicy.RetryableExceptions.Any(type => type.IsAssignableFrom(exception.GetType()));
+            return Array.Exists(retryPolicy.RetryableExceptions, type => type.IsAssignableFrom(exception.GetType()));
         }
 
         // Default: retry on transient exceptions
         return exception is TimeoutException ||
                exception is HttpRequestException ||
-               exception is TaskCanceledException && !exception.Message.Contains("timeout");
+               (exception is TaskCanceledException && !exception.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase));
     }
 
-    private TimeSpan CalculateDelay(int attempt, TimeSpan baseDelay, BackoffStrategy strategy)
+    private static TimeSpan CalculateDelay(int attempt, TimeSpan baseDelay, BackoffStrategy strategy)
     {
         return strategy switch
         {
@@ -65,6 +67,14 @@ public class RetryBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TR
             _ => baseDelay
         };
     }
+    private static readonly Action<ILogger, int, int, Exception?> LogRequestAttempt =
+        LoggerMessage.Define<int, int>(LogLevel.Debug, new EventId(1, "RequestAttempt"), "Executing request attempt {Attempt}/{MaxAttempts}");
+
+    private static readonly Action<ILogger, int, int, double, Exception?> LogRequestRetry =
+        LoggerMessage.Define<int, int, double>(LogLevel.Warning, new EventId(2, "RequestRetry"), "Request failed on attempt {Attempt}/{MaxAttempts}. Retrying in {Delay}ms");
+
+    private static readonly Action<ILogger, int, Exception?> LogRequestFailed =
+        LoggerMessage.Define<int>(LogLevel.Error, new EventId(3, "RequestFailed"), "Request failed after {MaxAttempts} attempts");
 }
 
 public interface IRetryableRequest

@@ -28,12 +28,14 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
                 .Where(f => f != null)
                 .ToList();
 
-            if (failures.Any())
+            if (failures.Count > 0)
             {
                 throw new ValidationException(failures);
             }
         }
 
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(next);
         return await next();
     }
 }

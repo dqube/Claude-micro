@@ -21,30 +21,44 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(next);
         var cacheKey = request.GetCacheKey();
         var cachePolicy = request.GetCachePolicy();
 
-        _logger.LogDebug("Checking cache for key: {CacheKey}", cacheKey.Key);
+        LogCheckingCache(_logger, cacheKey.Key, null);
 
         var cachedResponse = await _cacheService.GetAsync<TResponse>(cacheKey, cancellationToken);
         if (cachedResponse != null)
         {
-            _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey.Key);
+            LogCacheHit(_logger, cacheKey.Key, null);
             return cachedResponse;
         }
 
-        _logger.LogDebug("Cache miss for key: {CacheKey}", cacheKey.Key);
+        LogCacheMiss(_logger, cacheKey.Key, null);
 
         var response = await next();
 
         if (response != null)
         {
             await _cacheService.SetAsync(cacheKey, response, cachePolicy, cancellationToken);
-            _logger.LogDebug("Cached response for key: {CacheKey}", cacheKey.Key);
+            LogCacheSet(_logger, cacheKey.Key, null);
         }
 
         return response!;
     }
+
+    private static readonly Action<ILogger, string, Exception?> LogCheckingCache =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(1, "CheckingCache"), "Checking cache for key: {CacheKey}");
+
+    private static readonly Action<ILogger, string, Exception?> LogCacheHit =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(2, "CacheHit"), "Cache hit for key: {CacheKey}");
+
+    private static readonly Action<ILogger, string, Exception?> LogCacheMiss =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(3, "CacheMiss"), "Cache miss for key: {CacheKey}");
+
+    private static readonly Action<ILogger, string, Exception?> LogCacheSet =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(4, "CacheSet"), "Cached response for key: {CacheKey}");
 }
 
 public interface ICacheableRequest<TResponse>

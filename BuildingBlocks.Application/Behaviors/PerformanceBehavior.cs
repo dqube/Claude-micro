@@ -22,31 +22,32 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         RequestHandlerDelegate<TResponse> next, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(next);
         var stopwatch = Stopwatch.StartNew();
-        
+
         var response = await next();
-        
+
         stopwatch.Stop();
-        
+
         var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
         var requestName = typeof(TRequest).Name;
-        
+
         if (elapsedMilliseconds > _performanceThresholdMs)
         {
-            _logger.LogWarning(
-                "Long running request: {RequestName} took {ElapsedMilliseconds}ms (threshold: {ThresholdMs}ms)",
-                requestName,
-                elapsedMilliseconds,
-                _performanceThresholdMs);
+            LogPerformanceWarning(_logger, requestName, elapsedMilliseconds, _performanceThresholdMs, null);
         }
         else
         {
-            _logger.LogInformation(
-                "Request {RequestName} completed in {ElapsedMilliseconds}ms",
-                requestName,
-                elapsedMilliseconds);
+            LogPerformanceInfo(_logger, requestName, elapsedMilliseconds, null);
         }
-        
+
         return response;
     }
+
+    private static readonly Action<ILogger, string, long, long, Exception?> LogPerformanceWarning =
+        LoggerMessage.Define<string, long, long>(LogLevel.Warning, new EventId(1, "PerformanceWarning"), "Long running request: {RequestName} took {ElapsedMilliseconds}ms (threshold: {ThresholdMs}ms)");
+
+    private static readonly Action<ILogger, string, long, Exception?> LogPerformanceInfo =
+        LoggerMessage.Define<string, long>(LogLevel.Information, new EventId(2, "PerformanceInfo"), "Request {RequestName} completed in {ElapsedMilliseconds}ms");
 }
