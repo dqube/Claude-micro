@@ -7,27 +7,59 @@
     <InfrastructureProject>$(MSBuildThisFileDirectory)BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj</InfrastructureProject>
     <APIProject>$(MSBuildThisFileDirectory)BuildingBlocks.API\BuildingBlocks.API.csproj</APIProject>
   </PropertyGroup>
-
+  <PropertyGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('API'))">
+    <PackageId>BuildingBlocks.API</PackageId>
+    <Description>API layer building blocks for .NET applications following Clean Architecture principles</Description>
+    <PackageTags>api;web;aspnetcore;clean-architecture;building-blocks</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Application'))">
+    <PackageId>BuildingBlocks.Application</PackageId>
+    <Description>Application layer building blocks for .NET applications following Clean Architecture principles</Description>
+    <PackageTags>api;web;aspnetcore;clean-architecture;building-blocks</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Domain'))">
+    <PackageId>BuildingBlocks.Domain</PackageId>
+    <Description>Domain layer building blocks for .NET applications following Clean Architecture principles</Description>
+    <PackageTags>api;web;aspnetcore;clean-architecture;building-blocks</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Infrastructure'))">
+    <PackageId>BuildingBlocks.Infrastructure</PackageId>
+    <Description>Infrastructure layer building blocks for .NET applications following Clean Architecture principles</Description>
+    <PackageTags>api;web;aspnetcore;clean-architecture;building-blocks</PackageTags>
+  </PropertyGroup>
   <!-- Domain layer - no dependencies on other layers -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Domain'">
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Domain'))">
     <!-- Domain has no project dependencies -->
   </ItemGroup>
-
+  
   <!-- Application layer - depends on Domain -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Application'">
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Application'))">
     <ProjectReference Include="$(DomainProject)" />
   </ItemGroup>
-
   <!-- Infrastructure layer - depends on Application only (gets Domain through Application) -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Infrastructure'">
+   <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('Infrastructure'))">
     <ProjectReference Include="$(ApplicationProject)" />
   </ItemGroup>
-
   <!-- API layer - depends on Infrastructure only (gets Domain and Application through Infrastructure) -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.API'">
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('BuildingBlocks')) and $(MSBuildProjectName.EndsWith('API'))">
     <ProjectReference Include="$(InfrastructureProject)" />
   </ItemGroup>
-
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('Services')) and $(MSBuildProjectName.EndsWith('API'))">
+    <ProjectReference Include="$(APIProject)" />
+    <ProjectReference Include="..\Infrastructure\*.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('Services')) and $(MSBuildProjectName.EndsWith('Application'))">
+    <ProjectReference Include="$(ApplicationProject)" />
+    <ProjectReference Include="..\Domain\*.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('Services')) and $(MSBuildProjectName.EndsWith('Domain'))">
+    <ProjectReference Include="$(DomainProject)" />
+  </ItemGroup>
+ 
+  <ItemGroup Condition="$(MSBuildProjectFullPath.Contains('Services')) and $(MSBuildProjectName.EndsWith('Infrastructure'))">
+    <ProjectReference Include="$(InfrastructureProject)" />
+    <ProjectReference Include="..\Application\*.csproj" />
+  </ItemGroup>
   <!-- Common framework references -->
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'BuildingBlocks.Infrastructure' OR '$(MSBuildProjectName)' == 'BuildingBlocks.API'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

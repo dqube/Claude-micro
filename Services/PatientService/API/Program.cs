@@ -10,7 +10,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddOpenApiDocumentation(builder.Configuration);
 // Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, etc.)
 builder.Services.AddBuildingBlocksApi(builder.Configuration);
 
