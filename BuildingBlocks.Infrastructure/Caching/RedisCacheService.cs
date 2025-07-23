@@ -5,16 +5,54 @@ using BuildingBlocks.Application.Caching;
 
 namespace BuildingBlocks.Infrastructure.Caching;
 
-public class RedisCacheService : ICacheService
+public partial class RedisCacheService : ICacheService
 {
     private readonly IDatabase _database;
     private readonly IConnectionMultiplexer _connectionMultiplexer;
     private readonly ILogger<RedisCacheService> _logger;
 
+    [LoggerMessage(LogLevel.Error, "Error getting cached value for key {Key}")]
+    private static partial void LogGetError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache set for key: {Key}")]
+    private static partial void LogCacheSet(ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error setting cache value for key: {Key}")]
+    private static partial void LogSetError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache removed for key: {Key}")]
+    private static partial void LogCacheRemoved(ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error removing cache value for key: {Key}")]
+    private static partial void LogRemoveError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache removed by pattern: {Pattern}")]
+    private static partial void LogCacheRemovedByPattern(ILogger logger, string pattern);
+
+    [LoggerMessage(LogLevel.Error, "Error removing cached values by pattern {Pattern}")]
+    private static partial void LogRemoveByPatternError(ILogger logger, Exception exception, string pattern);
+
+    [LoggerMessage(LogLevel.Error, "Error checking cache existence for key: {Key}")]
+    private static partial void LogExistsError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache refreshed for key: {Key}")]
+    private static partial void LogCacheRefreshed(ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error refreshing cache for key: {Key}")]
+    private static partial void LogRefreshError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache cleared")]
+    private static partial void LogCacheCleared(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Error clearing cache")]
+    private static partial void LogClearError(ILogger logger, Exception exception);
+
     public RedisCacheService(
         IConnectionMultiplexer connectionMultiplexer,
         ILogger<RedisCacheService> logger)
     {
+        ArgumentNullException.ThrowIfNull(connectionMultiplexer);
+        ArgumentNullException.ThrowIfNull(logger);
         _connectionMultiplexer = connectionMultiplexer;
         _database = connectionMultiplexer.GetDatabase();
         _logger = logger;
@@ -22,6 +60,7 @@ public class RedisCacheService : ICacheService
 
     public async Task<T?> GetAsync<T>(ICacheKey key, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         return await GetAsync<T>(key.Key, cancellationToken);
     }
 
@@ -38,23 +77,24 @@ public class RedisCacheService : ICacheService
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            LogGetError(_logger, ex, key);
             return default;
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            LogGetError(_logger, ex, key);
             return default;
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            LogGetError(_logger, ex, key);
             return default;
         }
     }
 
     public async Task SetAsync<T>(ICacheKey key, T value, CachePolicy? policy = null, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         await SetAsync(key.Key, value, policy, cancellationToken);
     }
 
@@ -66,24 +106,25 @@ public class RedisCacheService : ICacheService
             TimeSpan? expiration = policy?.AbsoluteExpiration;
             await _database.StringSetAsync(key, serializedValue, expiration);
             
-            _logger.LogDebug("Cache set for key: {Key}", key);
+            LogCacheSet(_logger, key);
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            LogSetError(_logger, ex, key);
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            LogSetError(_logger, ex, key);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            LogSetError(_logger, ex, key);
         }
     }
 
     public async Task RemoveAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         await RemoveAsync(key.Key, cancellationToken);
     }
 
@@ -93,15 +134,15 @@ public class RedisCacheService : ICacheService
         {
             await _database.KeyDeleteAsync(key);
             
-            _logger.LogDebug("Cache removed for key: {Key}", key);
+            LogCacheRemoved(_logger, key);
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+            LogRemoveError(_logger, ex, key);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+            LogRemoveError(_logger, ex, key);
         }
     }
 
@@ -110,31 +151,32 @@ public class RedisCacheService : ICacheService
         try
         {
             var server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints()[0]);
-            var keys = server.Keys(pattern: pattern);
+            var keys = server.KeysAsync(pattern: pattern);
             
-            foreach (var key in keys)
+            await foreach (var key in keys)
             {
                 await _database.KeyDeleteAsync(key);
             }
             
-            _logger.LogDebug("Cache removed by pattern: {Pattern}", pattern);
+            LogCacheRemovedByPattern(_logger, pattern);
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
+            LogRemoveByPatternError(_logger, ex, pattern);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
+            LogRemoveByPatternError(_logger, ex, pattern);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
+            LogRemoveByPatternError(_logger, ex, pattern);
         }
     }
 
     public async Task<bool> ExistsAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return await ExistsAsync(key.Key, cancellationToken);
     }
 
@@ -146,18 +188,19 @@ public class RedisCacheService : ICacheService
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            LogExistsError(_logger, ex, key);
             return false;
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            LogExistsError(_logger, ex, key);
             return false;
         }
     }
 
     public Task RefreshAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return RefreshAsync(key.Key, cancellationToken);
     }
 
@@ -166,15 +209,15 @@ public class RedisCacheService : ICacheService
         try
         {
             await _database.KeyExpireAsync(key, TimeSpan.FromMinutes(30)); // Refresh with default expiry
-            _logger.LogDebug("Cache refreshed for key: {Key}", key);
+            LogCacheRefreshed(_logger, key);
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
+            LogRefreshError(_logger, ex, key);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
+            LogRefreshError(_logger, ex, key);
         }
     }
 
@@ -185,15 +228,15 @@ public class RedisCacheService : ICacheService
             var server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints()[0]);
             await server.FlushDatabaseAsync();
             
-            _logger.LogDebug("Cache cleared");
+            LogCacheCleared(_logger);
         }
         catch (RedisException ex)
         {
-            _logger.LogError(ex, "Error clearing cache");
+            LogClearError(_logger, ex);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error clearing cache");
+            LogClearError(_logger, ex);
         }
     }
 }

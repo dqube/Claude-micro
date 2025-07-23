@@ -4,10 +4,29 @@ using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Infrastructure.Data.Seeding;
 
-public static class SeedDataExtensions
+public static partial class SeedDataExtensions
 {
+    [LoggerMessage(LogLevel.Information, "No data seeders found")]
+    private static partial void LogNoSeedersFound(ILogger logger);
+
+    [LoggerMessage(LogLevel.Information, "Starting data seeding with {SeederCount} seeders")]
+    private static partial void LogSeedingStarted(ILogger logger, int seederCount);
+
+    [LoggerMessage(LogLevel.Information, "Running seeder: {SeederType} (Order: {Order})")]
+    private static partial void LogSeederStarted(ILogger logger, string seederType, int order);
+
+    [LoggerMessage(LogLevel.Information, "Completed seeder: {SeederType}")]
+    private static partial void LogSeederCompleted(ILogger logger, string seederType);
+
+    [LoggerMessage(LogLevel.Error, "Failed to run seeder: {SeederType}")]
+    private static partial void LogSeederFailed(ILogger logger, Exception exception, string seederType);
+
+    [LoggerMessage(LogLevel.Information, "Data seeding completed successfully")]
+    private static partial void LogSeedingCompleted(ILogger logger);
+
     public static async Task<IHost> SeedDataAsync(this IHost host)
     {
+        ArgumentNullException.ThrowIfNull(host);
         using var scope = host.Services.CreateScope();
         var seeders = scope.ServiceProvider.GetServices<IDataSeeder>()
             .OrderBy(s => s.Order)
@@ -15,33 +34,32 @@ public static class SeedDataExtensions
 
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IDataSeeder>>();
 
-        if (!seeders.Any())
+        if (seeders.Count == 0)
         {
-            logger.LogInformation("No data seeders found");
+            LogNoSeedersFound(logger);
             return host;
         }
 
-        logger.LogInformation("Starting data seeding with {SeederCount} seeders", seeders.Count);
+        LogSeedingStarted(logger, seeders.Count);
 
         foreach (var seeder in seeders)
         {
             try
             {
-                logger.LogInformation("Running seeder: {SeederType} (Order: {Order})", 
-                    seeder.GetType().Name, seeder.Order);
+                LogSeederStarted(logger, seeder.GetType().Name, seeder.Order);
                 
                 await seeder.SeedAsync();
                 
-                logger.LogInformation("Completed seeder: {SeederType}", seeder.GetType().Name);
+                LogSeederCompleted(logger, seeder.GetType().Name);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to run seeder: {SeederType}", seeder.GetType().Name);
+                LogSeederFailed(logger, ex, seeder.GetType().Name);
                 throw;
             }
         }
 
-        logger.LogInformation("Data seeding completed successfully");
+        LogSeedingCompleted(logger);
         return host;
     }
 
@@ -53,6 +71,7 @@ public static class SeedDataExtensions
 
     public static IServiceCollection AddDataSeeders(this IServiceCollection services, params Type[] seederTypes)
     {
+        ArgumentNullException.ThrowIfNull(seederTypes);
         foreach (var seederType in seederTypes)
         {
             if (!typeof(IDataSeeder).IsAssignableFrom(seederType))

@@ -22,6 +22,8 @@ public class StronglyTypedIdValueConverterSelector : ValueConverterSelector
 
     public override IEnumerable<ValueConverterInfo> Select(Type modelClrType, Type? providerClrType = null)
     {
+        ArgumentNullException.ThrowIfNull(modelClrType);
+        
         var baseConverters = base.Select(modelClrType, providerClrType);
         
         // Check if this is a strongly typed ID
@@ -112,6 +114,8 @@ public static class StronglyTypedIdValueConverterExtensions
     /// </summary>
     public static void UseStronglyTypedIdConverters(this DbContextOptionsBuilder optionsBuilder)
     {
+        ArgumentNullException.ThrowIfNull(optionsBuilder);
+        
         optionsBuilder.ReplaceService<IValueConverterSelector, StronglyTypedIdValueConverterSelector>();
     }
 
@@ -124,6 +128,8 @@ public static class StronglyTypedIdValueConverterExtensions
         where TProperty : StronglyTypedId<TValue>
         where TValue : notnull
     {
+        ArgumentNullException.ThrowIfNull(propertyBuilder);
+        
         return propertyBuilder.HasConversion<StronglyTypedIdValueConverter<TProperty, TValue>>();
     }
 
@@ -133,6 +139,8 @@ public static class StronglyTypedIdValueConverterExtensions
     /// </summary>
     public static void ConfigureStronglyTypedIds(this ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+        
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.GetProperties())

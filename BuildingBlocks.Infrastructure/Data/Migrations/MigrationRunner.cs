@@ -5,10 +5,31 @@ using BuildingBlocks.Infrastructure.Data.Context;
 
 namespace BuildingBlocks.Infrastructure.Data.Migrations;
 
-public class MigrationRunner : IMigrationRunner
+public partial class MigrationRunner : IMigrationRunner
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MigrationRunner> _logger;
+
+    [LoggerMessage(LogLevel.Error, "Unable to resolve DbContext from IDbContext")]
+    private static partial void LogDbContextResolutionError(ILogger logger);
+
+    [LoggerMessage(LogLevel.Information, "Starting database migration")]
+    private static partial void LogMigrationStarted(ILogger logger);
+
+    [LoggerMessage(LogLevel.Information, "Database migration completed successfully")]
+    private static partial void LogMigrationCompleted(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Database migration failed")]
+    private static partial void LogMigrationFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Starting database migration for {ContextType}")]
+    private static partial void LogMigrationStartedForContext(ILogger logger, string contextType);
+
+    [LoggerMessage(LogLevel.Information, "Database migration completed successfully for {ContextType}")]
+    private static partial void LogMigrationCompletedForContext(ILogger logger, string contextType);
+
+    [LoggerMessage(LogLevel.Error, "Database migration failed for {ContextType}")]
+    private static partial void LogMigrationFailedForContext(ILogger logger, Exception exception, string contextType);
 
     public MigrationRunner(IServiceProvider serviceProvider, ILogger<MigrationRunner> logger)
     {
@@ -23,19 +44,19 @@ public class MigrationRunner : IMigrationRunner
         
         if (context == null)
         {
-            _logger.LogError("Unable to resolve DbContext from IDbContext");
+            LogDbContextResolutionError(_logger);
             return;
         }
 
         try
         {
-            _logger.LogInformation("Starting database migration");
+            LogMigrationStarted(_logger);
             await context.Database.MigrateAsync(cancellationToken);
-            _logger.LogInformation("Database migration completed successfully");
+            LogMigrationCompleted(_logger);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database migration failed");
+            LogMigrationFailed(_logger, ex);
             throw;
         }
     }
@@ -47,13 +68,13 @@ public class MigrationRunner : IMigrationRunner
         
         try
         {
-            _logger.LogInformation("Starting database migration for {ContextType}", typeof(TContext).Name);
+            LogMigrationStartedForContext(_logger, typeof(TContext).Name);
             await context.Database.MigrateAsync(cancellationToken);
-            _logger.LogInformation("Database migration completed successfully for {ContextType}", typeof(TContext).Name);
+            LogMigrationCompletedForContext(_logger, typeof(TContext).Name);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database migration failed for {ContextType}", typeof(TContext).Name);
+            LogMigrationFailedForContext(_logger, ex, typeof(TContext).Name);
             throw;
         }
     }

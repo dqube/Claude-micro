@@ -110,7 +110,7 @@ internal static class PatientEndpoints
             
             return ResponseFactory.Success(result, "Patient retrieved successfully", correlationId);
         }
-        catch (Exception ex) when (ex.Message.Contains("not found"))
+        catch (Exception ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.NotFound("Patient", correlationId);
@@ -194,7 +194,7 @@ internal static class PatientEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.Success("Patient contact updated successfully", correlationId);
         }
-        catch (Exception ex) when (ex.Message.Contains("not found"))
+        catch (Exception ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.NotFound("Patient", correlationId);
@@ -223,7 +223,7 @@ internal static class PatientEndpoints
 }
 
 // Request DTOs for minimal API
-internal record GetPatientsRequest(
+internal sealed record GetPatientsRequest(
     int Page = 1,
     int PageSize = 10,
     string? SearchTerm = null,
@@ -232,7 +232,7 @@ internal record GetPatientsRequest(
     int? MinAge = null,
     int? MaxAge = null);
 
-internal record CreatePatientRequest(
+internal sealed record CreatePatientRequest(
     string MedicalRecordNumber,
     string FirstName,
     string LastName,
@@ -245,7 +245,7 @@ internal record CreatePatientRequest(
     string Gender,
     string? BloodType = null);
 
-internal record UpdateContactRequest(
+internal sealed record UpdateContactRequest(
     string Email,
     [property: JsonConverter(typeof(FlexibleNullableStringConverter))]
     string? PhoneNumber = null);

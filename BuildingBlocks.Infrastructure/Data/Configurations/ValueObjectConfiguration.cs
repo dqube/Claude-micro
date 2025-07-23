@@ -10,10 +10,12 @@ public static class ValueObjectConfiguration
         this PropertyBuilder<TValueObject> propertyBuilder)
         where TValueObject : ValueObject
     {
+        ArgumentNullException.ThrowIfNull(propertyBuilder);
+        
         return propertyBuilder
             .HasConversion(
                 vo => vo.ToString(),
-                value => CreateValueObject<TValueObject>(value))
+                value => CreateValueObject<TValueObject>(value!))
             .IsRequired();
     }
 
@@ -21,6 +23,8 @@ public static class ValueObjectConfiguration
         this PropertyBuilder<TValueObject?> propertyBuilder)
         where TValueObject : ValueObject
     {
+        ArgumentNullException.ThrowIfNull(propertyBuilder);
+        
         return propertyBuilder
             .HasConversion(
                 vo => vo != null ? vo.ToString() : null,
@@ -30,6 +34,8 @@ public static class ValueObjectConfiguration
     private static TValueObject CreateValueObject<TValueObject>(string value)
         where TValueObject : ValueObject
     {
+        ArgumentNullException.ThrowIfNull(value);
+        
         var constructor = typeof(TValueObject).GetConstructor(new[] { typeof(string) });
         
         if (constructor == null)

@@ -13,15 +13,17 @@ public class GetPatientByIdQueryHandler : IQueryHandler<GetPatientByIdQuery, Pat
 
     public GetPatientByIdQueryHandler(IReadOnlyRepository<Patient, PatientId> patientRepository)
     {
-        _patientRepository = patientRepository;
+        _patientRepository = patientRepository ?? throw new ArgumentNullException(nameof(patientRepository));
     }
 
     public async Task<PatientDto> HandleAsync(GetPatientByIdQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        
         var patientId = PatientId.From(request.PatientId);
         var patient = await _patientRepository.GetByIdAsync(patientId, cancellationToken);
         
-        if (patient == null)
+        if (patient is null)
             throw new PatientNotFoundException(patientId);
 
         return MapToDto(patient);

@@ -14,11 +14,13 @@ public class GetPatientsQueryHandler : IQueryHandler<GetPatientsQuery, PagedResu
 
     public GetPatientsQueryHandler(IReadOnlyRepository<Patient, PatientId> patientRepository)
     {
-        _patientRepository = patientRepository;
+        _patientRepository = patientRepository ?? throw new ArgumentNullException(nameof(patientRepository));
     }
 
     public async Task<PagedResult<PatientDto>> HandleAsync(GetPatientsQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        
         var specification = new PatientFilterSpecification(request);
         
         var patients = await _patientRepository.FindAsync(specification, cancellationToken);
@@ -73,15 +75,16 @@ public class PatientFilterSpecification : Specification<Patient>
 
     public PatientFilterSpecification(GetPatientsQuery query)
     {
+        ArgumentNullException.ThrowIfNull(query);
+        
         var criteria = PredicateBuilder.True<Patient>();
 
         if (!string.IsNullOrEmpty(query.SearchTerm))
         {
-            var searchTerm = query.SearchTerm.ToLower(CultureInfo.InvariantCulture);
             criteria = criteria.And(p => 
-                p.Name.FirstName.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm) ||
-                p.Name.LastName.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm) ||
-                p.MedicalRecordNumber.Value.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm));
+                p.Name.FirstName.Contains(query.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Name.LastName.Contains(query.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.MedicalRecordNumber.Value.Contains(query.SearchTerm, StringComparison.OrdinalIgnoreCase));
         }
 
         if (query.IsActive.HasValue)
@@ -122,6 +125,9 @@ public static class PredicateBuilder
         this System.Linq.Expressions.Expression<Func<T, bool>> expr1,
         System.Linq.Expressions.Expression<Func<T, bool>> expr2)
     {
+        ArgumentNullException.ThrowIfNull(expr1);
+        ArgumentNullException.ThrowIfNull(expr2);
+        
         var invokedExpr = System.Linq.Expressions.Expression.Invoke(expr2, expr1.Parameters.Cast<System.Linq.Expressions.Expression>());
         return System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(
             System.Linq.Expressions.Expression.AndAlso(expr1.Body, invokedExpr), expr1.Parameters);

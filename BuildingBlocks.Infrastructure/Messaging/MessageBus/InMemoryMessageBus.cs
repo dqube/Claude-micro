@@ -4,7 +4,7 @@ using BuildingBlocks.Application.Messaging;
 
 namespace BuildingBlocks.Infrastructure.Messaging.MessageBus;
 
-public class InMemoryMessageBus : IMessageBus
+public partial class InMemoryMessageBus : IMessageBus
 {
     private readonly ILogger<InMemoryMessageBus> _logger;
     private readonly ConcurrentDictionary<Type, List<Func<object, MessageMetadata, Task>>> _handlers = new();
@@ -38,9 +38,11 @@ public class InMemoryMessageBus : IMessageBus
 
     public async Task PublishAsync<T>(T message, MessageMetadata metadata, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(metadata);
+        
         if (!_isStarted)
         {
-            _logger.LogWarning("Message bus is not started. Message will be ignored.");
+            LogMessageBusNotStarted(_logger);
             return;
         }
 
@@ -51,8 +53,7 @@ public class InMemoryMessageBus : IMessageBus
             await Task.WhenAll(tasks);
         }
 
-        _logger.LogDebug("Published message of type {MessageType} with ID {MessageId}", 
-            messageType.Name, metadata.MessageId);
+        LogMessagePublished(_logger, messageType.Name, metadata.MessageId);
     }
 
     public Task SubscribeAsync<T>(Func<T, MessageMetadata, Task> handler, CancellationToken cancellationToken = default) where T : class
@@ -68,7 +69,7 @@ public class InMemoryMessageBus : IMessageBus
                 return existing;
             });
 
-        _logger.LogDebug("Subscribed to message type {MessageType}", messageType.Name);
+        LogSubscribedToMessageType(_logger, messageType.Name);
         return Task.CompletedTask;
     }
 
@@ -77,21 +78,21 @@ public class InMemoryMessageBus : IMessageBus
         var messageType = typeof(T);
         _handlers.TryRemove(messageType, out _);
         
-        _logger.LogDebug("Unsubscribed from message type {MessageType}", messageType.Name);
+        LogUnsubscribedFromMessageType(_logger, messageType.Name);
         return Task.CompletedTask;
     }
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         _isStarted = true;
-        _logger.LogInformation("InMemoryMessageBus started");
+        LogMessageBusStarted(_logger);
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
         _isStarted = false;
-        _logger.LogInformation("InMemoryMessageBus stopped");
+        LogMessageBusStopped(_logger);
         return Task.CompletedTask;
     }
 
@@ -103,19 +104,61 @@ public class InMemoryMessageBus : IMessageBus
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+            LogMessageHandlerError(_logger, ex, metadata.MessageId);
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+            LogMessageHandlerError(_logger, ex, metadata.MessageId);
         }
         catch (TimeoutException ex)
         {
-            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+            LogMessageHandlerError(_logger, ex, metadata.MessageId);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+            LogMessageHandlerError(_logger, ex, metadata.MessageId);
         }
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Warning,
+        Message = "Message bus is not started. Message will be ignored.")]
+    private static partial void LogMessageBusNotStarted(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Debug,
+        Message = "Published message of type {messageType} with ID {messageId}")]
+    private static partial void LogMessagePublished(ILogger logger, string messageType, string messageId);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Debug,
+        Message = "Subscribed to message type {messageType}")]
+    private static partial void LogSubscribedToMessageType(ILogger logger, string messageType);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = LogLevel.Debug,
+        Message = "Unsubscribed from message type {messageType}")]
+    private static partial void LogUnsubscribedFromMessageType(ILogger logger, string messageType);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = LogLevel.Information,
+        Message = "InMemoryMessageBus started")]
+    private static partial void LogMessageBusStarted(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = LogLevel.Information,
+        Message = "InMemoryMessageBus stopped")]
+    private static partial void LogMessageBusStopped(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 7,
+        Level = LogLevel.Error,
+        Message = "Error executing message handler for message {messageId}")]
+    private static partial void LogMessageHandlerError(ILogger logger, Exception exception, string messageId);
 }

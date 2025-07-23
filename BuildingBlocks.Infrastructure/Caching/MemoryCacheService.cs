@@ -5,11 +5,41 @@ using BuildingBlocks.Application.Caching;
 
 namespace BuildingBlocks.Infrastructure.Caching;
 
-public class MemoryCacheService : ICacheService
+public partial class MemoryCacheService : ICacheService
 {
     private readonly IMemoryCache _memoryCache;
     private readonly ILogger<MemoryCacheService> _logger;
     private readonly CacheConfiguration _configuration;
+
+    [LoggerMessage(LogLevel.Debug, "Cache {Operation} for key: {Key}")]
+    private static partial void LogCacheOperation(ILogger logger, string operation, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error getting cache value for key: {Key}")]
+    private static partial void LogGetError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache set for key: {Key}")]
+    private static partial void LogCacheSet(ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error setting cache value for key: {Key}")]
+    private static partial void LogSetError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache removed for key: {Key}")]
+    private static partial void LogCacheRemoved(ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Error, "Error removing cache value for key: {Key}")]
+    private static partial void LogRemoveError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Warning, "Pattern-based cache removal not efficiently supported in MemoryCache")]
+    private static partial void LogPatternRemovalNotSupported(ILogger logger);
+
+    [LoggerMessage(LogLevel.Warning, "Cache clear not efficiently supported in MemoryCache")]
+    private static partial void LogClearNotSupported(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Error checking cache existence for key: {Key}")]
+    private static partial void LogExistsError(ILogger logger, Exception exception, string key);
+
+    [LoggerMessage(LogLevel.Debug, "Cache refresh requested for key: {Key} (no-op in MemoryCache)")]
+    private static partial void LogCacheRefresh(ILogger logger, string key);
 
     public MemoryCacheService(
         IMemoryCache memoryCache,
@@ -23,6 +53,7 @@ public class MemoryCacheService : ICacheService
 
     public Task<T?> GetAsync<T>(ICacheKey key, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         return GetAsync<T>(key.Key, cancellationToken);
     }
 
@@ -33,24 +64,25 @@ public class MemoryCacheService : ICacheService
             var fullKey = GetFullKey(key);
             var value = _memoryCache.Get<T>(fullKey);
             
-            _logger.LogDebug("Cache {Operation} for key: {Key}", value != null ? "Hit" : "Miss", fullKey);
+            LogCacheOperation(_logger, value != null ? "Hit" : "Miss", fullKey);
             
             return Task.FromResult(value);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error getting cache value for key: {Key}", key);
+            LogGetError(_logger, ex, key);
             return Task.FromResult<T?>(default);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error getting cache value for key: {Key}", key);
+            LogGetError(_logger, ex, key);
             return Task.FromResult<T?>(default);
         }
     }
 
     public Task SetAsync<T>(ICacheKey key, T value, CachePolicy? policy = null, CancellationToken cancellationToken = default) where T : class
     {
+        ArgumentNullException.ThrowIfNull(key);
         var actualPolicy = policy ?? new CachePolicy
         {
             AbsoluteExpiration = key.Expiration,
@@ -89,24 +121,25 @@ public class MemoryCacheService : ICacheService
 
             _memoryCache.Set(fullKey, value, options);
             
-            _logger.LogDebug("Cache set for key: {Key}", fullKey);
+            LogCacheSet(_logger, fullKey);
             
             return Task.CompletedTask;
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            LogSetError(_logger, ex, key);
             return Task.CompletedTask;
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            LogSetError(_logger, ex, key);
             return Task.CompletedTask;
         }
     }
 
     public Task RemoveAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return RemoveAsync(key.Key, cancellationToken);
     }
 
@@ -117,18 +150,18 @@ public class MemoryCacheService : ICacheService
             var fullKey = GetFullKey(key);
             _memoryCache.Remove(fullKey);
             
-            _logger.LogDebug("Cache removed for key: {Key}", fullKey);
+            LogCacheRemoved(_logger, fullKey);
             
             return Task.CompletedTask;
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+            LogRemoveError(_logger, ex, key);
             return Task.CompletedTask;
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+            LogRemoveError(_logger, ex, key);
             return Task.CompletedTask;
         }
     }
@@ -137,7 +170,7 @@ public class MemoryCacheService : ICacheService
     {
         // Memory cache doesn't support pattern-based removal efficiently
         // This would require keeping track of keys, which is beyond basic implementation
-        _logger.LogWarning("Pattern-based cache removal not efficiently supported in MemoryCache");
+        LogPatternRemovalNotSupported(_logger);
         return Task.CompletedTask;
     }
 
@@ -145,12 +178,13 @@ public class MemoryCacheService : ICacheService
     {
         // Memory cache doesn't have a clear method
         // Would need to track keys or dispose and recreate cache
-        _logger.LogWarning("Cache clear not efficiently supported in MemoryCache");
+        LogClearNotSupported(_logger);
         return Task.CompletedTask;
     }
 
     public Task<bool> ExistsAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return ExistsAsync(key.Key, cancellationToken);
     }
 
@@ -164,18 +198,19 @@ public class MemoryCacheService : ICacheService
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            LogExistsError(_logger, ex, key);
             return Task.FromResult(false);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            LogExistsError(_logger, ex, key);
             return Task.FromResult(false);
         }
     }
 
     public Task RefreshAsync(ICacheKey key, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return RefreshAsync(key.Key, cancellationToken);
     }
 
@@ -183,7 +218,7 @@ public class MemoryCacheService : ICacheService
     {
         // Memory cache doesn't support explicit refresh
         // The value would need to be retrieved and reset
-        _logger.LogDebug("Cache refresh requested for key: {Key} (no-op in MemoryCache)", key);
+        LogCacheRefresh(_logger, key);
         return Task.CompletedTask;
     }
 

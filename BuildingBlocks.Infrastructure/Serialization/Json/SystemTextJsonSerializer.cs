@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Infrastructure.Serialization.Json;
 
-public class SystemTextJsonSerializer : IJsonSerializer
+public partial class SystemTextJsonSerializer : IJsonSerializer
 {
     private readonly JsonSerializerOptions _options;
     private readonly ILogger<SystemTextJsonSerializer> _logger;
@@ -29,7 +29,7 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error serializing object of type {Type}", typeof(T).Name);
+            LogSerializeError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
@@ -42,20 +42,22 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deserializing JSON to type {Type}", typeof(T).Name);
+            LogDeserializeError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
 
     public object? Deserialize(string json, Type type)
     {
+        ArgumentNullException.ThrowIfNull(type);
+        
         try
         {
             return JsonSerializer.Deserialize(json, type, _options);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deserializing JSON to type {Type}", type.Name);
+            LogDeserializeError(_logger, ex, type.Name);
             throw;
         }
     }
@@ -68,7 +70,7 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error serializing object to bytes for type {Type}", typeof(T).Name);
+            LogSerializeToBytesError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
@@ -81,7 +83,7 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deserializing bytes to type {Type}", typeof(T).Name);
+            LogDeserializeFromBytesError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
@@ -96,7 +98,7 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error async serializing object of type {Type}", typeof(T).Name);
+            LogAsyncSerializeError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
@@ -110,7 +112,7 @@ public class SystemTextJsonSerializer : IJsonSerializer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error async deserializing JSON to type {Type}", typeof(T).Name);
+            LogAsyncDeserializeError(_logger, ex, typeof(T).Name);
             throw;
         }
     }
@@ -155,4 +157,40 @@ public class SystemTextJsonSerializer : IJsonSerializer
             return false;
         }
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Error,
+        Message = "Error serializing object of type {typeName}")]
+    private static partial void LogSerializeError(ILogger logger, Exception exception, string typeName);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Error,
+        Message = "Error deserializing JSON to type {typeName}")]
+    private static partial void LogDeserializeError(ILogger logger, Exception exception, string typeName);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Error,
+        Message = "Error serializing object to bytes for type {typeName}")]
+    private static partial void LogSerializeToBytesError(ILogger logger, Exception exception, string typeName);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = LogLevel.Error,
+        Message = "Error deserializing bytes to type {typeName}")]
+    private static partial void LogDeserializeFromBytesError(ILogger logger, Exception exception, string typeName);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = LogLevel.Error,
+        Message = "Error async serializing object of type {typeName}")]
+    private static partial void LogAsyncSerializeError(ILogger logger, Exception exception, string typeName);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = LogLevel.Error,
+        Message = "Error async deserializing JSON to type {typeName}")]
+    private static partial void LogAsyncDeserializeError(ILogger logger, Exception exception, string typeName);
 }

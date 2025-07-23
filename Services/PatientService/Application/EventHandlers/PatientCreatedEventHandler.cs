@@ -4,21 +4,23 @@ using PatientService.Domain.Events;
 
 namespace PatientService.Application.EventHandlers;
 
-public class PatientCreatedEventHandler : IEventHandler<DomainEventWrapper<PatientCreatedEvent>>
+public partial class PatientCreatedEventHandler : IEventHandler<DomainEventWrapper<PatientCreatedEvent>>
 {
     private readonly ILogger<PatientCreatedEventHandler> _logger;
 
     public PatientCreatedEventHandler(ILogger<PatientCreatedEventHandler> logger)
     {
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task HandleAsync(DomainEventWrapper<PatientCreatedEvent> notification, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(notification);
+        
         var patientCreatedEvent = notification.DomainEvent;
         
-        _logger.LogInformation(
-            "Patient created: {PatientId} - {PatientName} (MRN: {MedicalRecordNumber})",
+        LogPatientCreated(
+            _logger,
             patientCreatedEvent.PatientId.Value,
             patientCreatedEvent.Name.FullName,
             patientCreatedEvent.MedicalRecordNumber.Value);
@@ -31,4 +33,10 @@ public class PatientCreatedEventHandler : IEventHandler<DomainEventWrapper<Patie
 
         await Task.CompletedTask;
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "Patient created: {patientId} - {patientName} (MRN: {medicalRecordNumber})")]
+    private static partial void LogPatientCreated(ILogger logger, Guid patientId, string patientName, string medicalRecordNumber);
 }

@@ -5,11 +5,20 @@ using BuildingBlocks.Application.Inbox;
 
 namespace BuildingBlocks.Application.Services;
 
-public class InboxBackgroundService : BackgroundService
+public partial class InboxBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<InboxBackgroundService> _logger;
     private readonly InboxOptions _options;
+
+    [LoggerMessage(LogLevel.Information, "Inbox background service started")]
+    private static partial void LogServiceStarted(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Error occurred while processing inbox messages")]
+    private static partial void LogProcessingError(ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Inbox background service stopped")]
+    private static partial void LogServiceStopped(ILogger logger);
 
     public InboxBackgroundService(
         IServiceProvider serviceProvider,
@@ -23,7 +32,7 @@ public class InboxBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Inbox background service started");
+        LogServiceStarted(_logger);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -38,24 +47,24 @@ public class InboxBackgroundService : BackgroundService
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing inbox messages");
+                LogProcessingError(_logger, ex);
             }
             catch (TaskCanceledException ex) when (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogError(ex, "Error occurred while processing inbox messages");
+                LogProcessingError(_logger, ex);
             }
             catch (TimeoutException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing inbox messages");
+                LogProcessingError(_logger, ex);
             }
             catch (ArgumentException ex)
             {
-                _logger.LogError(ex, "Error occurred while processing inbox messages");
+                LogProcessingError(_logger, ex);
             }
 
             await Task.Delay(_options.ProcessingInterval, stoppingToken);
         }
 
-        _logger.LogInformation("Inbox background service stopped");
+        LogServiceStopped(_logger);
     }
 }

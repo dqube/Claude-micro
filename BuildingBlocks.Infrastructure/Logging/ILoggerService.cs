@@ -11,5 +11,5 @@ public interface ILoggerService
     void LogCritical(string message, params object[] args);
     void LogCritical(Exception exception, string message, params object[] args);
     
-    IDisposable BeginScope<TState>(TState state);
+    IDisposable? BeginScope<TState>(TState state) where TState : notnull;
 }

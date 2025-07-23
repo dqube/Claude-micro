@@ -3,12 +3,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Application.Outbox;
 
-public class OutboxProcessor : IOutboxProcessor
+public partial class OutboxProcessor : IOutboxProcessor
 {
     private readonly IOutboxService _outboxService;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<OutboxProcessor> _logger;
     private readonly OutboxOptions _options;
+
+    [LoggerMessage(LogLevel.Error, "Failed to process outbox message {MessageId}")]
+    private static partial void LogProcessingError(ILogger logger, Exception exception, Guid messageId);
+
+    [LoggerMessage(LogLevel.Information, "Successfully published outbox message {MessageId} to {Destination}")]
+    private static partial void LogMessagePublished(ILogger logger, Guid messageId, string destination);
+
+    [LoggerMessage(LogLevel.Error, "Failed to publish outbox message {MessageId}: {Error}")]
+    private static partial void LogPublishError(ILogger logger, Exception exception, Guid messageId, string error);
+
+    [LoggerMessage(LogLevel.Error, "Failed to retry outbox message {MessageId}")]
+    private static partial void LogRetryError(ILogger logger, Exception exception, Guid messageId);
+
+    [LoggerMessage(LogLevel.Information, "Cleaned up expired outbox messages older than {RetentionPeriod}")]
+    private static partial void LogCleanupCompleted(ILogger logger, TimeSpan retentionPeriod);
 
     public OutboxProcessor(
         IOutboxService outboxService,
@@ -34,21 +49,22 @@ public class OutboxProcessor : IOutboxProcessor
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
+                LogProcessingError(_logger, ex, message.Id);
             }
             catch (TaskCanceledException ex)
             {
-                _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
+                LogProcessingError(_logger, ex, message.Id);
             }
             catch (TimeoutException ex)
             {
-                _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
+                LogProcessingError(_logger, ex, message.Id);
             }
         }
     }
 
     public async Task ProcessMessageAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(message);
         try
         {
             await _outboxService.MarkAsPublishingAsync(message.Id, cancellationToken);
@@ -64,26 +80,26 @@ public class OutboxProcessor : IOutboxProcessor
             
             await _outboxService.MarkAsPublishedAsync(message.Id, cancellationToken);
             
-            _logger.LogInformation("Successfully published outbox message {MessageId} to {Destination}", message.Id, message.Destination);
+            LogMessagePublished(_logger, message.Id, message.Destination);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            LogPublishError(_logger, ex, message.Id, ex.Message);
             await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            LogPublishError(_logger, ex, message.Id, ex.Message);
             await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
         catch (TimeoutException ex)
         {
-            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            LogPublishError(_logger, ex, message.Id, ex.Message);
             await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            LogPublishError(_logger, ex, message.Id, ex.Message);
             await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
     }
@@ -100,15 +116,15 @@ public class OutboxProcessor : IOutboxProcessor
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
+                LogRetryError(_logger, ex, message.Id);
             }
             catch (TaskCanceledException ex)
             {
-                _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
+                LogRetryError(_logger, ex, message.Id);
             }
             catch (TimeoutException ex)
             {
-                _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
+                LogRetryError(_logger, ex, message.Id);
             }
         }
     }
@@ -116,7 +132,7 @@ public class OutboxProcessor : IOutboxProcessor
     public async Task CleanupExpiredMessagesAsync(CancellationToken cancellationToken = default)
     {
         await _outboxService.CleanupOldMessagesAsync(_options.RetentionPeriod, cancellationToken);
-        _logger.LogInformation("Cleaned up expired outbox messages older than {RetentionPeriod}", _options.RetentionPeriod);
+        LogCleanupCompleted(_logger, _options.RetentionPeriod);
     }
 
     private IOutboxMessagePublisher? GetMessagePublisher(string destination)
