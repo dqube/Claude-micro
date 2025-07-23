@@ -20,6 +20,8 @@ public static class SecurityExtensions
 
     public static WebApplication UseApiSecurity(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseApiSecurityHeaders();
@@ -40,6 +42,9 @@ public static class SecurityExtensions
 
     public static WebApplication UseCustomSecurityHeaders(this WebApplication app, Action<SecurityHeaderOptions> configure)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(configure);
+        
         var options = new SecurityHeaderOptions();
         configure(options);
 

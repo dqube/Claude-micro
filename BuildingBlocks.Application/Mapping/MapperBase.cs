@@ -18,8 +18,7 @@ public abstract class MapperBase : IMapper
 
     public virtual TDestination Map<TDestination>(object source)
     {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
 
         return Map<object, TDestination>(source);
     }
@@ -61,8 +60,7 @@ public abstract class MapperBase : IMapper
 
     public virtual IEnumerable<TDestination> Map<TSource, TDestination>(IEnumerable<TSource> source)
     {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
 
         return source.Select(Map<TSource, TDestination>);
     }

@@ -36,7 +36,19 @@ public class OutboxBackgroundService : BackgroundService
                 await processor.RetryFailedMessagesAsync(stoppingToken);
                 await processor.CleanupExpiredMessagesAsync(stoppingToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Error occurred while processing outbox messages");
+            }
+            catch (TaskCanceledException ex) when (!stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogError(ex, "Error occurred while processing outbox messages");
+            }
+            catch (TimeoutException ex)
+            {
+                _logger.LogError(ex, "Error occurred while processing outbox messages");
+            }
+            catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while processing outbox messages");
             }

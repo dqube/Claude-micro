@@ -101,7 +101,19 @@ public class InMemoryMessageBus : IMessageBus
         {
             await handler(message, metadata);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+        }
+        catch (TimeoutException ex)
+        {
+            _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error executing message handler for message {MessageId}", metadata.MessageId);
         }

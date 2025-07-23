@@ -88,6 +88,7 @@ public static class ApiExtensions
         IConfiguration configuration,
         Action<ApiRegistrationOptions> configureOptions)
     {
+        ArgumentNullException.ThrowIfNull(configureOptions);
         var options = new ApiRegistrationOptions();
         configureOptions(options);
         
@@ -170,6 +171,8 @@ public static class ApiExtensions
     /// <returns>The web application for method chaining</returns>
     public static WebApplication UseBuildingBlocksApi(this WebApplication app, IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(configuration);
         app.UseOpenApiDocumentation();
 
         // Development-specific middleware
@@ -226,6 +229,8 @@ public static class ApiExtensions
         IConfiguration _,
         Action<ApiPipelineOptions> configureOptions)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(configureOptions);
         var options = new ApiPipelineOptions();
         configureOptions(options);
         
@@ -301,6 +306,7 @@ public static class ApiExtensions
     /// <returns>The service collection for method chaining</returns>
     public static IServiceCollection AddApiCors(this IServiceCollection services, IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         var corsOptions = configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>() ?? new CorsOptions();
         
         services.AddCors(options =>

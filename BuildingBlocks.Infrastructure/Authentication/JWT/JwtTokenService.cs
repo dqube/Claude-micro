@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -50,7 +51,7 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.NameIdentifier, userId),
             new(ClaimTypes.Name, userName),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };
 
         if (roles != null)
@@ -88,7 +89,17 @@ public class JwtTokenService : IJwtTokenService
             var principal = _tokenHandler.ValidateToken(token, validationParameters, out _);
             return principal;
         }
-        catch (Exception ex)
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogWarning(ex, "Token validation failed");
+            return null;
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Token validation failed");
+            return null;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Token validation failed");
             return null;
@@ -110,7 +121,11 @@ public class JwtTokenService : IJwtTokenService
             var bytes = Convert.FromBase64String(refreshToken);
             return bytes.Length == 32;
         }
-        catch
+        catch (FormatException)
+        {
+            return false;
+        }
+        catch (ArgumentException)
         {
             return false;
         }
@@ -123,7 +138,12 @@ public class JwtTokenService : IJwtTokenService
             var jwtToken = _tokenHandler.ReadJwtToken(token);
             return jwtToken.ValidTo;
         }
-        catch (Exception ex)
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogError(ex, "Error getting token expiration");
+            return DateTime.MinValue;
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error getting token expiration");
             return DateTime.MinValue;
@@ -137,7 +157,12 @@ public class JwtTokenService : IJwtTokenService
             var jwtToken = _tokenHandler.ReadJwtToken(token);
             return jwtToken.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
         }
-        catch (Exception ex)
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogError(ex, "Error getting claim value from token");
+            return null;
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error getting claim value from token");
             return null;
@@ -164,7 +189,12 @@ public class JwtTokenService : IJwtTokenService
                 .Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value);
         }
-        catch (Exception ex)
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogError(ex, "Error getting roles from token");
+            return Enumerable.Empty<string>();
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error getting roles from token");
             return Enumerable.Empty<string>();

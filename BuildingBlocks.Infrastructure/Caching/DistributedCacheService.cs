@@ -34,7 +34,17 @@ public class DistributedCacheService : ICacheService
 
             return JsonSerializer.Deserialize<T>(cachedValue);
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            return default;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            return default;
+        }
+        catch (TaskCanceledException ex)
         {
             _logger.LogError(ex, "Error getting cached value for key {Key}", key);
             return default;
@@ -67,7 +77,15 @@ public class DistributedCacheService : ICacheService
             
             _logger.LogDebug("Cache set for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+        }
+        catch (TaskCanceledException ex)
         {
             _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
         }
@@ -86,7 +104,11 @@ public class DistributedCacheService : ICacheService
             
             _logger.LogDebug("Cache removed for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+        }
+        catch (TaskCanceledException ex)
         {
             _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
         }
@@ -111,7 +133,12 @@ public class DistributedCacheService : ICacheService
             var value = await _distributedCache.GetStringAsync(key, cancellationToken);
             return !string.IsNullOrEmpty(value);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            return false;
+        }
+        catch (TaskCanceledException ex)
         {
             _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
             return false;
@@ -130,7 +157,11 @@ public class DistributedCacheService : ICacheService
             await _distributedCache.RefreshAsync(key, cancellationToken);
             _logger.LogDebug("Cache refreshed for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
+        }
+        catch (TaskCanceledException ex)
         {
             _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
         }

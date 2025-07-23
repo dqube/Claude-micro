@@ -36,7 +36,17 @@ public class RedisCacheService : ICacheService
 
             return JsonSerializer.Deserialize<T>(cachedValue!);
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            return default;
+        }
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error getting cached value for key {Key}", key);
+            return default;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error getting cached value for key {Key}", key);
             return default;
@@ -58,7 +68,15 @@ public class RedisCacheService : ICacheService
             
             _logger.LogDebug("Cache set for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+        }
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
         }
@@ -77,7 +95,11 @@ public class RedisCacheService : ICacheService
             
             _logger.LogDebug("Cache removed for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
         }
@@ -97,7 +119,15 @@ public class RedisCacheService : ICacheService
             
             _logger.LogDebug("Cache removed by pattern: {Pattern}", pattern);
         }
-        catch (Exception ex)
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error removing cached values by pattern {Pattern}", pattern);
         }
@@ -114,7 +144,12 @@ public class RedisCacheService : ICacheService
         {
             return await _database.KeyExistsAsync(key);
         }
-        catch (Exception ex)
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            return false;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
             return false;
@@ -133,7 +168,11 @@ public class RedisCacheService : ICacheService
             await _database.KeyExpireAsync(key, TimeSpan.FromMinutes(30)); // Refresh with default expiry
             _logger.LogDebug("Cache refreshed for key: {Key}", key);
         }
-        catch (Exception ex)
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error refreshing cache for key: {Key}", key);
         }
@@ -148,7 +187,11 @@ public class RedisCacheService : ICacheService
             
             _logger.LogDebug("Cache cleared");
         }
-        catch (Exception ex)
+        catch (RedisException ex)
+        {
+            _logger.LogError(ex, "Error clearing cache");
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error clearing cache");
         }

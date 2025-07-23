@@ -14,6 +14,8 @@ public static class ProblemDetailsFactory
         string? detail = null,
         string? instance = null)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         statusCode ??= httpContext.Response.StatusCode;
 
         var problemDetails = new ProblemDetails
@@ -39,6 +41,9 @@ public static class ProblemDetailsFactory
         string? detail = null,
         string? instance = null)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(errors);
+        
         statusCode ??= HttpConstants.StatusCodes.UnprocessableEntity;
 
         var problemDetails = new ValidationProblemDetails(errors)

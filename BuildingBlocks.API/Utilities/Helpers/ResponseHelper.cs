@@ -1,3 +1,4 @@
+using System.Globalization;
 using BuildingBlocks.API.Responses.Base;
 using BuildingBlocks.API.Utilities.Constants;
 
@@ -89,10 +90,12 @@ public static class ResponseHelper
 
     public static ErrorResponse NotFound(string resource, string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(resource);
+        
         return Error(
             $"{resource} not found",
             "NOT_FOUND", 
-            $"The requested {resource.ToLower()} could not be found",
+            $"The requested {resource.ToUpperInvariant()} could not be found",
             correlationId: correlationId);
     }
 

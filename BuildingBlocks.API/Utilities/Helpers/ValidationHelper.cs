@@ -15,7 +15,11 @@ public static class ValidationHelper
             var emailAttribute = new EmailAddressAttribute();
             return emailAttribute.IsValid(email);
         }
-        catch
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
         {
             return false;
         }

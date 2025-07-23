@@ -20,7 +20,10 @@ public class PagedResult<T>
     public int TotalPages { get; }
     public bool HasNextPage { get; }
     public bool HasPreviousPage { get; }
+}
 
-    public static PagedResult<T> Empty(int page = 1, int pageSize = 10) =>
-        new(Enumerable.Empty<T>(), 0, page, pageSize);
+public static class PagedResult
+{
+    public static PagedResult<T> Empty<T>(int page = 1, int pageSize = 10) =>
+        new PagedResult<T>(Enumerable.Empty<T>(), 0, page, pageSize);
 }

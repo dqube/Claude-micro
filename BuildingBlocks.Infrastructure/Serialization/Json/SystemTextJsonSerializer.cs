@@ -122,7 +122,17 @@ public class SystemTextJsonSerializer : IJsonSerializer
             result = JsonSerializer.Deserialize<T>(json, _options);
             return true;
         }
-        catch
+        catch (JsonException)
+        {
+            result = default;
+            return false;
+        }
+        catch (ArgumentException)
+        {
+            result = default;
+            return false;
+        }
+        catch (NotSupportedException)
         {
             result = default;
             return false;
@@ -136,7 +146,11 @@ public class SystemTextJsonSerializer : IJsonSerializer
             using var document = JsonDocument.Parse(json);
             return true;
         }
-        catch
+        catch (JsonException)
+        {
+            return false;
+        }
+        catch (ArgumentException)
         {
             return false;
         }

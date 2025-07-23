@@ -26,6 +26,8 @@ public class ApiEndpointConvention : IEndpointConventionBuilder
 
     public static void ApplyConventions(EndpointBuilder builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        
         // Apply consistent conventions across all API endpoints
         
         // Simplified metadata without complex type mappings
@@ -54,6 +56,8 @@ public class VersioningEndpointConvention : IEndpointConventionBuilder
 
     public static void ApplyVersioningConventions(EndpointBuilder builder, int majorVersion, int minorVersion = 0)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        
         var apiVersion = new ApiVersion(majorVersion, minorVersion);
         builder.Metadata.Add(new ApiVersionMetadata(apiVersion));
         

@@ -2,7 +2,7 @@ namespace BuildingBlocks.API.Utilities.Constants;
 
 public static class HttpConstants
 {
-    public static class StatusCodes
+    internal static class StatusCodes
     {
         public const int Ok = 200;
         public const int Created = 201;
@@ -17,7 +17,7 @@ public static class HttpConstants
         public const int InternalServerError = 500;
     }
 
-    public static class ContentTypes
+    internal static class ContentTypes
     {
         public const string Json = "application/json";
         public const string Xml = "application/xml";
@@ -27,7 +27,7 @@ public static class HttpConstants
         public const string Html = "text/html";
     }
 
-    public static class Methods
+    internal static class Methods
     {
         public const string Get = "GET";
         public const string Post = "POST";

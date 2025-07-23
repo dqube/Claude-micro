@@ -15,6 +15,8 @@ public static class ErrorFactory
         string? type = null,
         string? instance = null)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
@@ -34,6 +36,9 @@ public static class ErrorFactory
         string title = "One or more validation errors occurred.",
         string detail = "See the errors property for details.")
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(errors);
+        
         var problemDetails = new ValidationProblemDetails(errors)
         {
             Status = HttpConstants.StatusCodes.UnprocessableEntity,

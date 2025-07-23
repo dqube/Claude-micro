@@ -23,6 +23,7 @@ public abstract class EndpointBase
     
     protected static string GetCorrelationId(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
         return context.TraceIdentifier;
     }
     

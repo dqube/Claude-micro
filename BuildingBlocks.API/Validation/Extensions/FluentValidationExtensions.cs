@@ -15,6 +15,9 @@ public static class FluentValidationExtensions
 
     public static IServiceCollection AddFluentValidation(this IServiceCollection services, params System.Reflection.Assembly[] assemblies)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(assemblies);
+        
         foreach (var assembly in assemblies)
         {
             services.AddValidatorsFromAssembly(assembly);
@@ -24,6 +27,8 @@ public static class FluentValidationExtensions
 
     public static BuildingBlocks.API.Validation.Results.ValidationResult ToValidationResult(this FluentValidation.Results.ValidationResult fluentResult)
     {
+        ArgumentNullException.ThrowIfNull(fluentResult);
+        
         if (fluentResult.IsValid)
         {
             return BuildingBlocks.API.Validation.Results.ValidationResult.Success();
@@ -40,6 +45,8 @@ public static class FluentValidationExtensions
 
     public static IDictionary<string, string[]> ToErrorDictionary(this FluentValidation.Results.ValidationResult fluentResult)
     {
+        ArgumentNullException.ThrowIfNull(fluentResult);
+        
         return fluentResult.Errors
             .GroupBy(x => x.PropertyName)
             .ToDictionary(
@@ -49,6 +56,8 @@ public static class FluentValidationExtensions
 
     public static async Task<T?> ValidateAndThrowAsync<T>(this IValidator<T> validator, T instance)
     {
+        ArgumentNullException.ThrowIfNull(validator);
+        
         var result = await validator.ValidateAsync(instance);
         if (!result.IsValid)
         {

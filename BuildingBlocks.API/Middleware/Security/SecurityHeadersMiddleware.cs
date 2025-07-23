@@ -16,6 +16,8 @@ public class SecurityHeadersMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        
         // Add security headers
         var headers = context.Response.Headers;
 

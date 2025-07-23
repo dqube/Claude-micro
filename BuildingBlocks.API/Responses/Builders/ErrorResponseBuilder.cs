@@ -1,3 +1,4 @@
+using System.Globalization;
 using BuildingBlocks.API.Responses.Base;
 
 namespace BuildingBlocks.API.Responses.Builders;
@@ -40,10 +41,12 @@ public static class ErrorResponseBuilder
 
     public static ErrorResponse NotFound(string resource, string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(resource);
+        
         return Build(
             $"{resource} not found",
             "NOT_FOUND",
-            $"The requested {resource.ToLower()} could not be found",
+            $"The requested {resource.ToLower(CultureInfo.InvariantCulture)} could not be found",
             correlationId: correlationId);
     }
 

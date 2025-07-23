@@ -32,7 +32,15 @@ public class OutboxProcessor : IOutboxProcessor
             {
                 await ProcessMessageAsync(message, cancellationToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
+            }
+            catch (TimeoutException ex)
             {
                 _logger.LogError(ex, "Failed to process outbox message {MessageId}", message.Id);
             }
@@ -58,7 +66,22 @@ public class OutboxProcessor : IOutboxProcessor
             
             _logger.LogInformation("Successfully published outbox message {MessageId} to {Destination}", message.Id, message.Destination);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
+        }
+        catch (TimeoutException ex)
+        {
+            _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
+            await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Failed to publish outbox message {MessageId}: {Error}", message.Id, ex.Message);
             await _outboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
@@ -75,7 +98,15 @@ public class OutboxProcessor : IOutboxProcessor
             {
                 await ProcessMessageAsync(message, cancellationToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
+            }
+            catch (TimeoutException ex)
             {
                 _logger.LogError(ex, "Failed to retry outbox message {MessageId}", message.Id);
             }

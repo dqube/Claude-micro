@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 
 namespace BuildingBlocks.API.Validation.Validators;
@@ -24,7 +25,7 @@ public class PaginationValidator : AbstractValidator<PaginationRequest>
             .WithMessage("PageSize must be between 1 and 100");
 
         RuleFor(x => x.SortDirection)
-            .Must(x => string.IsNullOrEmpty(x) || x.ToLower() is "asc" or "desc")
+            .Must(x => string.IsNullOrEmpty(x) || x.ToLower(CultureInfo.InvariantCulture) is "asc" or "desc")
             .WithMessage("SortDirection must be 'asc' or 'desc'");
     }
 }

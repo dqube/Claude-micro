@@ -10,7 +10,7 @@ public static class HeaderConstants
     public const string ContentType = "Content-Type";
     public const string Authorization = "Authorization";
     
-    public static class Security
+    internal static class Security
     {
         public const string ContentTypeOptions = "X-Content-Type-Options";
         public const string FrameOptions = "X-Frame-Options";
@@ -20,7 +20,7 @@ public static class HeaderConstants
         public const string StrictTransportSecurity = "Strict-Transport-Security";
     }
     
-    public static class RateLimit
+    internal static class RateLimit
     {
         public const string RetryAfter = "Retry-After";
         public const string RateLimitRemaining = "X-RateLimit-Remaining";

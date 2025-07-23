@@ -10,6 +10,9 @@ public static class VersioningConvention
 {
     public static void ApplyVersioning(EndpointBuilder builder, ApiVersion version)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(version);
+        
         builder.Metadata.Add(version);
         builder.DisplayName = $"{builder.DisplayName}_v{version.MajorVersion}";
     }
@@ -31,6 +34,8 @@ public class EndpointVersioningConvention
 {
     public static void Configure(EndpointBuilder builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        
         // Simple versioning convention based on endpoint metadata
         // This would be used by the routing system to apply version metadata
         var version = new ApiVersion(1, 0);

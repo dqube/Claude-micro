@@ -1,3 +1,4 @@
+using System.Globalization;
 using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Domain.Repository;
 using BuildingBlocks.Domain.Specifications;
@@ -76,11 +77,11 @@ public class PatientFilterSpecification : Specification<Patient>
 
         if (!string.IsNullOrEmpty(query.SearchTerm))
         {
-            var searchTerm = query.SearchTerm.ToLower();
+            var searchTerm = query.SearchTerm.ToLower(CultureInfo.InvariantCulture);
             criteria = criteria.And(p => 
-                p.Name.FirstName.ToLower().Contains(searchTerm) ||
-                p.Name.LastName.ToLower().Contains(searchTerm) ||
-                p.MedicalRecordNumber.Value.ToLower().Contains(searchTerm));
+                p.Name.FirstName.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm) ||
+                p.Name.LastName.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm) ||
+                p.MedicalRecordNumber.Value.ToLower(CultureInfo.InvariantCulture).Contains(searchTerm));
         }
 
         if (query.IsActive.HasValue)

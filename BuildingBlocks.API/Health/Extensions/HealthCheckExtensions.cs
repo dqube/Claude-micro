@@ -41,10 +41,13 @@ public static class HealthCheckExtensions
         return services;
     }
 
-    public static IServiceCollection AddUrlHealthCheck(this IServiceCollection services, string url, string name = "external_service")
+    public static IServiceCollection AddUrlHealthCheck(this IServiceCollection services, Uri url, string name = "external_service")
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(url);
+        
         //services.AddHealthChecks()
-        //    .AddUrlGroup(new Uri(url), name: name);
+        //    .AddUrlGroup(url, name: name);
 
         return services;
     }
@@ -54,6 +57,8 @@ public static class HealthEndpointExtensions
 {
     public static WebApplication MapHealthCheckEndpoints(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        
         app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
         {
             ResponseWriter = SimpleHealthReporter.WriteResponse

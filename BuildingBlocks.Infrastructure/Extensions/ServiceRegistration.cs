@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -144,7 +145,7 @@ public static class ServiceRegistration
             SecretKey = configuration["Jwt:SecretKey"] ?? "default-secret-key-change-in-production-min-32-chars",
             Issuer = configuration["Jwt:Issuer"] ?? "BuildingBlocks",
             Audience = configuration["Jwt:Audience"] ?? "BuildingBlocks-API",
-            TokenLifetime = TimeSpan.FromMinutes(int.Parse(configuration["Jwt:ExpiryMinutes"] ?? "60"))
+            TokenLifetime = TimeSpan.FromMinutes(int.Parse(configuration["Jwt:ExpiryMinutes"] ?? "60", CultureInfo.InvariantCulture))
         };
         services.AddSingleton(jwtConfig);
 

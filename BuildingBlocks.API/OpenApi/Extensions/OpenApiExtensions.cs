@@ -12,6 +12,9 @@ public static class OpenApiExtensions
     public static IServiceCollection AddOpenApiDocumentation(
         this IServiceCollection services,IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+        
         var apiSettings = configuration.GetSection("Api");
         var title = apiSettings["Title"] ?? "API";
         var version = apiSettings["Version"] ?? "v1";
@@ -29,6 +32,8 @@ public static class ScalarExtensions
     public static WebApplication UseOpenApiDocumentation(
         this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();

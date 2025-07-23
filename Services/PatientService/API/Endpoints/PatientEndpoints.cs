@@ -79,7 +79,17 @@ internal static class PatientEndpoints
             
             return ResponseFactory.PagedResult(result.Items, result.TotalCount, result.Page, result.PageSize, "Patients retrieved successfully", correlationId);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patients: {ex.Message}", correlationId);
+        }
+        catch (TaskCanceledException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patients: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to retrieve patients: {ex.Message}", correlationId);
@@ -105,7 +115,17 @@ internal static class PatientEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.NotFound("Patient", correlationId);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patient: {ex.Message}", correlationId);
+        }
+        catch (TaskCanceledException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patient: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to retrieve patient: {ex.Message}", correlationId);
@@ -142,7 +162,17 @@ internal static class PatientEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Invalid patient data: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to create patient: {ex.Message}", correlationId);
+        }
+        catch (TaskCanceledException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to create patient: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to create patient: {ex.Message}", correlationId);
@@ -174,7 +204,17 @@ internal static class PatientEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Invalid contact data: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to update patient contact: {ex.Message}", correlationId);
+        }
+        catch (TaskCanceledException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to update patient contact: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to update patient contact: {ex.Message}", correlationId);

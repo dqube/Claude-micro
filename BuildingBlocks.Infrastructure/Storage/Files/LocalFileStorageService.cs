@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace BuildingBlocks.Infrastructure.Storage.Files;
 
@@ -6,6 +7,15 @@ public class LocalFileStorageService : IFileStorageService
 {
     private readonly string _basePath;
     private readonly ILogger<LocalFileStorageService> _logger;
+
+    private static readonly Action<ILogger, string, Exception?> LogFileUploaded =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(1, "FileUploaded"), "File uploaded with ID: {FileId}");
+
+    private static readonly Action<ILogger, string, Exception?> LogFileDeleted =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(2, "FileDeleted"), "File deleted with ID: {FileId}");
+
+    private static readonly Action<ILogger, string, Exception?> LogMetadataReadError =
+        LoggerMessage.Define<string>(LogLevel.Warning, new EventId(3, "MetadataReadError"), "Failed to read metadata from file: {File}");
 
     public LocalFileStorageService(ILogger<LocalFileStorageService> logger, string basePath = "Storage/Files")
     {
@@ -16,6 +26,9 @@ public class LocalFileStorageService : IFileStorageService
 
     public async Task<string> UploadAsync(Stream fileStream, string fileName, string? contentType = null, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileStream);
+        ArgumentNullException.ThrowIfNull(fileName);
+        
         var fileId = Guid.NewGuid().ToString();
         var filePath = Path.Combine(_basePath, fileId);
         
@@ -25,18 +38,23 @@ public class LocalFileStorageService : IFileStorageService
         // Store metadata
         await SaveMetadataAsync(fileId, fileName, contentType, fileSystemStream.Length);
         
-        _logger.LogDebug("File uploaded with ID: {FileId}", fileId);
+        LogFileUploaded(_logger, fileId, null);
         return fileId;
     }
 
     public async Task<string> UploadAsync(byte[] fileData, string fileName, string? contentType = null, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileData);
+        ArgumentNullException.ThrowIfNull(fileName);
+        
         using var stream = new MemoryStream(fileData);
         return await UploadAsync(stream, fileName, contentType, cancellationToken);
     }
 
     public async Task<Stream> DownloadAsync(string fileId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         var filePath = Path.Combine(_basePath, fileId);
         if (!File.Exists(filePath))
         {
@@ -48,6 +66,8 @@ public class LocalFileStorageService : IFileStorageService
 
     public async Task<byte[]> DownloadBytesAsync(string fileId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         var filePath = Path.Combine(_basePath, fileId);
         if (!File.Exists(filePath))
         {
@@ -59,12 +79,16 @@ public class LocalFileStorageService : IFileStorageService
 
     public Task<bool> ExistsAsync(string fileId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         var filePath = Path.Combine(_basePath, fileId);
         return Task.FromResult(File.Exists(filePath));
     }
 
     public Task DeleteAsync(string fileId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         var filePath = Path.Combine(_basePath, fileId);
         var metadataPath = GetMetadataPath(fileId);
         
@@ -78,12 +102,14 @@ public class LocalFileStorageService : IFileStorageService
             File.Delete(metadataPath);
         }
         
-        _logger.LogDebug("File deleted with ID: {FileId}", fileId);
+        LogFileDeleted(_logger, fileId, null);
         return Task.CompletedTask;
     }
 
     public Task<string> GetDownloadUrlAsync(string fileId, TimeSpan? expiry = null, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         // For local storage, return a simple file path or URL
         // In a real implementation, this might generate a temporary URL
         var url = $"/files/{fileId}";
@@ -92,6 +118,8 @@ public class LocalFileStorageService : IFileStorageService
 
     public async Task<FileMetadata> GetMetadataAsync(string fileId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(fileId);
+        
         var metadataPath = GetMetadataPath(fileId);
         if (!File.Exists(metadataPath))
         {
@@ -114,14 +142,30 @@ public class LocalFileStorageService : IFileStorageService
             {
                 var metadataJson = await File.ReadAllTextAsync(file, cancellationToken);
                 var metadata = System.Text.Json.JsonSerializer.Deserialize<FileMetadata>(metadataJson);
-                if (metadata != null && (prefix == null || metadata.FileName.StartsWith(prefix)))
+                if (metadata != null && (prefix == null || metadata.FileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 {
                     metadataList.Add(metadata);
                 }
             }
-            catch (Exception ex)
+            catch (FileNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Failed to read metadata from file: {File}", file);
+                LogMetadataReadError(_logger, file, ex);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                LogMetadataReadError(_logger, file, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogMetadataReadError(_logger, file, ex);
+            }
+            catch (JsonException ex)
+            {
+                LogMetadataReadError(_logger, file, ex);
+            }
+            catch (IOException ex)
+            {
+                LogMetadataReadError(_logger, file, ex);
             }
         }
 
@@ -130,6 +174,9 @@ public class LocalFileStorageService : IFileStorageService
 
     public async Task<string> CopyAsync(string sourceFileId, string destinationFileName, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(sourceFileId);
+        ArgumentNullException.ThrowIfNull(destinationFileName);
+        
         var sourcePath = Path.Combine(_basePath, sourceFileId);
         if (!File.Exists(sourcePath))
         {
@@ -152,6 +199,9 @@ public class LocalFileStorageService : IFileStorageService
 
     public async Task<string> MoveAsync(string sourceFileId, string destinationFileName, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(sourceFileId);
+        ArgumentNullException.ThrowIfNull(destinationFileName);
+        
         var newFileId = await CopyAsync(sourceFileId, destinationFileName, cancellationToken);
         await DeleteAsync(sourceFileId, cancellationToken);
         return newFileId;

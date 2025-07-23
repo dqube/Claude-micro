@@ -37,7 +37,12 @@ public class MemoryCacheService : ICacheService
             
             return Task.FromResult(value);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error getting cache value for key: {Key}", key);
+            return Task.FromResult<T?>(default);
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error getting cache value for key: {Key}", key);
             return Task.FromResult<T?>(default);
@@ -88,7 +93,12 @@ public class MemoryCacheService : ICacheService
             
             return Task.CompletedTask;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
+            return Task.CompletedTask;
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error setting cache value for key: {Key}", key);
             return Task.CompletedTask;
@@ -111,7 +121,12 @@ public class MemoryCacheService : ICacheService
             
             return Task.CompletedTask;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
+            return Task.CompletedTask;
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error removing cache value for key: {Key}", key);
             return Task.CompletedTask;
@@ -147,7 +162,12 @@ public class MemoryCacheService : ICacheService
             var exists = _memoryCache.TryGetValue(fullKey, out _);
             return Task.FromResult(exists);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
+            return Task.FromResult(false);
+        }
+        catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Error checking cache existence for key: {Key}", key);
             return Task.FromResult(false);

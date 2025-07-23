@@ -14,6 +14,8 @@ public class CorrelationIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        
         var correlationId = GetOrCreateCorrelationId(context);
         
         // Set the correlation ID in the response headers

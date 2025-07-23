@@ -18,6 +18,9 @@ public static class ValidationExtensions
         this IServiceCollection services,
         params Type[] assemblyMarkerTypes)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(assemblyMarkerTypes);
+        
         foreach (var markerType in assemblyMarkerTypes)
         {
             services.AddValidatorsFromAssemblyContaining(markerType);
@@ -30,6 +33,8 @@ public static class ValidationExtensions
         IValidator<T> validator,
         string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(validator);
+        
         var validationResult = await validator.ValidateAsync(model);
         
         if (!validationResult.IsValid)
@@ -52,6 +57,8 @@ public static class ValidationExtensions
         IValidator<T> validator,
         string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(validator);
+        
         var validationResult = await validator.ValidateAsync(model);
         
         if (!validationResult.IsValid)

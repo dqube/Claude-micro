@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 
 namespace BuildingBlocks.API.Extensions;
@@ -94,9 +95,17 @@ public static class ClaimsPrincipalExtensions
 
         try
         {
-            return (T)Convert.ChangeType(claimValue, typeof(T));
+            return (T)Convert.ChangeType(claimValue, typeof(T), CultureInfo.InvariantCulture);
         }
-        catch
+        catch (InvalidCastException)
+        {
+            return default;
+        }
+        catch (FormatException)
+        {
+            return default;
+        }
+        catch (OverflowException)
         {
             return default;
         }
@@ -111,7 +120,7 @@ public static class ClaimsPrincipalExtensions
 
     public static bool HasClaim(this ClaimsPrincipal principal, string claimType)
     {
-        return principal?.HasClaim(claimType, null) == true || principal?.FindFirst(claimType) != null;
+        return principal?.HasClaim(claimType, string.Empty) == true || principal?.FindFirst(claimType) != null;
     }
 
     public static bool HasClaim(this ClaimsPrincipal principal, string claimType, string claimValue)

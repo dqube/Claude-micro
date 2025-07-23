@@ -36,7 +36,19 @@ public class InboxBackgroundService : BackgroundService
                 await processor.RetryFailedMessagesAsync(stoppingToken);
                 await processor.CleanupExpiredMessagesAsync(stoppingToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Error occurred while processing inbox messages");
+            }
+            catch (TaskCanceledException ex) when (!stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogError(ex, "Error occurred while processing inbox messages");
+            }
+            catch (TimeoutException ex)
+            {
+                _logger.LogError(ex, "Error occurred while processing inbox messages");
+            }
+            catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Error occurred while processing inbox messages");
             }

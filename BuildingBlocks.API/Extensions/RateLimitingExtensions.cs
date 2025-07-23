@@ -16,6 +16,9 @@ public static class RateLimitingExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+        
         var rateLimitOptions = configuration.GetSection(RateLimitingOptions.SectionName).Get<RateLimitingOptions>()
                               ?? new RateLimitingOptions();
 
@@ -58,6 +61,9 @@ public static class RateLimitingExtensions
         this IServiceCollection services,
         Action<RateLimitingOptions> configureOptions)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configureOptions);
+        
         var options = new RateLimitingOptions();
         configureOptions(options);
 

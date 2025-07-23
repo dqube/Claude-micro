@@ -10,6 +10,9 @@ public static class MinimalApiExtensions
 {
     public static IServiceCollection AddEndpoints(this IServiceCollection services, Assembly assembly)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(assembly);
+        
         var endpointTypes = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any(i => i == typeof(IEndpoint)))
             .ToList();
@@ -24,6 +27,9 @@ public static class MinimalApiExtensions
 
     public static WebApplication MapEndpoints(this WebApplication app, Assembly assembly)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(assembly);
+        
         var endpointTypes = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any(i => i == typeof(IEndpoint)))
             .ToList();

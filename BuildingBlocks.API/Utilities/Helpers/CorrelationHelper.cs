@@ -7,6 +7,8 @@ public static class CorrelationHelper
 {
     public static string GetOrCreateCorrelationId(HttpContext httpContext)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         if (httpContext.Request.Headers.TryGetValue(HeaderConstants.CorrelationId, out var correlationId) 
             && !string.IsNullOrEmpty(correlationId))
         {
@@ -22,6 +24,8 @@ public static class CorrelationHelper
 
     public static string GetCorrelationId(HttpContext httpContext)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         return httpContext.Request.Headers.TryGetValue(HeaderConstants.CorrelationId, out var correlationId)
             ? correlationId.ToString()
             : httpContext.TraceIdentifier;
@@ -29,6 +33,9 @@ public static class CorrelationHelper
 
     public static void SetCorrelationId(HttpContext httpContext, string correlationId)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(correlationId);
+        
         httpContext.Request.Headers[HeaderConstants.CorrelationId] = correlationId;
         httpContext.Response.Headers[HeaderConstants.CorrelationId] = correlationId;
     }
@@ -40,6 +47,8 @@ public static class CorrelationHelper
 
     public static string GetRequestId(HttpContext httpContext)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         return httpContext.Request.Headers.TryGetValue(HeaderConstants.RequestId, out var requestId)
             ? requestId.ToString()
             : httpContext.TraceIdentifier;
@@ -47,6 +56,9 @@ public static class CorrelationHelper
 
     public static void SetRequestId(HttpContext httpContext, string requestId)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(requestId);
+        
         httpContext.Request.Headers[HeaderConstants.RequestId] = requestId;
         httpContext.Response.Headers[HeaderConstants.RequestId] = requestId;
     }
@@ -58,6 +70,8 @@ public static class CorrelationHelper
 
     public static IDictionary<string, object> GetTrackingContext(HttpContext httpContext)
     {
+        ArgumentNullException.ThrowIfNull(httpContext);
+        
         return new Dictionary<string, object>
         {
             ["CorrelationId"] = GetCorrelationId(httpContext),

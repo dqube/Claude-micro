@@ -82,7 +82,22 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
                 await step.CompensateAsync(cancellationToken);
                 _logger.LogInformation("Compensated step {StepName} in saga {SagaName}", step.Name, Name);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
+                // Continue with other compensations
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
+                // Continue with other compensations
+            }
+            catch (TimeoutException ex)
+            {
+                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
+                // Continue with other compensations
+            }
+            catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
                 // Continue with other compensations

@@ -80,6 +80,8 @@ public static class MiddlewareExtensions
 
     public static WebApplication UseProductionMiddleware(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -95,6 +97,8 @@ public static class MiddlewareExtensions
 
     public static WebApplication UseDevelopmentMiddleware(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        
         if (app.Environment.IsDevelopment())
         {
             // More detailed logging in development

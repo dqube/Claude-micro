@@ -135,13 +135,13 @@ namespace BuildingBlocks.Application.Extensions
         {
             services.Scan(scan => scan
                 .FromAssemblyOf<IEvent>()
-                .AddClasses(classes => classes.AssignableTo(typeof(BuildingBlocks.Application.Messaging.IMessageHandler<>)))
+                .AddClasses(classes => classes.AssignableTo<BuildingBlocks.Application.Messaging.IMessageHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
             services.Scan(scan => scan
                 .FromAssemblyOf<IEvent>()
-                .AddClasses(classes => classes.AssignableTo(typeof(BuildingBlocks.Application.Messaging.IMessageHandler)))
+                .AddClasses(classes => classes.AssignableTo<BuildingBlocks.Application.Messaging.IMessageHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
@@ -152,13 +152,13 @@ namespace BuildingBlocks.Application.Extensions
         {
             services.Scan(scan => scan
                 .FromAssemblies(assemblies)
-                .AddClasses(classes => classes.AssignableTo(typeof(BuildingBlocks.Application.Messaging.IMessageHandler<>)))
+                .AddClasses(classes => classes.AssignableTo<BuildingBlocks.Application.Messaging.IMessageHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
             services.Scan(scan => scan
                 .FromAssemblies(assemblies)
-                .AddClasses(classes => classes.AssignableTo(typeof(BuildingBlocks.Application.Messaging.IMessageHandler)))
+                .AddClasses(classes => classes.AssignableTo<BuildingBlocks.Application.Messaging.IMessageHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
