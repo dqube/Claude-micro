@@ -38,8 +38,8 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
 
         Status = SagaStatus.Running;
         LastUpdatedAt = DateTime.UtcNow;
-        
-        _logger.LogInformation("Starting saga {SagaName} with ID {SagaId}", Name, Id);
+
+        LogStartingSaga(_logger, Name, Id, null);
 
         try
         {
@@ -49,7 +49,7 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Saga {SagaName} failed: {Error}", Name, ex.Message);
+            LogSagaFailed(_logger, Name, ex.Message, ex);
             await CompensateAsync(cancellationToken);
             throw;
         }
@@ -60,8 +60,8 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
         Status = SagaStatus.Completed;
         CompletedAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
-        
-        _logger.LogInformation("Saga {SagaName} completed successfully", Name);
+
+        LogSagaCompleted(_logger, Name, null);
         await OnCompletedAsync(cancellationToken);
     }
 
@@ -69,44 +69,29 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
     {
         Status = SagaStatus.Compensating;
         LastUpdatedAt = DateTime.UtcNow;
-        
-        _logger.LogWarning("Starting compensation for saga {SagaName}", Name);
+
+        LogSagaCompensating(_logger, Name, null);
 
         // Compensate in reverse order
         var completedSteps = _steps.Where(s => s.Status == SagaStepStatus.Completed).Reverse();
-        
+
         foreach (var step in completedSteps)
         {
             try
             {
                 await step.CompensateAsync(cancellationToken);
-                _logger.LogInformation("Compensated step {StepName} in saga {SagaName}", step.Name, Name);
+                LogStepCompensated(_logger, step.Name, Name, null);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex) when (ex is InvalidOperationException || ex is TaskCanceledException || ex is TimeoutException || ex is ArgumentException)
             {
-                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
-                // Continue with other compensations
-            }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
-                // Continue with other compensations
-            }
-            catch (TimeoutException ex)
-            {
-                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
-                // Continue with other compensations
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Failed to compensate step {StepName} in saga {SagaName}", step.Name, Name);
+                LogStepCompensationFailed(_logger, step.Name, Name, ex);
                 // Continue with other compensations
             }
         }
 
         Status = SagaStatus.Compensated;
         LastUpdatedAt = DateTime.UtcNow;
-        
+
         await OnCompensatedAsync(cancellationToken);
     }
 
@@ -114,8 +99,8 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
     {
         Status = SagaStatus.Failed;
         LastUpdatedAt = DateTime.UtcNow;
-        
-        _logger.LogError("Saga {SagaName} failed: {Reason}", Name, reason);
+
+        LogSagaFailed(_logger, Name, reason, null);
         await OnFailedAsync(reason, cancellationToken);
     }
 
@@ -128,9 +113,33 @@ public abstract class SagaBase<TData> : ISaga<TData> where TData : class
     {
         foreach (var step in _steps)
         {
-            _logger.LogInformation("Executing step {StepName} in saga {SagaName}", step.Name, Name);
+            LogStepExecuting(_logger, step.Name, Name, null);
             await step.ExecuteAsync(cancellationToken);
-            _logger.LogInformation("Completed step {StepName} in saga {SagaName}", step.Name, Name);
+            LogStepExecuted(_logger, step.Name, Name, null);
         }
     }
+    // LoggerMessage delegates for performance and code analysis compliance
+    private static readonly Action<ILogger, string, Guid, Exception?> LogStartingSaga =
+        LoggerMessage.Define<string, Guid>(LogLevel.Information, new EventId(1000, "SagaStarting"), "Starting saga {SagaName} with ID {SagaId}");
+
+    private static readonly Action<ILogger, string, string, Exception?> LogSagaFailed =
+        LoggerMessage.Define<string, string>(LogLevel.Error, new EventId(1001, "SagaFailed"), "Saga {SagaName} failed: {Error}");
+
+    private static readonly Action<ILogger, string, Exception?> LogSagaCompleted =
+        LoggerMessage.Define<string>(LogLevel.Information, new EventId(1002, "SagaCompleted"), "Saga {SagaName} completed successfully");
+
+    private static readonly Action<ILogger, string, Exception?> LogSagaCompensating =
+        LoggerMessage.Define<string>(LogLevel.Warning, new EventId(1003, "SagaCompensating"), "Starting compensation for saga {SagaName}");
+
+    private static readonly Action<ILogger, string, string, Exception?> LogStepCompensationFailed =
+        LoggerMessage.Define<string, string>(LogLevel.Error, new EventId(1004, "StepCompensationFailed"), "Failed to compensate step {StepName} in saga {SagaName}");
+
+    private static readonly Action<ILogger, string, string, Exception?> LogStepCompensated =
+        LoggerMessage.Define<string, string>(LogLevel.Information, new EventId(1005, "StepCompensated"), "Compensated step {StepName} in saga {SagaName}");
+
+    private static readonly Action<ILogger, string, string, Exception?> LogStepExecuting =
+        LoggerMessage.Define<string, string>(LogLevel.Information, new EventId(1006, "StepExecuting"), "Executing step {StepName} in saga {SagaName}");
+
+    private static readonly Action<ILogger, string, string, Exception?> LogStepExecuted =
+        LoggerMessage.Define<string, string>(LogLevel.Information, new EventId(1007, "StepExecuted"), "Completed step {StepName} in saga {SagaName}");
 }

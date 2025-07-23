@@ -30,8 +30,16 @@ public static class ValidationHelper
         if (string.IsNullOrWhiteSpace(url))
             return false;
 
-        return Uri.TryCreate(url, UriKind.Absolute, out var result)
-               && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
+        if (Uri.TryCreate(url, UriKind.Absolute, out var result))
+            return IsValidUrl(result);
+        return false;
+    }
+
+    public static bool IsValidUrl(Uri url)
+    {
+        if (url == null)
+            return false;
+        return url.IsAbsoluteUri && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps);
     }
 
     public static bool IsValidGuid(string guidString)

@@ -16,13 +16,13 @@ public class ContactInfo
 {
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
+    public Uri Url { get; set; } = new Uri("about:blank");
 }
 
 public class LicenseInfo
 {
     public string Name { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
+    public Uri Url { get; set; } = new Uri("about:blank");
 }
 
 public class SecurityDefinition

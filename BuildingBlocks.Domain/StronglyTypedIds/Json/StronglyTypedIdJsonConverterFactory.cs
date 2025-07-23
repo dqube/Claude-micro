@@ -11,6 +11,8 @@ public class StronglyTypedIdJsonConverterFactory : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {
+        ArgumentNullException.ThrowIfNull(typeToConvert);
+
         // Check if the type implements IStronglyTypedId
         if (!typeof(IStronglyTypedId).IsAssignableFrom(typeToConvert))
             return false;
@@ -35,6 +37,9 @@ public class StronglyTypedIdJsonConverterFactory : JsonConverterFactory
 
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(typeToConvert);
+        ArgumentNullException.ThrowIfNull(options);
+
         // Find the StronglyTypedId<T> base type to get the underlying value type
         var stronglyTypedIdBaseType = GetStronglyTypedIdBaseType(typeToConvert);
         if (stronglyTypedIdBaseType == null)
@@ -78,6 +83,7 @@ public static class StronglyTypedIdJsonExtensions
     /// <returns>The same JsonSerializerOptions instance for chaining</returns>
     public static JsonSerializerOptions AddStronglyTypedIdConverters(this JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         options.Converters.Add(new StronglyTypedIdJsonConverterFactory());
         return options;
     }

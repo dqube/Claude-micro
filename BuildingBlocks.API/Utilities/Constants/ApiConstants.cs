@@ -6,7 +6,7 @@ public static class ApiConstants
     public const string DefaultSuccessMessage = "Operation completed successfully";
     public const string DefaultErrorMessage = "An error occurred while processing the request";
     
-    public static class StatusMessages
+    internal static class StatusMessages
     {
         public const string Created = "Resource created successfully";
         public const string Updated = "Resource updated successfully";
@@ -19,7 +19,7 @@ public static class ApiConstants
         public const string ValidationFailed = "Validation failed";
     }
 
-    public static class DefaultPageSize
+    internal static class DefaultPageSize
     {
         public const int Small = 10;
         public const int Medium = 25;

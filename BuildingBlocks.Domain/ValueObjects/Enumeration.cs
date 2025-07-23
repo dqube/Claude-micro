@@ -24,6 +24,7 @@ public abstract class Enumeration : IComparable
 
     public override bool Equals(object? obj)
     {
+        ArgumentNullException.ThrowIfNull(obj);
         if (obj is not Enumeration otherValue)
         {
             return false;
@@ -45,12 +46,16 @@ public abstract class Enumeration : IComparable
 
     public static T FromDisplayName<T>(string displayName) where T : Enumeration
     {
-        var matchingItem = Parse<T, string>(displayName, "display name", item => item.Name == displayName);
+        ArgumentNullException.ThrowIfNull(displayName);
+        var matchingItem = Parse<T, string>(displayName, "display name", item => string.Equals(item.Name, displayName, StringComparison.Ordinal));
         return matchingItem;
     }
 
     private static T Parse<T, K>(K value, string description, Func<T, bool> predicate) where T : Enumeration
     {
+        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(description);
+        ArgumentNullException.ThrowIfNull(predicate);
         var matchingItem = GetAll<T>().FirstOrDefault(predicate);
 
         if (matchingItem == null)
@@ -59,5 +64,11 @@ public abstract class Enumeration : IComparable
         return matchingItem;
     }
 
-    public int CompareTo(object? other) => Id.CompareTo(((Enumeration?)other)?.Id);
+public int CompareTo(object? other)
+{
+    ArgumentNullException.ThrowIfNull(other);
+    if (other is not Enumeration otherEnum)
+        throw new ArgumentException($"Object must be of type {nameof(Enumeration)}", nameof(other));
+    return Id.CompareTo(otherEnum.Id);
+}
 }

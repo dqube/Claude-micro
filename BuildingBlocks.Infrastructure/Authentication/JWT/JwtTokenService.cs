@@ -21,8 +21,12 @@ public class JwtTokenService : IJwtTokenService
         _tokenHandler = new JwtSecurityTokenHandler();
     }
 
+    // ...existing methods and static fields...
+    // (Move all methods and static fields here, remove stray closing brace after constructor)
+
     public string GenerateToken(IEnumerable<Claim> claims)
     {
+        ArgumentNullException.ThrowIfNull(claims);
         try
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.SecretKey));
@@ -39,13 +43,15 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating JWT token");
+            LogJwtTokenGenerationError(_logger, ex);
             throw;
         }
     }
 
     public string GenerateToken(string userId, string userName, IEnumerable<string>? roles = null, IDictionary<string, string>? additionalClaims = null)
     {
+        ArgumentNullException.ThrowIfNull(userId);
+        ArgumentNullException.ThrowIfNull(userName);
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId),
@@ -69,6 +75,7 @@ public class JwtTokenService : IJwtTokenService
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
+        ArgumentNullException.ThrowIfNull(token);
         try
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.SecretKey));
@@ -91,17 +98,17 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogWarning(ex, "Token validation failed");
+            LogJwtTokenValidationWarning(_logger, ex);
             return null;
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Token validation failed");
+            LogJwtTokenValidationWarning(_logger, ex);
             return null;
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning(ex, "Token validation failed");
+            LogJwtTokenValidationWarning(_logger, ex);
             return null;
         }
     }
@@ -116,6 +123,7 @@ public class JwtTokenService : IJwtTokenService
 
     public bool ValidateRefreshToken(string refreshToken)
     {
+        ArgumentNullException.ThrowIfNull(refreshToken);
         try
         {
             var bytes = Convert.FromBase64String(refreshToken);
@@ -133,6 +141,7 @@ public class JwtTokenService : IJwtTokenService
 
     public DateTime GetTokenExpiration(string token)
     {
+        ArgumentNullException.ThrowIfNull(token);
         try
         {
             var jwtToken = _tokenHandler.ReadJwtToken(token);
@@ -140,18 +149,20 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogError(ex, "Error getting token expiration");
+            LogJwtTokenExpirationError(_logger, ex);
             return DateTime.MinValue;
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error getting token expiration");
+            LogJwtTokenExpirationError(_logger, ex);
             return DateTime.MinValue;
         }
     }
 
     public string? GetClaimValue(string token, string claimType)
     {
+        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(claimType);
         try
         {
             var jwtToken = _tokenHandler.ReadJwtToken(token);
@@ -159,29 +170,32 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogError(ex, "Error getting claim value from token");
+            LogJwtClaimValueError(_logger, ex);
             return null;
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error getting claim value from token");
+            LogJwtClaimValueError(_logger, ex);
             return null;
         }
     }
 
     public bool IsTokenExpired(string token)
     {
+        ArgumentNullException.ThrowIfNull(token);
         var expiration = GetTokenExpiration(token);
         return expiration < DateTime.UtcNow;
     }
 
     public string? GetUserIdFromToken(string token)
     {
+        ArgumentNullException.ThrowIfNull(token);
         return GetClaimValue(token, ClaimTypes.NameIdentifier);
     }
 
     public IEnumerable<string> GetRolesFromToken(string token)
     {
+        ArgumentNullException.ThrowIfNull(token);
         try
         {
             var jwtToken = _tokenHandler.ReadJwtToken(token);
@@ -191,13 +205,29 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogError(ex, "Error getting roles from token");
+            LogJwtRolesError(_logger, ex);
             return Enumerable.Empty<string>();
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error getting roles from token");
+            LogJwtRolesError(_logger, ex);
             return Enumerable.Empty<string>();
         }
     }
+
+    // LoggerMessage delegates for performance and code analysis compliance
+    private static readonly Action<ILogger, Exception?> LogJwtTokenGenerationError =
+        LoggerMessage.Define(LogLevel.Error, new EventId(2000, "JwtTokenGenerationError"), "Error generating JWT token");
+
+    private static readonly Action<ILogger, Exception?> LogJwtTokenValidationWarning =
+        LoggerMessage.Define(LogLevel.Warning, new EventId(2001, "JwtTokenValidationWarning"), "Token validation failed");
+
+    private static readonly Action<ILogger, Exception?> LogJwtTokenExpirationError =
+        LoggerMessage.Define(LogLevel.Error, new EventId(2002, "JwtTokenExpirationError"), "Error getting token expiration");
+
+    private static readonly Action<ILogger, Exception?> LogJwtClaimValueError =
+        LoggerMessage.Define(LogLevel.Error, new EventId(2003, "JwtClaimValueError"), "Error getting claim value from token");
+
+    private static readonly Action<ILogger, Exception?> LogJwtRolesError =
+        LoggerMessage.Define(LogLevel.Error, new EventId(2004, "JwtRolesError"), "Error getting roles from token");
 }
