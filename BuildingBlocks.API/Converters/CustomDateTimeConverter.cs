@@ -2,8 +2,11 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PatientService.API.Converters;
+namespace BuildingBlocks.API.Converters;
 
+/// <summary>
+/// Custom JSON converter for DateTime objects with multiple format support
+/// </summary>
 public class CustomDateTimeConverter : JsonConverter<DateTime>
 {
     private readonly string[] _formats = {
@@ -20,10 +23,24 @@ public class CustomDateTimeConverter : JsonConverter<DateTime>
 
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            // Return default DateTime for null - validation will handle if this is invalid
+            return default(DateTime);
+        }
+
+        if (reader.TokenType != JsonTokenType.String)
+        {
+            throw new JsonException($"Unexpected token type {reader.TokenType} for DateTime. Expected String.");
+        }
+
         var value = reader.GetString();
         
         if (string.IsNullOrEmpty(value))
-            throw new JsonException("DateTime value cannot be null or empty");
+        {
+            // Return default DateTime for empty string - validation will handle if this is invalid
+            return default(DateTime);
+        }
 
         // Try parsing with each format
         foreach (var format in _formats)

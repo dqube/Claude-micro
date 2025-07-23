@@ -1,10 +1,9 @@
 using FluentValidation;
 using PatientService.API.Endpoints;
-using System.Text.RegularExpressions;
 
 namespace PatientService.API.Validators;
 
-public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequest>
+internal sealed class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequest>
 {
     public CreatePatientRequestValidator()
     {

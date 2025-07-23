@@ -3,7 +3,7 @@ using PatientService.API.Endpoints;
 
 namespace PatientService.API.Validators;
 
-public class GetPatientsRequestValidator : AbstractValidator<GetPatientsRequest>
+internal sealed class GetPatientsRequestValidator : AbstractValidator<GetPatientsRequest>
 {
     public GetPatientsRequestValidator()
     {
@@ -35,9 +35,9 @@ public class GetPatientsRequestValidator : AbstractValidator<GetPatientsRequest>
             .When(x => x.MinAge.HasValue && x.MaxAge.HasValue);
     }
 
-    private static bool BeValidGender(string gender)
+    private static bool BeValidGender(string? gender)
     {
         var validGenders = new[] { "Male", "Female", "Other" };
-        return validGenders.Contains(gender, StringComparer.OrdinalIgnoreCase);
+        return gender != null && validGenders.Contains(gender, StringComparer.OrdinalIgnoreCase);
     }
 }

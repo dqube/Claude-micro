@@ -70,6 +70,9 @@ public static class ApiExtensions
         // OpenAPI documentation
         services.AddOpenApiDocumentation(configuration);
         
+        // JSON configuration with custom converters
+        services.AddApiJsonConfiguration();
+        
         return services;
     }
     
@@ -152,6 +155,9 @@ public static class ApiExtensions
         {
             services.AddOpenApiDocumentation(configuration);
         }
+        
+        // JSON configuration with custom converters (always included)
+        services.AddApiJsonConfiguration();
         
         return services;
     }

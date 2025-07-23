@@ -1,23 +1,13 @@
 using BuildingBlocks.API.Extensions;
 using BuildingBlocks.API.OpenApi.Extensions;
-using PatientService.API.Converters;
 using PatientService.API.Endpoints;
 using PatientService.Application;
 using PatientService.Domain;
 using PatientService.Infrastructure;
-using Scalar.AspNetCore;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-// Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, etc.)
+// Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, JSON converters, etc.)
 builder.Services.AddBuildingBlocksApi(builder.Configuration);
-
-// Configure custom JSON options (merges with BuildingBlocks.API defaults)
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.Converters.Add(new CustomDateTimeConverter());
-});
 
 // Add domain layers
 builder.Services.AddDomain();

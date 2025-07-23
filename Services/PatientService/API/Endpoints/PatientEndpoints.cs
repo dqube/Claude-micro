@@ -7,10 +7,12 @@ using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.CQRS.Mediator;
 using BuildingBlocks.API.Utilities.Factories;
 using BuildingBlocks.API.Extensions;
+using BuildingBlocks.API.Converters;
+using System.Text.Json.Serialization;
 
 namespace PatientService.API.Endpoints;
 
-public static class PatientEndpoints
+internal static class PatientEndpoints
 {
     public static IEndpointRouteBuilder MapPatientEndpoints(this IEndpointRouteBuilder app)
     {
@@ -181,7 +183,7 @@ public static class PatientEndpoints
 }
 
 // Request DTOs for minimal API
-public record GetPatientsRequest(
+internal record GetPatientsRequest(
     int Page = 1,
     int PageSize = 10,
     string? SearchTerm = null,
@@ -190,18 +192,20 @@ public record GetPatientsRequest(
     int? MinAge = null,
     int? MaxAge = null);
 
-public record CreatePatientRequest(
+internal record CreatePatientRequest(
     string MedicalRecordNumber,
     string FirstName,
     string LastName,
     string? MiddleName,
     string Email,
+    [property: JsonConverter(typeof(FlexibleNullableStringConverter))]
     string? PhoneNumber,
     AddressDto? Address,
     DateTime DateOfBirth,
     string Gender,
     string? BloodType = null);
 
-public record UpdateContactRequest(
+internal record UpdateContactRequest(
     string Email,
+    [property: JsonConverter(typeof(FlexibleNullableStringConverter))]
     string? PhoneNumber = null);

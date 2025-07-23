@@ -3,7 +3,7 @@ using PatientService.API.Endpoints;
 
 namespace PatientService.API.Validators;
 
-public class UpdateContactRequestValidator : AbstractValidator<UpdateContactRequest>
+internal sealed class UpdateContactRequestValidator : AbstractValidator<UpdateContactRequest>
 {
     public UpdateContactRequestValidator()
     {
