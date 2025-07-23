@@ -12,8 +12,8 @@ public static class SecurityExtensions
 {
     public static IServiceCollection AddApiSecurity(this IServiceCollection services)
     {
-        services.AddScoped<SecurityHeadersMiddleware>();
-        services.AddScoped<RateLimitingMiddleware>();
+        // Note: Middleware classes should not be registered as services in DI container
+        // They are instantiated directly by the middleware pipeline when UseMiddleware<T>() is called
         
         return services;
     }

@@ -81,6 +81,7 @@ public static class OpenApiExtensions
 
     public static IServiceCollection AddScalarDocumentation(this IServiceCollection services)
     {
+        services.AddOpenApi("v1");
         services.AddEndpointsApiExplorer();
         return services;
     }

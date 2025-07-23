@@ -5,6 +5,8 @@ using PatientService.Application.Queries;
 using BuildingBlocks.Domain.Common;
 using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Application.CQRS.Mediator;
+using BuildingBlocks.API.Utilities.Factories;
+using BuildingBlocks.API.Extensions;
 
 namespace PatientService.API.Endpoints;
 
@@ -56,41 +58,62 @@ public static class PatientEndpoints
     private static async Task<IResult> GetPatientsAsync(
         [FromServices] IMediator mediator,
         [AsParameters] GetPatientsRequest request,
+        HttpContext context,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetPatientsQuery(
-            request.Page,
-            request.PageSize,
-            request.SearchTerm,
-            request.IsActive,
-            request.Gender,
-            request.MinAge,
-            request.MaxAge);
+        try
+        {
+            var query = new GetPatientsQuery(
+                request.Page,
+                request.PageSize,
+                request.SearchTerm,
+                request.IsActive,
+                request.Gender,
+                request.MinAge,
+                request.MaxAge);
 
-        var result = await mediator.QueryAsync<GetPatientsQuery, PagedResult<PatientDto>>(query, cancellationToken);
-        return Results.Ok(result);
+            var result = await mediator.QueryAsync<GetPatientsQuery, PagedResult<PatientDto>>(query, cancellationToken);
+            var correlationId = context.GetCorrelationId();
+            
+            return ResponseFactory.PagedResult(result.Items, result.TotalCount, result.Page, result.PageSize, "Patients retrieved successfully", correlationId);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patients: {ex.Message}", correlationId);
+        }
     }
 
     private static async Task<IResult> GetPatientByIdAsync(
         Guid id,
         [FromServices] IMediator mediator,
+        HttpContext context,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var query = new GetPatientByIdQuery(id);
             var result = await mediator.QueryAsync<GetPatientByIdQuery, PatientDto>(query, cancellationToken);
-            return Results.Ok(result);
+            var correlationId = context.GetCorrelationId();
+            
+            return ResponseFactory.Success(result, "Patient retrieved successfully", correlationId);
         }
         catch (Exception ex) when (ex.Message.Contains("not found"))
         {
-            return Results.NotFound(new { Message = ex.Message });
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.NotFound("Patient", correlationId);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to retrieve patient: {ex.Message}", correlationId);
         }
     }
 
     private static async Task<IResult> CreatePatientAsync(
         [FromBody] CreatePatientRequest request,
         [FromServices] IMediator mediator,
+        HttpContext context,
         CancellationToken cancellationToken = default)
     {
         try
@@ -108,12 +131,19 @@ public static class PatientEndpoints
                 request.BloodType);
 
             var result = await mediator.SendAsync<CreatePatientCommand, PatientDto>(command, cancellationToken);
+            var correlationId = context.GetCorrelationId();
             
-            return Results.Created($"/api/patients/{result.Id}", result);
+            return ResponseFactory.Created(result, $"/api/patients/{result.Id}", "Patient created successfully", correlationId);
         }
         catch (ArgumentException ex)
         {
-            return Results.BadRequest(new { Message = ex.Message });
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Invalid patient data: {ex.Message}", correlationId);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to create patient: {ex.Message}", correlationId);
         }
     }
 
@@ -121,6 +151,7 @@ public static class PatientEndpoints
         Guid id,
         [FromBody] UpdateContactRequest request,
         [FromServices] IMediator mediator,
+        HttpContext context,
         CancellationToken cancellationToken = default)
     {
         try
@@ -128,15 +159,23 @@ public static class PatientEndpoints
             var command = new UpdatePatientContactCommand(id, request.Email, request.PhoneNumber);
             await mediator.SendAsync<UpdatePatientContactCommand>(command, cancellationToken);
             
-            return Results.NoContent();
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.Success("Patient contact updated successfully", correlationId);
         }
         catch (Exception ex) when (ex.Message.Contains("not found"))
         {
-            return Results.NotFound(new { Message = ex.Message });
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.NotFound("Patient", correlationId);
         }
         catch (ArgumentException ex)
         {
-            return Results.BadRequest(new { Message = ex.Message });
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Invalid contact data: {ex.Message}", correlationId);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Failed to update patient contact: {ex.Message}", correlationId);
         }
     }
 }

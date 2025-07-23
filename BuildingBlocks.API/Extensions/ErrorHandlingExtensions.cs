@@ -15,7 +15,8 @@ public static class ErrorHandlingExtensions
     public static IServiceCollection AddApiErrorHandling(this IServiceCollection services)
     {
         services.AddProblemDetails();
-        services.AddScoped<GlobalExceptionMiddleware>();
+        // GlobalExceptionMiddleware should not be registered as a service
+        // It is instantiated directly by the middleware pipeline
         
         return services;
     }

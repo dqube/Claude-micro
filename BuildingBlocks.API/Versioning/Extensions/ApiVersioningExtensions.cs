@@ -30,7 +30,8 @@ public static class ApiVersioningExtensions
 
     public static WebApplication UseApiVersioning(this WebApplication app)
     {
-        app.UseApiVersioning();
+        // API versioning is handled by the services configuration and routing
+        // No additional middleware configuration needed
         return app;
     }
 }

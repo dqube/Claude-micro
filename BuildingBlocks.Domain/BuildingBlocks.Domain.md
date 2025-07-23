@@ -1,4 +1,4 @@
-PosStore.Libraries.Domain/
+BuildingBlocks.Domain/
 ├── Entities/
 │   ├── Entity.cs
 │   ├── AggregateRoot.cs

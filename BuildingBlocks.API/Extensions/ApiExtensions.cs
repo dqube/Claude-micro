@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using BuildingBlocks.API.Authentication.JWT;
 using BuildingBlocks.API.Authentication.ApiKey;
 using BuildingBlocks.API.Configuration.Extensions;
+using BuildingBlocks.API.Configuration.Options;
 using BuildingBlocks.API.Health.Extensions;
 using BuildingBlocks.API.OpenApi.Configuration;
 using BuildingBlocks.API.Versioning.Extensions;
@@ -43,6 +45,9 @@ public static class ApiExtensions
         // Rate limiting
         services.AddApiRateLimiting(configuration);
         
+        // CORS
+        services.AddApiCors(configuration);
+        
         // API versioning
         services.AddApiVersioning();
         
@@ -59,6 +64,9 @@ public static class ApiExtensions
         {
             services.AddApiKeyAuthentication(configuration);
         }
+        
+        // Authorization services (required for UseAuthorization middleware)
+        services.AddAuthorization();
         
         // OpenAPI documentation
         services.AddScalarDocumentation();
@@ -110,6 +118,11 @@ public static class ApiExtensions
             services.AddApiRateLimiting(configuration);
         }
         
+        if (options.IncludeCors)
+        {
+            services.AddApiCors(configuration);
+        }
+        
         if (options.IncludeVersioning)
         {
             services.AddApiVersioning();
@@ -131,6 +144,9 @@ public static class ApiExtensions
             {
                 services.AddApiKeyAuthentication(configuration);
             }
+            
+            // Authorization services (required for UseAuthorization middleware)
+            services.AddAuthorization();
         }
         
         if (options.IncludeDocumentation)
@@ -165,8 +181,12 @@ public static class ApiExtensions
         // CORS
         app.UseCors();
         
-        // Rate limiting
-        app.UseRateLimiter();
+        // Rate limiting (conditional based on configuration)
+        var rateLimitSection = configuration.GetSection("RateLimiting");
+        if (rateLimitSection.Exists() && rateLimitSection.GetValue<bool>("Enabled", true))
+        {
+            app.UseRateLimiter();
+        }
         
         // Authentication & Authorization
         app.UseAuthentication();
@@ -185,7 +205,7 @@ public static class ApiExtensions
         // OpenAPI documentation
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
+            app.MapOpenApi("/openapi/{documentName}.json");
             app.MapScalarApiReference();
         }
         
@@ -264,11 +284,75 @@ public static class ApiExtensions
         // OpenAPI documentation
         if (options.IncludeDocumentation && (app.Environment.IsDevelopment() || options.EnableDocumentationInProduction))
         {
-            app.MapOpenApi();
+            app.MapOpenApi("/openapi/{documentName}.json");
             app.MapScalarApiReference(opts => opts.WithTitle(options.DocumentationTitle));
         }
         
         return app;
+    }
+    
+    /// <summary>
+    /// Adds CORS services to the service collection with configuration from appsettings
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">Application configuration</param>
+    /// <returns>The service collection for method chaining</returns>
+    public static IServiceCollection AddApiCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        var corsOptions = configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>() ?? new CorsOptions();
+        
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                // Configure allowed origins
+                if (corsOptions.AllowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(corsOptions.AllowedOrigins);
+                }
+                else
+                {
+                    policy.AllowAnyOrigin();
+                }
+                
+                // Configure allowed methods
+                if (corsOptions.AllowedMethods.Length > 0)
+                {
+                    policy.WithMethods(corsOptions.AllowedMethods);
+                }
+                else
+                {
+                    policy.AllowAnyMethod();
+                }
+                
+                // Configure allowed headers
+                if (corsOptions.AllowedHeaders.Length > 0)
+                {
+                    policy.WithHeaders(corsOptions.AllowedHeaders);
+                }
+                else
+                {
+                    policy.AllowAnyHeader();
+                }
+                
+                // Configure exposed headers
+                if (corsOptions.ExposedHeaders.Length > 0)
+                {
+                    policy.WithExposedHeaders(corsOptions.ExposedHeaders);
+                }
+                
+                // Configure credentials
+                if (corsOptions.AllowCredentials)
+                {
+                    policy.AllowCredentials();
+                }
+                
+                // Configure preflight max age
+                policy.SetPreflightMaxAge(TimeSpan.FromSeconds(corsOptions.PreflightMaxAge));
+            });
+        });
+        
+        return services;
     }
 }
 
@@ -282,6 +366,7 @@ public class ApiRegistrationOptions
     public bool IncludeSecurity { get; set; } = true;
     public bool IncludeValidation { get; set; } = true;
     public bool IncludeRateLimiting { get; set; } = true;
+    public bool IncludeCors { get; set; } = true;
     public bool IncludeVersioning { get; set; } = true;
     public bool IncludeHealthChecks { get; set; } = true;
     public bool IncludeAuthentication { get; set; } = true;

@@ -11,12 +11,8 @@ public static class MiddlewareExtensions
 {
     public static IServiceCollection AddApiMiddleware(this IServiceCollection services)
     {
-        services.AddScoped<GlobalExceptionMiddleware>();
-        services.AddScoped<RequestLoggingMiddleware>();
-        services.AddScoped<CorrelationIdMiddleware>();
-        services.AddScoped<SecurityHeadersMiddleware>();
-        services.AddScoped<RateLimitingMiddleware>();
-
+        // Middleware classes should not be registered as services
+        // They are instantiated directly by the middleware pipeline
         return services;
     }
 
