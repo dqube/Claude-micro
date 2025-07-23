@@ -11,6 +11,7 @@ public abstract class EntityConfigurationBase<TEntity, TId> : IEntityTypeConfigu
 {
     public virtual void Configure(EntityTypeBuilder<TEntity> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         builder.HasKey(e => e.Id);
         
         builder.Property(e => e.Id)

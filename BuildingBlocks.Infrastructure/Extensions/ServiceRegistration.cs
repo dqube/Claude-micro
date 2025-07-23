@@ -73,7 +73,8 @@ public static class ServiceRegistration
 
         // Register migration and seeding services
         services.AddScoped<IMigrationRunner, MigrationRunner>();
-        services.AddScoped<IDataSeeder, DataSeederBase>();
+        // Register a concrete implementation for IDataSeeder here, e.g. ExampleDataSeeder
+        // services.AddScoped<IDataSeeder, ExampleDataSeeder>();
 
         return services;
     }
@@ -82,6 +83,7 @@ public static class ServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         // Register cache configuration
         var cacheConfig = new CacheConfiguration
         {
@@ -138,6 +140,7 @@ public static class ServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         // Register JWT configuration
         var jwtConfig = new JwtConfiguration
         {

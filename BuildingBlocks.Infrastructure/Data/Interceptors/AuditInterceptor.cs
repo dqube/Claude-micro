@@ -11,11 +11,13 @@ public class AuditInterceptor : SaveChangesInterceptor
 
     public AuditInterceptor(ICurrentUserService currentUserService)
     {
+        ArgumentNullException.ThrowIfNull(currentUserService);
         _currentUserService = currentUserService;
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         UpdateAuditableEntities(eventData.Context);
         return base.SavingChanges(eventData, result);
     }
@@ -25,6 +27,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         UpdateAuditableEntities(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }

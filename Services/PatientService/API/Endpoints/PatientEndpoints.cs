@@ -1,3 +1,4 @@
+#pragma warning disable CA1812 // Request DTOs are instantiated by ASP.NET Core model binding
 using Microsoft.AspNetCore.Mvc;
 using PatientService.Application.Commands;
 using PatientService.Application.DTOs;
@@ -63,6 +64,9 @@ internal static class PatientEndpoints
         HttpContext context,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(mediator);
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(context);
         try
         {
             var query = new GetPatientsQuery(
@@ -102,6 +106,8 @@ internal static class PatientEndpoints
         HttpContext context,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(mediator);
+        ArgumentNullException.ThrowIfNull(context);
         try
         {
             var query = new GetPatientByIdQuery(id);
@@ -138,6 +144,9 @@ internal static class PatientEndpoints
         HttpContext context,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(mediator);
+        ArgumentNullException.ThrowIfNull(context);
         try
         {
             var command = new CreatePatientCommand(
@@ -186,6 +195,9 @@ internal static class PatientEndpoints
         HttpContext context,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(mediator);
+        ArgumentNullException.ThrowIfNull(context);
         try
         {
             var command = new UpdatePatientContactCommand(id, request.Email, request.PhoneNumber);

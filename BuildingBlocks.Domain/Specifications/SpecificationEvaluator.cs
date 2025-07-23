@@ -4,6 +4,8 @@ public static class SpecificationEvaluator
 {
     public static IQueryable<T> GetQuery<T>(IQueryable<T> inputQuery, ISpecification<T> specification) where T : class
     {
+        ArgumentNullException.ThrowIfNull(inputQuery);
+        ArgumentNullException.ThrowIfNull(specification);
         var query = inputQuery;
 
         if (specification.Criteria != null)

@@ -11,12 +11,14 @@ public class PatientDbContext : DbContext
 {
     public PatientDbContext(DbContextOptions<PatientDbContext> options) : base(options)
     {
+        ArgumentNullException.ThrowIfNull(options);
     }
 
     public DbSet<Patient> Patients => Set<Patient>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new PatientConfiguration());
@@ -31,6 +33,7 @@ public class PatientDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        ArgumentNullException.ThrowIfNull(optionsBuilder);
         if (!optionsBuilder.IsConfigured)
         {
             // This will be overridden by the options passed in the constructor
@@ -47,7 +50,6 @@ public class PatientDbContext : DbContext
     {
         // Publish domain events before saving changes
         await PublishDomainEventsAsync(cancellationToken);
-        
         return await base.SaveChangesAsync(cancellationToken);
     }
 
@@ -70,8 +72,6 @@ public class PatientDbContext : DbContext
             // Here you would publish the domain event using your preferred method
             // For example, using MediatR or a service bus
             // await _mediator.Publish(domainEvent, cancellationToken);
-            
-            // For now, we'll just clear the events
             await Task.CompletedTask;
         }
     }

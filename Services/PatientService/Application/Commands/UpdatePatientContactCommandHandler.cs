@@ -16,25 +16,26 @@ public class UpdatePatientContactCommandHandler : ICommandHandler<UpdatePatientC
         IRepository<Patient, PatientId> patientRepository,
         IUnitOfWork unitOfWork)
     {
+        ArgumentNullException.ThrowIfNull(patientRepository);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
         _patientRepository = patientRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task HandleAsync(UpdatePatientContactCommand request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
         var patientId = PatientId.From(request.PatientId);
         var patient = await _patientRepository.GetByIdAsync(patientId, cancellationToken);
-        
-        if (patient == null)
+        if (patient is null)
             throw new PatientNotFoundException(patientId);
 
         var email = new Email(request.Email);
-        var phoneNumber = string.IsNullOrEmpty(request.PhoneNumber) 
-            ? null 
+        var phoneNumber = string.IsNullOrEmpty(request.PhoneNumber)
+            ? null
             : new PhoneNumber(request.PhoneNumber);
 
         patient.UpdateContactInformation(email, phoneNumber);
-
         _patientRepository.Update(patient);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }

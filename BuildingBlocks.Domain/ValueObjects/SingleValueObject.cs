@@ -17,5 +17,9 @@ public abstract class SingleValueObject<T> : ValueObject
 
     public override string ToString() => Value.ToString() ?? string.Empty;
 
-    public static implicit operator T(SingleValueObject<T> valueObject) => valueObject.Value;
+    public static implicit operator T(SingleValueObject<T> valueObject)
+    {
+        ArgumentNullException.ThrowIfNull(valueObject);
+        return valueObject.Value;
+    }
 }

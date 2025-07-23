@@ -11,13 +11,14 @@ public class InMemoryEventBus : IEventBus
 
     public InMemoryEventBus(ILogger<InMemoryEventBus> logger)
     {
+        ArgumentNullException.ThrowIfNull(logger);
         _logger = logger;
     }
 
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IEvent
     {
         var eventType = typeof(T);
-        _logger.LogDebug("Publishing event {EventType}", eventType.Name);
+        LogPublishing(_logger, eventType.Name, null);
 
         if (_handlers.TryGetValue(eventType, out var handlers))
         {
@@ -39,7 +40,7 @@ public class InMemoryEventBus : IEventBus
             _ => new List<Func<object, CancellationToken, Task>> { (e, ct) => handler((T)e, ct) },
             (_, existing) => { existing.Add((e, ct) => handler((T)e, ct)); return existing; });
         
-        _logger.LogDebug("Subscribed to event {EventType}", eventType.Name);
+        LogSubscribed(_logger, eventType.Name, null);
         return Task.CompletedTask;
     }
 
@@ -47,7 +48,16 @@ public class InMemoryEventBus : IEventBus
     {
         var eventType = typeof(T);
         _handlers.TryRemove(eventType, out _);
-        _logger.LogDebug("Unsubscribed from event {EventType}", eventType.Name);
+        LogUnsubscribed(_logger, eventType.Name, null);
         return Task.CompletedTask;
     }
+
+    private static readonly Action<ILogger, string, Exception?> LogPublishing =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(2001, "Publishing"), "Publishing event {EventType}");
+
+    private static readonly Action<ILogger, string, Exception?> LogSubscribed =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(2002, "Subscribed"), "Subscribed to event {EventType}");
+
+    private static readonly Action<ILogger, string, Exception?> LogUnsubscribed =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(2003, "Unsubscribed"), "Unsubscribed from event {EventType}");
 }

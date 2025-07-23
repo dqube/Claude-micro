@@ -16,5 +16,9 @@ public class CacheKey : ICacheKey
     
     public override string ToString() => Key;
     
-    public static implicit operator string(CacheKey cacheKey) => cacheKey.Key;
+    public static implicit operator string(CacheKey cacheKey)
+    {
+        ArgumentNullException.ThrowIfNull(cacheKey);
+        return cacheKey.Key;
+    }
 }

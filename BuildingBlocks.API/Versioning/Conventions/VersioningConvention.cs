@@ -19,18 +19,20 @@ public static class VersioningConvention
 
     public static RouteGroupBuilder WithApiVersion(this RouteGroupBuilder group, int majorVersion, int minorVersion = 0)
     {
+        ArgumentNullException.ThrowIfNull(group);
         var version = new ApiVersion(majorVersion, minorVersion);
         return group.WithMetadata(version);
     }
 
     public static RouteHandlerBuilder WithApiVersion(this RouteHandlerBuilder builder, int majorVersion, int minorVersion = 0)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         var version = new ApiVersion(majorVersion, minorVersion);
         return builder.WithMetadata(version);
     }
 }
 
-public class EndpointVersioningConvention
+public static class EndpointVersioningConvention
 {
     public static void Configure(EndpointBuilder builder)
     {

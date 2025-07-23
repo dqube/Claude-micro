@@ -4,10 +4,10 @@ namespace BuildingBlocks.Application.Messaging;
 
 public interface IEventBus
 {
-    Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
+    Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default)
         where TEvent : class, IEvent;
 
-    Task PublishAsync<TEvent>(TEvent @event, MessageMetadata metadata, CancellationToken cancellationToken = default)
+    Task PublishAsync<TEvent>(TEvent eventData, MessageMetadata metadata, CancellationToken cancellationToken = default)
         where TEvent : class, IEvent;
 
     Task PublishIntegrationEventAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken = default)

@@ -50,7 +50,7 @@ public class GetPatientsQueryHandler : IQueryHandler<GetPatientsQuery, PagedResu
             DisplayName = patient.Name.DisplayName,
             Email = patient.Email.Value,
             PhoneNumber = patient.PhoneNumber?.Value,
-            Address = patient.Address != null 
+            Address = patient.Address is not null 
                 ? new AddressDto(
                     patient.Address.Street,
                     patient.Address.City,

@@ -20,7 +20,7 @@ public interface IMediator
         where TQuery : IQuery<TResult>;
 
     // Event dispatching
-    Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
+    Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default)
         where TEvent : IEvent;
 
     Task PublishAsync<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken = default)

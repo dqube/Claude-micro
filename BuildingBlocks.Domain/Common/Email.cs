@@ -18,5 +18,9 @@ public class Email : SingleValueObject<string>
     }
 
     public static implicit operator Email(string email) => new(email);
-    public static explicit operator string(Email email) => email.Value;
+    public static explicit operator string(Email email)
+    {
+        ArgumentNullException.ThrowIfNull(email);
+        return email.Value;
+    }
 }

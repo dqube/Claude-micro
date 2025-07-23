@@ -37,6 +37,7 @@ public static class ApplicationExtensions
 
     public static IHostBuilder UseApplication(this IHostBuilder hostBuilder)
     {
+        ArgumentNullException.ThrowIfNull(hostBuilder);
         return hostBuilder.ConfigureServices((context, services) =>
         {
             services.AddApplicationLayer();
@@ -45,6 +46,7 @@ public static class ApplicationExtensions
 
     public static IHost UseApplicationSecurity(this IHost host)
     {
+        ArgumentNullException.ThrowIfNull(host);
         using var scope = host.Services.CreateScope();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
         // Initialize security context if needed

@@ -12,6 +12,7 @@ public static class ErrorResponseBuilder
         IDictionary<string, object>? errors = null,
         string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(message);
         return new ErrorResponse
         {
             Success = false,
@@ -29,6 +30,8 @@ public static class ErrorResponseBuilder
         IDictionary<string, string[]> validationErrors,
         string? correlationId = null)
     {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(validationErrors);
         return new ValidationErrorResponse
         {
             Success = false,
@@ -46,7 +49,7 @@ public static class ErrorResponseBuilder
         return Build(
             $"{resource} not found",
             "NOT_FOUND",
-            $"The requested {resource.ToLower(CultureInfo.InvariantCulture)} could not be found",
+            $"The requested {resource.ToUpperInvariant()} could not be found",
             correlationId: correlationId);
     }
 

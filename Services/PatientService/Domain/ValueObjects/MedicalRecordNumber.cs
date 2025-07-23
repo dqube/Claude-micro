@@ -24,6 +24,10 @@ public class MedicalRecordNumber : ValueObject
 
     public override string ToString() => Value;
 
-    public static implicit operator string(MedicalRecordNumber mrn) => mrn.Value;
+    public static implicit operator string(MedicalRecordNumber mrn)
+    {
+        ArgumentNullException.ThrowIfNull(mrn);
+        return mrn.Value;
+    }
     public static explicit operator MedicalRecordNumber(string value) => new(value);
 }

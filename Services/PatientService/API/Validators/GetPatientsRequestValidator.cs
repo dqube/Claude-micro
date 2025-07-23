@@ -37,7 +37,9 @@ internal sealed class GetPatientsRequestValidator : AbstractValidator<GetPatient
 
     private static bool BeValidGender(string? gender)
     {
+        if (gender is null)
+            return false;
         var validGenders = new[] { "Male", "Female", "Other" };
-        return gender != null && validGenders.Contains(gender, StringComparer.OrdinalIgnoreCase);
+        return validGenders.Contains(gender, StringComparer.OrdinalIgnoreCase);
     }
 }

@@ -11,11 +11,13 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
 
     public SoftDeleteInterceptor(ICurrentUserService currentUserService)
     {
+        ArgumentNullException.ThrowIfNull(currentUserService);
         _currentUserService = currentUserService;
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         HandleSoftDelete(eventData.Context);
         return base.SavingChanges(eventData, result);
     }
@@ -25,6 +27,7 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         HandleSoftDelete(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }

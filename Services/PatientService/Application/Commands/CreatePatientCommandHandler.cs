@@ -22,6 +22,8 @@ public class CreatePatientCommandHandler : ICommandHandler<CreatePatientCommand,
 
     public async Task<PatientDto> HandleAsync(CreatePatientCommand request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var patientId = PatientId.New();
         var mrn = new MedicalRecordNumber(request.MedicalRecordNumber);
         var name = new PatientName(request.FirstName, request.LastName, request.MiddleName);
@@ -30,24 +32,24 @@ public class CreatePatientCommandHandler : ICommandHandler<CreatePatientCommand,
 
         var patient = new Patient(patientId, mrn, name, email, request.DateOfBirth, gender);
 
-        // Add optional fields
-        if (!string.IsNullOrEmpty(request.PhoneNumber))
+        // Add optional fields safely
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
             var phoneNumber = new PhoneNumber(request.PhoneNumber);
             patient.UpdateContactInformation(email, phoneNumber);
         }
 
-        if (request.Address != null)
+        if (request.Address is not null)
         {
             var address = new Address(
-                request.Address.Street,
-                request.Address.City,
-                request.Address.PostalCode,
-                request.Address.Country);
+                request.Address.Street ?? string.Empty,
+                request.Address.City ?? string.Empty,
+                request.Address.PostalCode ?? string.Empty,
+                request.Address.Country ?? string.Empty);
             patient.UpdateAddress(address);
         }
 
-        if (!string.IsNullOrEmpty(request.BloodType))
+        if (!string.IsNullOrWhiteSpace(request.BloodType))
         {
             var bloodType = BloodType.FromName(request.BloodType);
             patient.UpdateBloodType(bloodType);
@@ -72,7 +74,7 @@ public class CreatePatientCommandHandler : ICommandHandler<CreatePatientCommand,
             DisplayName = patient.Name.DisplayName,
             Email = patient.Email.Value,
             PhoneNumber = patient.PhoneNumber?.Value,
-            Address = patient.Address != null 
+            Address = patient.Address is not null
                 ? new AddressDto(
                     patient.Address.Street,
                     patient.Address.City,

@@ -4,7 +4,7 @@ namespace BuildingBlocks.Application.Dispatchers;
 
 public interface IEventDispatcher
 {
-    Task DispatchAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
+    Task DispatchAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default)
         where TEvent : IEvent;
 
     Task DispatchAsync<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken = default)

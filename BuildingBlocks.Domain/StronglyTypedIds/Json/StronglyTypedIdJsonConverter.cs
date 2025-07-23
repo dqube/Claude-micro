@@ -31,6 +31,7 @@ public class StronglyTypedIdJsonConverter<TStronglyTypedId, TValue> : JsonConver
 
     public override void Write(Utf8JsonWriter writer, TStronglyTypedId value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         if (value is null)
         {
             writer.WriteNullValue();

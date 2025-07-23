@@ -8,11 +8,13 @@ public class DomainEventDispatcher : IDomainEventDispatcher
 
     public DomainEventDispatcher(IServiceProvider serviceProvider)
     {
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         _serviceProvider = serviceProvider;
     }
 
     public async Task DispatchAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(domainEvent);
         var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
         var handlers = _serviceProvider.GetServices(handlerType);
 
@@ -27,6 +29,7 @@ public class DomainEventDispatcher : IDomainEventDispatcher
 
     public async Task DispatchAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(domainEvents);
         foreach (var domainEvent in domainEvents)
         {
             await DispatchAsync(domainEvent, cancellationToken);

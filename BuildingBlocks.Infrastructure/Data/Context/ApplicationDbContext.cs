@@ -10,14 +10,15 @@ public class ApplicationDbContext : DbContextBase
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
-        
         // Configure entity relationships and constraints here
         ConfigureEntities(modelBuilder);
     }
 
-    private void ConfigureEntities(ModelBuilder modelBuilder)
+    private static void ConfigureEntities(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
         // Add specific entity configurations here
     }
 }

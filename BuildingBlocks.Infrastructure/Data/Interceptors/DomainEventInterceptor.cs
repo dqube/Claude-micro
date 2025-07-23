@@ -12,11 +12,13 @@ public class DomainEventInterceptor : SaveChangesInterceptor
 
     public DomainEventInterceptor(IDomainEventService domainEventService)
     {
+        ArgumentNullException.ThrowIfNull(domainEventService);
         _domainEventService = domainEventService;
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         DispatchDomainEvents(eventData.Context).GetAwaiter().GetResult();
         return base.SavingChanges(eventData, result);
     }
@@ -26,6 +28,7 @@ public class DomainEventInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
         await DispatchDomainEvents(eventData.Context);
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }

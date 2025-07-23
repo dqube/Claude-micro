@@ -8,11 +8,13 @@ public abstract class ApplicationServiceBase : IApplicationService
 
     protected ApplicationServiceBase(IUnitOfWork unitOfWork)
     {
+        ArgumentNullException.ThrowIfNull(unitOfWork);
         UnitOfWork = unitOfWork;
     }
 
     protected async Task<T> ExecuteAsync<T>(Func<Task<T>> operation)
     {
+        ArgumentNullException.ThrowIfNull(operation);
         try
         {
             await UnitOfWork.BeginTransactionAsync();
@@ -29,6 +31,7 @@ public abstract class ApplicationServiceBase : IApplicationService
 
     protected async Task ExecuteAsync(Func<Task> operation)
     {
+        ArgumentNullException.ThrowIfNull(operation);
         try
         {
             await UnitOfWork.BeginTransactionAsync();

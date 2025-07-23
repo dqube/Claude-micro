@@ -11,6 +11,7 @@ public abstract class AuditableEntityConfiguration<TEntity, TId> : EntityConfigu
 {
     public override void Configure(EntityTypeBuilder<TEntity> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         base.Configure(builder);
 
         builder.Property(e => e.CreatedAt)

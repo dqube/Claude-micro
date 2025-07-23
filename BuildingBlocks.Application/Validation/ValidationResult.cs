@@ -13,7 +13,7 @@ public class ValidationResult
         _errors.AddRange(errors);
     }
 
-    public bool IsValid => !_errors.Any();
+    public bool IsValid => _errors.Count == 0;
     public IReadOnlyList<ValidationError> Errors => _errors.AsReadOnly();
 
     public void AddError(ValidationError error)

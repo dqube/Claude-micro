@@ -16,12 +16,14 @@ public abstract class RepositoryBase<TEntity, TId> : IReadOnlyRepository<TEntity
 
     protected RepositoryBase(IDbContext dbContext)
     {
+        ArgumentNullException.ThrowIfNull(dbContext);
         DbContext = dbContext;
-        DbSet = dbContext.Set<TEntity>();
+        DbSet = dbContext.GetDbSet<TEntity>();
     }
 
     public virtual async Task<TEntity?> GetByIdAsync(TId id, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(id);
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
@@ -117,6 +119,7 @@ public abstract class RepositoryBase<TEntity, TId> : IReadOnlyRepository<TEntity
 
     protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification)
     {
+        ArgumentNullException.ThrowIfNull(specification);
         var query = DbSet.AsQueryable();
 
         if (specification.Criteria != null)

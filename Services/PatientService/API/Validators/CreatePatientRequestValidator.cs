@@ -1,3 +1,4 @@
+#pragma warning disable CA1812 // Validator is instantiated by FluentValidation
 using FluentValidation;
 using PatientService.API.Endpoints;
 

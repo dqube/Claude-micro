@@ -11,16 +11,19 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 
     public UnitOfWork(PatientDbContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
         _context = context;
     }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(_context);
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(_context);
         _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
     }
 
@@ -46,7 +49,16 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 
     public void Dispose()
     {
-        _transaction?.Dispose();
-        _context.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _transaction?.Dispose();
+            _context?.Dispose();
+        }
     }
 }

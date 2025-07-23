@@ -42,7 +42,7 @@ public class GetPatientByIdQueryHandler : IQueryHandler<GetPatientByIdQuery, Pat
             DisplayName = patient.Name.DisplayName,
             Email = patient.Email.Value,
             PhoneNumber = patient.PhoneNumber?.Value,
-            Address = patient.Address != null 
+            Address = patient.Address is not null 
                 ? new AddressDto(
                     patient.Address.Street,
                     patient.Address.City,

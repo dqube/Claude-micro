@@ -10,6 +10,7 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
 {
     public void Configure(EntityTypeBuilder<Patient> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         builder.ToTable("Patients");
 
         builder.HasKey(p => p.Id);
@@ -55,9 +56,12 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
         // Phone Number
         builder.Property(p => p.PhoneNumber)
             .HasConversion(
+#pragma warning disable CS8604, CS8625 // Entity Framework expression trees require null comparisons
                 phone => phone != null ? phone.Value : null,
-                value => value != null ? new PhoneNumber(value) : null)
-            .HasMaxLength(20);
+                value => string.IsNullOrEmpty(value) ? null : new PhoneNumber(value))
+#pragma warning restore CS8604, CS8625
+            .HasMaxLength(20)
+            .IsRequired(false);
 
         // Address
         builder.OwnsOne(p => p.Address, addressBuilder =>

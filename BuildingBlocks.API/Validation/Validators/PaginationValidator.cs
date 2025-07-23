@@ -25,7 +25,7 @@ public class PaginationValidator : AbstractValidator<PaginationRequest>
             .WithMessage("PageSize must be between 1 and 100");
 
         RuleFor(x => x.SortDirection)
-            .Must(x => string.IsNullOrEmpty(x) || x.ToLower(CultureInfo.InvariantCulture) is "asc" or "desc")
+            .Must(x => string.IsNullOrEmpty(x) || x.ToUpperInvariant() is "ASC" or "DESC")
             .WithMessage("SortDirection must be 'asc' or 'desc'");
     }
 }
