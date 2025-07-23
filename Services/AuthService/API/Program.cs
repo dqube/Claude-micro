@@ -1,9 +1,10 @@
 using BuildingBlocks.API.Extensions;
 using BuildingBlocks.API.OpenApi.Extensions;
-using PatientService.API.Endpoints;
-using PatientService.Application;
-using PatientService.Domain;
-using PatientService.Infrastructure;
+using AuthService.API.Endpoints;
+using AuthService.Application;
+using AuthService.Domain;
+using AuthService.Infrastructure;
+using AuthService.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, JSON converters, etc.)
@@ -13,6 +14,7 @@ builder.Services.AddBuildingBlocksApi(builder.Configuration);
 builder.Services.AddDomain()
                 .AddApplication()
                 .AddInfrastructure(builder.Configuration);
+
 var app = builder.Build();
 // OpenAPI documentation
 
@@ -24,13 +26,13 @@ if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<PatientService.Infrastructure.Persistence.PatientDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
         context.Database.EnsureCreated();
     }
 }
 
 // Map application-specific endpoints
-app.MapPatientEndpoints();
+app.MapAuthEndpoints();
 
 // Add root endpoint redirect to documentation (only in development)
 if (app.Environment.IsDevelopment())
