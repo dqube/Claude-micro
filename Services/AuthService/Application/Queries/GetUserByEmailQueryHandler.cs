@@ -1,1 +1,84 @@
-// GetUserByEmailQueryHandler will be implemented here
+using BuildingBlocks.Application.CQRS.Queries;
+using BuildingBlocks.Domain.Repository;
+using AuthService.Application.DTOs;
+using AuthService.Domain.Entities;
+using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Exceptions;
+
+namespace AuthService.Application.Queries;
+
+public class GetUserByEmailQueryHandler : IQueryHandler<GetUserByEmailQuery, UserDto>
+{
+    private readonly IReadOnlyRepository<User, UserId> _userRepository;
+    private readonly IReadOnlyRepository<UserRole, UserId> _userRoleRepository;
+    private readonly IReadOnlyRepository<Role, RoleId> _roleRepository;
+
+    public GetUserByEmailQueryHandler(
+        IReadOnlyRepository<User, UserId> userRepository,
+        IReadOnlyRepository<UserRole, UserId> userRoleRepository,
+        IReadOnlyRepository<Role, RoleId> roleRepository)
+    {
+        _userRepository = userRepository;
+        _userRoleRepository = userRoleRepository;
+        _roleRepository = roleRepository;
+    }
+
+    public async Task<UserDto> HandleAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var user = await _userRepository.FindFirstAsync(
+            u => u.Email.Value == request.Email,
+            cancellationToken);
+
+        if (user is null)
+        {
+            throw new UserNotFoundException(request.Email, isUsername: false);
+        }
+
+        // Get user role (since UserRole uses UserId as key, there's only one role per user)
+        var userRole = await _userRoleRepository.GetByIdAsync(user.Id, cancellationToken);
+
+        var roles = new List<RoleDto>();
+        if (userRole is not null)
+        {
+            var role = await _roleRepository.GetByIdAsync(userRole.RoleId, cancellationToken);
+            if (role is not null)
+            {
+                roles.Add(MapRoleToDto(role));
+            }
+        }
+
+        return MapToDto(user, roles);
+    }
+
+    private static UserDto MapToDto(User user, List<RoleDto> roles)
+    {
+        return new UserDto
+        {
+            Id = user.Id.Value,
+            Username = user.Username.Value,
+            Email = user.Email.Value,
+            IsActive = user.IsActive,
+            IsLocked = user.IsLockedOut(),
+            FailedLoginAttempts = user.FailedLoginAttempts,
+            LastLoginAt = null, // Not tracked in this version
+            LockedUntil = user.LockoutEnd,
+            CreatedAt = user.CreatedAt,
+            LastUpdatedAt = user.UpdatedAt,
+            Roles = roles
+        };
+    }
+
+    private static RoleDto MapRoleToDto(Role role)
+    {
+        return new RoleDto
+        {
+            Id = role.Id.Value,
+            Name = role.Name,
+            Description = role.Description ?? string.Empty,
+            CreatedAt = role.CreatedAt,
+            LastUpdatedAt = role.UpdatedAt
+        };
+    }
+}

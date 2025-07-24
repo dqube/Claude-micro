@@ -17,6 +17,8 @@ public class Email : SingleValueObject<string>
             throw new ArgumentException("Invalid email format", nameof(value));
     }
 
+    public static Email From(string value) => new(value);
+
     public static implicit operator Email(string email) => new(email);
     public static explicit operator string(Email email)
     {

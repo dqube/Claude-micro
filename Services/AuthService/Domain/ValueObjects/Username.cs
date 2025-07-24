@@ -19,6 +19,8 @@ public class Username : SingleValueObject<string>
             throw new ArgumentException("Username contains invalid characters", nameof(value));
     }
     
+    public static Username From(string value) => new(value);
+    
     private static bool IsValidUsername(string username)
     {
         return username.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '.');

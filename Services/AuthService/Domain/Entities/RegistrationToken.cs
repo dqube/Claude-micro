@@ -1,4 +1,5 @@
 using BuildingBlocks.Domain.Entities;
+using BuildingBlocks.Domain.Common;
 using AuthService.Domain.Events;
 using AuthService.Domain.ValueObjects;
 
@@ -6,9 +7,14 @@ namespace AuthService.Domain.Entities;
 
 public class RegistrationToken : AggregateRoot<TokenId>
 {
+    public string Token { get; private set; } = string.Empty;
+    public Email Email { get; private set; } = new("temp@temp.com");
     public UserId UserId { get; private set; }
     public TokenType TokenType { get; private set; }
     public DateTime Expiration { get; private set; }
+    public DateTime ExpiresAt => Expiration;
+    public DateTime? UsedAt { get; private set; }
+    public UserId? UsedBy { get; private set; }
     public bool IsUsed { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public UserId? CreatedBy { get; private set; }
@@ -22,11 +28,15 @@ public class RegistrationToken : AggregateRoot<TokenId>
 
     public RegistrationToken(
         TokenId id,
+        string token,
+        Email email,
         UserId userId,
         TokenType tokenType,
         DateTime? expiration = null,
         UserId? createdBy = null) : base(id)
     {
+        Token = token ?? throw new ArgumentNullException(nameof(token));
+        Email = email ?? throw new ArgumentNullException(nameof(email));
         UserId = userId;
         TokenType = tokenType;
         Expiration = expiration ?? DateTime.UtcNow.AddHours(24);
@@ -39,7 +49,7 @@ public class RegistrationToken : AggregateRoot<TokenId>
         AddDomainEvent(new RegistrationTokenCreatedEvent(Id, UserId, TokenType));
     }
 
-    public void MarkAsUsed()
+    public void MarkAsUsed(UserId? usedBy = null)
     {
         if (IsUsed)
             throw new InvalidOperationException("Token has already been used");
@@ -48,6 +58,8 @@ public class RegistrationToken : AggregateRoot<TokenId>
             throw new InvalidOperationException("Token has expired");
 
         IsUsed = true;
+        UsedAt = DateTime.UtcNow;
+        UsedBy = usedBy;
     }
 
     public bool IsExpired()

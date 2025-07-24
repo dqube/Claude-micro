@@ -16,6 +16,8 @@ public class TokenType : SingleValueObject<string>
             throw new ArgumentException($"Invalid token type: {value}", nameof(value));
     }
     
+    public static TokenType From(string value) => new(value);
+    
     private static bool IsValidTokenType(string value)
     {
         return value is "EmailVerification" or "PasswordReset";
