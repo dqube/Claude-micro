@@ -1,3 +1,4 @@
+```markdown
 BuildingBlocks.Infrastructure/
 ├── Data/
 │   ├── Repositories/
@@ -316,3 +317,4 @@ BuildingBlocks.Infrastructure/
     ├── ValidationExtensions.cs
     ├── SerializationExtensions.cs
     └── InfrastructureExtensions.cs
+```
