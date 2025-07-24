@@ -1,5 +1,8 @@
 using BuildingBlocks.Infrastructure.Data.Converters;
+using BuildingBlocks.Application.Inbox;
+using BuildingBlocks.Application.Outbox;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using AuthService.Domain.Entities;
 using AuthService.Infrastructure.Configurations;
 
@@ -16,6 +19,10 @@ public class AuthDbContext : DbContext
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<RegistrationToken> RegistrationTokens => Set<RegistrationToken>();
+    
+    // Inbox/Outbox pattern tables
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +34,10 @@ public class AuthDbContext : DbContext
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationTokenConfiguration());
+        
+        // Apply inbox/outbox configurations
+        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new InboxMessageConfiguration());
 
         // Configure all strongly typed IDs automatically
         modelBuilder.ConfigureStronglyTypedIds();
@@ -95,12 +106,20 @@ public class AuthDbContext : DbContext
         tokenEntities.ForEach(entity => entity.ClearDomainEvents());
         userRoleEntities.ForEach(entity => entity.ClearDomainEvents());
 
+        // Save domain events to outbox for eventual consistency
         foreach (var domainEvent in allDomainEvents)
         {
-            // Here you would publish the domain event using your preferred method
-            // For example, using MediatR or a service bus
-            // await _mediator.Publish(domainEvent, cancellationToken);
-            await Task.CompletedTask;
+            var eventTypeName = domainEvent.GetType().Name;
+            var eventPayload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType());
+            
+            var outboxMessage = new OutboxMessage(
+                messageType: eventTypeName,
+                payload: eventPayload,
+                destination: "AuthService.DomainEvents",
+                correlationId: domainEvent.Id.ToString()
+            );
+            
+            await OutboxMessages.AddAsync(outboxMessage, cancellationToken);
         }
     }
 }

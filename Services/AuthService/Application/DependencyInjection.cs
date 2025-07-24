@@ -13,6 +13,9 @@ public static class DependencyInjection
         // Register mediator with all handlers from this assembly
         services.AddMediatorWithAssemblies(assembly);
         
+        // Register BuildingBlocks application layer services (includes inbox/outbox support)
+        services.AddApplicationLayer();
+        
         return services;
     }
 }

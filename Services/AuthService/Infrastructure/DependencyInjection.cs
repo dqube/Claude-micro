@@ -1,5 +1,7 @@
 using BuildingBlocks.Domain.Repository;
 using BuildingBlocks.Infrastructure.Data.Converters;
+using BuildingBlocks.Application.Outbox;
+using BuildingBlocks.Application.Inbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +10,7 @@ using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using AuthService.Infrastructure.Repositories;
+using AuthService.Infrastructure.Services;
 
 namespace AuthService.Infrastructure;
 
@@ -55,6 +58,9 @@ public static class DependencyInjection
 
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Register Inbox/Outbox services
+        services.AddScoped<IOutboxService, OutboxService>();
 
         return services;
     }
