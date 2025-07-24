@@ -3,14 +3,15 @@ using BuildingBlocks.Domain.Repository;
 using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 
 namespace AuthService.Application.Queries;
 
 public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PagedResult<UserDto>>
 {
-    private readonly IReadOnlyRepository<User, UserId> _userRepository;
+    private readonly IUserRepository _userRepository;
 
-    public GetUsersQueryHandler(IReadOnlyRepository<User, UserId> userRepository)
+    public GetUsersQueryHandler(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }

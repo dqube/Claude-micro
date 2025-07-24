@@ -1,53 +1,42 @@
 using BuildingBlocks.Application.CQRS.Queries;
 using BuildingBlocks.Domain.Repository;
+using BuildingBlocks.Domain.Common;
 using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Domain.Exceptions;
 
 namespace AuthService.Application.Queries;
 
 public class GetUserByEmailQueryHandler : IQueryHandler<GetUserByEmailQuery, UserDto>
 {
-    private readonly IReadOnlyRepository<User, UserId> _userRepository;
-    private readonly IReadOnlyRepository<UserRole, UserId> _userRoleRepository;
-    private readonly IReadOnlyRepository<Role, RoleId> _roleRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IUserRoleRepository _userRoleRepository;
 
     public GetUserByEmailQueryHandler(
-        IReadOnlyRepository<User, UserId> userRepository,
-        IReadOnlyRepository<UserRole, UserId> userRoleRepository,
-        IReadOnlyRepository<Role, RoleId> roleRepository)
+        IUserRepository userRepository,
+        IUserRoleRepository userRoleRepository)
     {
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
-        _roleRepository = roleRepository;
     }
 
     public async Task<UserDto> HandleAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var user = await _userRepository.FindFirstAsync(
-            u => u.Email.Value == request.Email,
-            cancellationToken);
+        var email = new Email(request.Email);
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
 
         if (user is null)
         {
             throw new UserNotFoundException(request.Email, isUsername: false);
         }
 
-        // Get user role (since UserRole uses UserId as key, there's only one role per user)
-        var userRole = await _userRoleRepository.GetByIdAsync(user.Id, cancellationToken);
-
-        var roles = new List<RoleDto>();
-        if (userRole is not null)
-        {
-            var role = await _roleRepository.GetByIdAsync(userRole.RoleId, cancellationToken);
-            if (role is not null)
-            {
-                roles.Add(MapRoleToDto(role));
-            }
-        }
+        // Get roles for this user using domain-specific method
+        var userRoles = await _userRoleRepository.GetRolesByUserIdAsync(user.Id, cancellationToken);
+        var roles = userRoles.Select(MapRoleToDto).ToList();
 
         return MapToDto(user, roles);
     }

@@ -4,16 +4,17 @@ using BuildingBlocks.Domain.Common;
 using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 
 namespace AuthService.Application.Commands;
 
 public class CreateRegistrationTokenCommandHandler : ICommandHandler<CreateRegistrationTokenCommand, RegistrationTokenDto>
 {
-    private readonly IRepository<RegistrationToken, TokenId> _tokenRepository;
+    private readonly IRegistrationTokenRepository _tokenRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateRegistrationTokenCommandHandler(
-        IRepository<RegistrationToken, TokenId> tokenRepository,
+        IRegistrationTokenRepository tokenRepository,
         IUnitOfWork unitOfWork)
     {
         _tokenRepository = tokenRepository;

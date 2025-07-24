@@ -3,17 +3,18 @@ using BuildingBlocks.Domain.Repository;
 using BuildingBlocks.Domain.Common;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Domain.Exceptions;
 
 namespace AuthService.Application.Commands;
 
 public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand>
 {
-    private readonly IRepository<User, UserId> _userRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdatePasswordCommandHandler(
-        IRepository<User, UserId> userRepository,
+        IUserRepository userRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;

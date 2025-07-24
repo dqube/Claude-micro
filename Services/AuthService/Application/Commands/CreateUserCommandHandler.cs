@@ -4,17 +4,18 @@ using BuildingBlocks.Domain.Common;
 using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Domain.Exceptions;
 
 namespace AuthService.Application.Commands;
 
 public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserDto>
 {
-    private readonly IRepository<User, UserId> _userRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateUserCommandHandler(
-        IRepository<User, UserId> userRepository,
+        IUserRepository userRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
@@ -26,13 +27,17 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserD
         ArgumentNullException.ThrowIfNull(request);
 
         // Check if user with email already exists
-        var existingUser = await _userRepository.FindFirstAsync(
-            u => u.Email.Value == request.Email, 
-            cancellationToken);
-
-        if (existingUser is not null)
+        var email = new Email(request.Email);
+        var username = Username.From(request.Username);
+        
+        if (await _userRepository.EmailExistsAsync(email, cancellationToken))
         {
             throw new InvalidOperationException($"User with email '{request.Email}' already exists");
+        }
+        
+        if (await _userRepository.UsernameExistsAsync(username, cancellationToken))
+        {
+            throw new InvalidOperationException($"User with username '{request.Username}' already exists");
         }
 
         // Create password hash and salt (simplified for this implementation)
@@ -42,8 +47,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserD
         // Create user entity
         var user = new User(
             UserId.New(),
-            Username.From(request.Username),
-            new Email(request.Email),
+            username,
+            email,
             PasswordHash.From(System.Text.Encoding.UTF8.GetBytes(passwordHash)),
             passwordSalt);
 

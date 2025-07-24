@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using AuthService.Infrastructure.Repositories;
 
@@ -33,16 +34,24 @@ public static class DependencyInjection
         });
 
         // Register User Repository
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRepository<User, UserId>, UserRepository>();
         services.AddScoped<IReadOnlyRepository<User, UserId>, UserRepository>();
 
         // Register Role Repository
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRepository<Role, RoleId>, RoleRepository>();
         services.AddScoped<IReadOnlyRepository<Role, RoleId>, RoleRepository>();
 
         // Register RegistrationToken Repository
+        services.AddScoped<IRegistrationTokenRepository, RegistrationTokenRepository>();
         services.AddScoped<IRepository<RegistrationToken, TokenId>, RegistrationTokenRepository>();
         services.AddScoped<IReadOnlyRepository<RegistrationToken, TokenId>, RegistrationTokenRepository>();
+
+        // Register UserRole Repository
+        services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+        services.AddScoped<IRepository<UserRole, UserId>, UserRoleRepository>();
+        services.AddScoped<IReadOnlyRepository<UserRole, UserId>, UserRoleRepository>();
 
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

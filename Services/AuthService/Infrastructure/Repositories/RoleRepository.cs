@@ -3,12 +3,13 @@ using BuildingBlocks.Domain.Specifications;
 using Microsoft.EntityFrameworkCore;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using System.Linq.Expressions;
 
 namespace AuthService.Infrastructure.Repositories;
 
-public class RoleRepository : IRepository<Role, RoleId>, IReadOnlyRepository<Role, RoleId>
+public class RoleRepository : IRoleRepository
 {
     private readonly AuthDbContext _context;
 
@@ -161,6 +162,23 @@ public class RoleRepository : IRepository<Role, RoleId>, IReadOnlyRepository<Rol
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         return await _context.Roles
             .FirstOrDefaultAsync(r => r.Name == name, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Role>> GetAllOrderedByNameAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Roles
+            .OrderBy(r => r.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> RoleNameExistsAsync(
+        string name,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return await _context.Roles
+            .AnyAsync(r => r.Name == name, cancellationToken);
     }
 
     public async Task<bool> NameExistsAsync(

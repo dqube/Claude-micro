@@ -4,12 +4,13 @@ using BuildingBlocks.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using System.Linq.Expressions;
 
 namespace AuthService.Infrastructure.Repositories;
 
-public class UserRepository : IRepository<User, UserId>, IReadOnlyRepository<User, UserId>
+public class UserRepository : IUserRepository
 {
     private readonly AuthDbContext _context;
 
@@ -196,6 +197,38 @@ public class UserRepository : IRepository<User, UserId>, IReadOnlyRepository<Use
     {
         return await _context.Users
             .Where(u => u.IsActive)
+            .OrderBy(u => u.Username)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<User>> GetInactiveUsersAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Where(u => !u.IsActive)
+            .OrderBy(u => u.Username)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<User>> GetLockedUsersAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Where(u => u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTime.UtcNow)
+            .OrderBy(u => u.LockoutEnd)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<User>> SearchUsersAsync(
+        string searchTerm, 
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(searchTerm);
+        var lowerSearchTerm = searchTerm.ToLowerInvariant();
+        
+        return await _context.Users
+            .Where(u => u.Username.Value.ToLower().Contains(lowerSearchTerm) ||
+                       u.Email.Value.ToLower().Contains(lowerSearchTerm))
             .OrderBy(u => u.Username)
             .ToListAsync(cancellationToken);
     }

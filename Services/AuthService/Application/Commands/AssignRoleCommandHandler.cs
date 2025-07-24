@@ -4,21 +4,22 @@ using BuildingBlocks.Domain.Common;
 using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Domain.Exceptions;
 
 namespace AuthService.Application.Commands;
 
 public class AssignRoleCommandHandler : ICommandHandler<AssignRoleCommand, UserRoleDto>
 {
-    private readonly IRepository<User, UserId> _userRepository;
-    private readonly IRepository<Role, RoleId> _roleRepository;
-    private readonly IRepository<UserRole, UserId> _userRoleRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly IUserRoleRepository _userRoleRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignRoleCommandHandler(
-        IRepository<User, UserId> userRepository,
-        IRepository<Role, RoleId> roleRepository,
-        IRepository<UserRole, UserId> userRoleRepository,
+        IUserRepository userRepository,
+        IRoleRepository roleRepository,
+        IUserRoleRepository userRoleRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
@@ -42,12 +43,10 @@ public class AssignRoleCommandHandler : ICommandHandler<AssignRoleCommand, UserR
         var role = await _roleRepository.GetByIdAsync(roleId, cancellationToken)
             ?? throw new RoleNotFoundException(roleId);
 
-        // Check if user already has a role (since UserRole uses UserId as key)
-        var existingUserRole = await _userRoleRepository.GetByIdAsync(userId, cancellationToken);
-
-        if (existingUserRole is not null)
+        // Check if user already has this role
+        if (await _userRoleRepository.UserHasRoleAsync(userId, roleId, cancellationToken))
         {
-            throw new InvalidOperationException($"User already has a role assigned");
+            throw new InvalidOperationException($"User already has this role assigned");
         }
 
         // Create user role assignment

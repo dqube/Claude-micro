@@ -4,12 +4,13 @@ using BuildingBlocks.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using System.Linq.Expressions;
 
 namespace AuthService.Infrastructure.Repositories;
 
-public class RegistrationTokenRepository : IRepository<RegistrationToken, TokenId>, IReadOnlyRepository<RegistrationToken, TokenId>
+public class RegistrationTokenRepository : IRegistrationTokenRepository
 {
     private readonly AuthDbContext _context;
 
