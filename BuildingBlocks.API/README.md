@@ -1,38 +1,184 @@
 # BuildingBlocks.API
 
-A comprehensive API layer building blocks library for ASP.NET Core 9 applications using Minimal APIs, following Clean Architecture principles.
+A comprehensive, production-ready API layer building blocks library for ASP.NET Core 9 applications using Minimal APIs, following Clean Architecture principles. This library provides essential infrastructure components for modern web APIs including authentication, validation, documentation, monitoring, and more.
 
-## 🚀 Features
+## 🏗️ Architecture Overview
 
-### 🏗️ Minimal API Support
-- **Base Classes**: `EndpointBase` and `CrudEndpoints` for rapid API development
-- **Response Models**: Standardized API responses with consistent structure
-- **Route Conventions**: Consistent endpoint routing and naming
-- **Validation**: Integrated request validation with detailed error responses
+BuildingBlocks.API serves as the presentation layer in Clean Architecture, providing concrete implementations for HTTP concerns while maintaining separation from business logic. It focuses on API-specific cross-cutting concerns like request/response handling, authentication, validation, documentation, and monitoring.
 
-### 🔒 Authentication & Security
-- **JWT Authentication**: Bearer token authentication with configurable options
-- **API Key Authentication**: Simple API key-based authentication
-- **CORS**: Cross-origin resource sharing configuration
-- **Security Headers**: HTTPS, HSTS, and security header middleware
-- **Rate Limiting**: Configurable rate limiting per endpoint
+## 🚀 Core Features
 
-### 🛡️ Middleware Pipeline
-- **Error Handling**: Global exception handling with structured error responses
-- **Request Logging**: Comprehensive request/response logging with correlation IDs
-- **Correlation ID**: Request correlation tracking for distributed systems
-- **Security Middleware**: Security headers, CORS, and rate limiting
+### 🏗️ Minimal API Foundation
+- **Modern Endpoint System**: Advanced base classes (`EndpointBase`, `CrudEndpoints`, `QueryEndpoints`) for rapid API development
+- **Standardized Response Models**: Consistent API response structure with correlation IDs and timestamps
+- **Smart Route Conventions**: Automatic endpoint routing and OpenAPI integration
+- **Request/Response Pipeline**: Streamlined request processing with validation and error handling
+- **Type-Safe Endpoints**: Strongly-typed endpoint definitions with automatic model binding
 
-### 📚 Documentation & Monitoring
-- **OpenAPI**: Native .NET 9 OpenAPI integration with Swagger
-- **Scalar**: Modern API documentation interface (replaces Swagger UI)
-- **Health Checks**: Built-in health monitoring for APIs, databases, and external services
-- **Versioning**: URL-based API versioning with OpenAPI documentation
+### 🔒 Advanced Authentication & Security
+- **JWT Bearer Authentication**: Industry-standard JWT token authentication with configurable validation
+- **API Key Authentication**: Simple yet secure API key-based authentication with custom headers
+- **Multi-Scheme Authentication**: Support for multiple authentication schemes simultaneously
+- **CORS Management**: Comprehensive cross-origin resource sharing configuration
+- **Security Headers**: Essential security headers (HSTS, CSP, X-Frame-Options, etc.)
+- **Rate Limiting**: Advanced rate limiting with per-user, per-IP, and global limits
+- **Security Middleware Pipeline**: Layered security with customizable policies
 
-### 🔧 Configuration & Validation
-- **Options Pattern**: Strongly-typed configuration with validation
-- **FluentValidation**: Comprehensive request validation framework
-- **Configuration Extensions**: Easy setup and binding of configuration sections
+### 🛡️ Robust Middleware Pipeline
+- **Global Exception Handling**: Structured error responses with detailed logging and correlation tracking
+- **Request/Response Logging**: Comprehensive HTTP logging with customizable levels and filters
+- **Correlation ID Management**: Distributed tracing support with automatic correlation ID propagation
+- **Performance Monitoring**: Request timing and performance metrics collection
+- **Security Middleware**: Integrated security headers, CORS, and rate limiting middleware
+
+### 📚 Modern Documentation & API Discovery
+- **Scalar Integration**: Beautiful, interactive API documentation interface (next-generation Swagger UI)
+- **OpenAPI 3.0 Support**: Full OpenAPI specification with automatic schema generation
+- **Interactive Testing**: Built-in API testing capabilities within documentation
+- **Customizable Documentation**: Branded documentation with custom themes and examples
+- **Versioned Documentation**: Automatic documentation versioning with API versions
+
+### 💯 Advanced Validation & Error Handling
+- **FluentValidation Integration**: Comprehensive request validation with custom rules and localization
+- **Structured Error Responses**: Consistent error format with detailed validation messages
+- **Problem Details Support**: RFC 7807 Problem Details for HTTP APIs compliance
+- **Custom Validation Attributes**: Reusable validation components for common scenarios
+- **Validation Pipeline Integration**: Automatic validation with clear error propagation
+
+### 📊 Health Monitoring & Observability
+- **Comprehensive Health Checks**: Built-in health monitoring for databases, external services, and system resources
+- **Custom Health Check Support**: Extensible health check framework for domain-specific monitoring
+- **Health Dashboard**: JSON and UI-based health reporting with detailed status information
+- **Dependency Monitoring**: Automatic health checks for database connections, Redis, external APIs
+- **Alerting Integration**: Health check results suitable for monitoring and alerting systems
+
+### 🔧 Flexible Configuration Management
+- **Options Pattern**: Strongly-typed configuration classes with validation and binding
+- **Environment-Specific Settings**: Support for multiple environments with configuration overrides
+- **Configuration Validation**: Startup-time configuration validation with detailed error messages
+- **Hot Reload Support**: Runtime configuration updates without application restart
+- **Secret Management**: Integration with secure configuration providers (Azure Key Vault, etc.)
+
+### 🌐 API Versioning & Evolution
+- **URL-Based Versioning**: Clean, RESTful API versioning with automatic route generation
+- **Backward Compatibility**: Support for multiple API versions simultaneously
+- **Deprecation Management**: Built-in support for API deprecation warnings and migration guides
+- **Version-Specific Documentation**: Separate documentation for each API version
+- **Smooth Migration Path**: Tools and conventions for API evolution without breaking changes
+
+### 🔄 Advanced JSON Processing
+- **Custom JSON Converters**: Specialized converters for common data types (DateTime, Decimal, GUID, etc.)
+- **Flexible Date Handling**: Multiple date format support with automatic parsing
+- **Phone Number Formatting**: International phone number validation and formatting
+- **Enum Serialization**: String-based enum serialization with custom naming policies
+- **Null Handling**: Robust null value processing with configurable behavior
+
+## 📋 Comprehensive Directory Structure
+
+```
+BuildingBlocks.API/
+├── 📁 Authentication/                    # Authentication schemes and handlers
+│   ├── 🔑 JWT/                          # JWT Bearer token authentication
+│   │   ├── JwtAuthenticationExtensions.cs    # JWT service registration and configuration
+│   │   └── JwtBearerOptionsSetup.cs          # JWT bearer options configuration
+│   └── 🔐 ApiKey/                       # API key authentication
+│       ├── ApiKeyAuthenticationExtensions.cs # API key service registration
+│       └── ApiKeyAuthenticationHandler.cs    # Custom API key authentication handler
+├── 📁 Configuration/                     # Configuration management and options
+│   ├── 📁 Examples/                     # Configuration examples and templates
+│   │   └── appsettings.ratelimiting.example.json # Rate limiting configuration example
+│   ├── 📁 Extensions/                   # Configuration extension methods
+│   │   └── ConfigurationExtensions.cs       # Configuration binding and validation helpers
+│   └── 📁 Options/                      # Strongly-typed configuration classes
+│       └── ApiOptions.cs                    # Core API configuration options
+├── 📁 Converters/                       # Custom JSON converters for specialized types
+│   ├── 📅 CustomDateTimeConverter.cs        # Flexible DateTime parsing and formatting
+│   ├── 📅 CustomDateTimeOffsetConverter.cs  # DateTimeOffset with timezone support
+│   ├── 💰 CustomDecimalConverter.cs         # Decimal precision and formatting
+│   ├── 🆔 CustomGuidConverter.cs            # GUID format handling
+│   ├── ❓ CustomNullableDateTimeConverter.cs # Nullable DateTime support
+│   ├── 📱 CustomPhoneNumberConverter.cs     # International phone number formatting
+│   ├── 📝 FlexibleStringConverter.cs        # String normalization and trimming
+│   └── 🏷️ JsonStringEnumConverter.cs        # Enum to string serialization
+├── 📁 Endpoints/                        # Minimal API endpoint base classes and conventions
+│   ├── 📁 Base/                         # Base endpoint classes for inheritance
+│   │   ├── EndpointBase.cs                  # Abstract base with common functionality
+│   │   ├── CrudEndpoints.cs                 # Full CRUD operations template
+│   │   └── QueryEndpoints.cs                # Read-only query operations template
+│   ├── 📁 Conventions/                  # Endpoint routing and naming conventions
+│   │   └── ApiEndpointConvention.cs         # Standardized endpoint conventions
+│   └── 📁 Extensions/                   # Endpoint registration and configuration helpers
+│       ├── EndpointRouteBuilderExtensions.cs # Route builder extension methods
+│       └── MinimalApiExtensions.cs          # Minimal API utility extensions
+├── 📁 Extensions/                       # Core API extension methods for service registration
+│   ├── 🔧 ApiExtensions.cs                  # Main API service registration entry point
+│   ├── 👤 ClaimsPrincipalExtensions.cs      # User claims and identity helpers
+│   ├── ❌ ErrorHandlingExtensions.cs        # Error handling middleware registration
+│   ├── 🌐 HttpContextExtensions.cs          # HTTP context utility methods
+│   ├── 📄 JsonExtensions.cs                 # JSON serialization extensions
+│   ├── 🔗 MiddlewareExtensions.cs           # Middleware pipeline configuration
+│   ├── ⏱️ RateLimitingExtensions.cs          # Rate limiting service registration
+│   ├── 📝 RequestExtensions.cs              # HTTP request helper methods
+│   ├── 📤 ResponseExtensions.cs             # HTTP response helper methods
+│   ├── 🛡️ SecurityExtensions.cs             # Security middleware and headers
+│   ├── ✅ ValidationExtensions.cs           # Validation service registration
+│   └── 🔢 VersioningExtensions.cs           # API versioning configuration
+├── 📁 Health/                           # Health check implementations and reporting
+│   ├── 📁 Extensions/                   # Health check service registration
+│   │   └── HealthCheckExtensions.cs         # Health check registration helpers
+│   └── 📁 Reporters/                    # Health check result formatters
+│       └── JsonHealthReporter.cs            # JSON health check reporting
+├── 📁 Middleware/                       # HTTP middleware components
+│   ├── 📁 ErrorHandling/                # Global exception handling and error responses
+│   │   ├── GlobalExceptionMiddleware.cs     # Global exception handling middleware
+│   │   └── ProblemDetailsFactory.cs         # RFC 7807 problem details factory
+│   ├── 📁 Logging/                      # Request logging and correlation
+│   │   ├── CorrelationIdMiddleware.cs       # Correlation ID generation and propagation
+│   │   └── RequestLoggingMiddleware.cs      # HTTP request/response logging
+│   └── 📁 Security/                     # Security middleware components
+│       ├── RateLimitingMiddleware.cs        # Rate limiting enforcement
+│       └── SecurityHeadersMiddleware.cs     # Security headers injection
+├── 📁 OpenApi/                          # OpenAPI documentation configuration
+│   ├── 📁 Configuration/                # OpenAPI setup and options
+│   │   └── ApiDocumentationOptions.cs      # Documentation configuration options
+│   └── 📁 Extensions/                   # OpenAPI service registration
+│       └── OpenApiExtensions.cs             # OpenAPI and Scalar integration
+├── 📁 Responses/                        # Standardized API response models
+│   ├── 📁 Base/                         # Core response classes
+│   │   └── ApiResponse.cs                   # Base API response with metadata
+│   └── 📁 Builders/                     # Response building utilities
+│       ├── ApiResponseBuilder.cs            # Fluent API response builder
+│       └── ErrorResponseBuilder.cs          # Error response construction
+├── 📁 Utilities/                        # Helper classes and utility functions
+│   ├── 📁 Constants/                    # API-related constants
+│   │   ├── ApiConstants.cs                  # General API constants
+│   │   ├── HeaderConstants.cs               # HTTP header name constants
+│   │   └── HttpConstants.cs                 # HTTP status and method constants
+│   ├── 📁 Factories/                    # Object creation factories
+│   │   ├── ErrorFactory.cs                  # Error object creation
+│   │   └── ResponseFactory.cs               # Response object creation
+│   └── 📁 Helpers/                      # Utility helper methods
+│       ├── CorrelationHelper.cs             # Correlation ID management
+│       ├── ResponseHelper.cs                # Response formatting helpers
+│       └── ValidationHelper.cs              # Validation result processing
+├── 📁 Validation/                       # Request validation framework
+│   ├── 📁 Extensions/                   # Validation extension methods
+│   │   ├── FluentValidationExtensions.cs   # FluentValidation integration
+│   │   └── ValidationExtensions.cs         # General validation extensions
+│   ├── 📁 Results/                      # Validation result models
+│   │   └── ValidationResult.cs              # Structured validation results
+│   └── 📁 Validators/                   # Reusable validator classes
+│       ├── PaginationValidator.cs           # Pagination parameter validation
+│       └── RequestValidator.cs              # Base request validator
+├── 📁 Versioning/                       # API versioning implementation
+│   ├── 📁 Conventions/                  # Versioning conventions and rules
+│   │   └── VersioningConvention.cs          # API versioning conventions
+│   └── 📁 Extensions/                   # Versioning service registration
+│       └── ApiVersioningExtensions.cs      # API versioning configuration
+├── 📄 BuildingBlocks.API.csproj             # Project file with NuGet dependencies
+├── 📚 BuildingBlocks.API.md                 # Technical architecture documentation
+└── 📖 README.md                             # This comprehensive usage guide
+```
 
 ## 📦 Installation
 
@@ -454,6 +600,417 @@ public class CustomResponseExample
             .Build();
         
         return Results.BadRequest(response);
+    }
+}
+```
+
+## 🔧 Advanced Implementation Examples
+
+### 🏗️ Modern Endpoint Development
+
+#### Advanced CRUD Endpoints with Custom Logic
+```csharp
+using BuildingBlocks.API.Endpoints.Base;
+using BuildingBlocks.API.Responses.Base;
+using MediatR;
+
+public class ProductEndpoints : CrudEndpoints<Product, ProductDto, ProductId>
+{
+    private readonly IProductService _productService;
+    
+    public ProductEndpoints(IMediator mediator, IProductService productService) 
+        : base(mediator)
+    {
+        _productService = productService;
+    }
+    
+    protected override string Tag => "Products";
+    protected override string Route => "/api/v1/products";
+    
+    // Override with custom business logic
+    protected override async Task<IResult> HandleCreateAsync(
+        CreateProductRequest request, 
+        CancellationToken cancellationToken)
+    {
+        // Custom validation
+        if (await _productService.ProductExistsAsync(request.Sku))
+        {
+            return ApiError("Product with this SKU already exists", 409, GetCorrelationId());
+        }
+        
+        // Custom creation logic
+        var command = new CreateProductCommand(request);
+        var result = await Mediator.Send(command, cancellationToken);
+        
+        if (!result.IsSuccess)
+            return ApiError(result.Error, correlationId: GetCorrelationId());
+        
+        return Created(result.Data, $"/api/v1/products/{result.Data.Id}", 
+            correlationId: GetCorrelationId());
+    }
+    
+    // Custom endpoint beyond CRUD
+    public void RegisterCustomEndpoints(IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup(Route).WithTags(Tag);
+        
+        group.MapGet("/{id}/analytics", GetProductAnalyticsAsync)
+            .RequireAuthorization()
+            .WithOpenApi(op => new(op)
+            {
+                Summary = "Get product analytics",
+                Description = "Retrieve detailed analytics for a specific product"
+            });
+            
+        group.MapPost("/{id}/inventory", UpdateInventoryAsync)
+            .RequireAuthorization("InventoryManager")
+            .WithOpenApi();
+    }
+    
+    private async Task<IResult> GetProductAnalyticsAsync(
+        ProductId id,
+        [AsParameters] AnalyticsQuery query,
+        CancellationToken cancellationToken)
+    {
+        var analytics = await _productService.GetAnalyticsAsync(id, query, cancellationToken);
+        return ApiResponse(analytics, correlationId: GetCorrelationId());
+    }
+}
+```
+
+#### Custom Query Endpoints with Advanced Filtering
+```csharp
+public class ProductQueryEndpoints : QueryEndpoints<ProductDto, ProductQuery>
+{
+    public ProductQueryEndpoints(IMediator mediator) : base(mediator) { }
+    
+    protected override string Tag => "Product Queries";
+    protected override string Route => "/api/v1/products/query";
+    
+    public void RegisterAdvancedQueries(IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/v1/products")
+            .WithTags("Products")
+            .WithOpenApi();
+        
+        // Advanced search with faceting
+        group.MapPost("/search", SearchProductsAsync)
+            .WithOpenApi(op => new(op)
+            {
+                Summary = "Advanced product search",
+                Description = "Search products with filters, facets, and full-text search"
+            });
+            
+        // Bulk operations
+        group.MapPost("/bulk/update", BulkUpdateProductsAsync)
+            .RequireAuthorization("ProductManager")
+            .WithOpenApi();
+            
+        // Export endpoints
+        group.MapGet("/export/{format}", ExportProductsAsync)
+            .RequireAuthorization()
+            .WithOpenApi();
+    }
+    
+    private async Task<IResult> SearchProductsAsync(
+        ProductSearchRequest request,
+        IValidator<ProductSearchRequest> validator,
+        CancellationToken cancellationToken)
+    {
+        // Validation
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+            return ValidationError(validationResult.ToDictionary(), GetCorrelationId());
+        
+        // Execute search
+        var query = new SearchProductsQuery(request);
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        return ApiResponse(result, correlationId: GetCorrelationId());
+    }
+}
+```
+
+### 🔒 Advanced Authentication & Security Implementation
+
+#### Multi-Scheme Authentication Setup
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure multiple authentication schemes
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "MultiAuthSchemes";
+    options.DefaultChallengeScheme = "MultiAuthSchemes";
+})
+.AddScheme<MultiAuthenticationHandler>("MultiAuthSchemes", options => { })
+.AddJwtBearer("JWT", options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+    };
+})
+.AddScheme<ApiKeyAuthenticationHandler>("ApiKey", options =>
+{
+    options.ApiKeys = builder.Configuration.GetSection("ApiKey:Keys").Get<string[]>();
+    options.HeaderName = "X-API-Key";
+});
+
+// Advanced authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy =>
+        policy.RequireRole("Admin")
+              .RequireAuthenticatedUser());
+              
+    options.AddPolicy("RequireValidSubscription", policy =>
+        policy.Requirements.Add(new SubscriptionRequirement()));
+        
+    options.AddPolicy("RateLimitExempt", policy =>
+        policy.RequireClaim("rate_limit_exempt", "true"));
+});
+```
+
+#### Custom Authorization Requirements
+```csharp
+public class SubscriptionRequirement : IAuthorizationRequirement
+{
+    public string RequiredPlan { get; set; } = "Premium";
+}
+
+public class SubscriptionAuthorizationHandler : AuthorizationHandler<SubscriptionRequirement>
+{
+    private readonly ISubscriptionService _subscriptionService;
+    
+    public SubscriptionAuthorizationHandler(ISubscriptionService subscriptionService)
+    {
+        _subscriptionService = subscriptionService;
+    }
+    
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        SubscriptionRequirement requirement)
+    {
+        var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            context.Fail();
+            return;
+        }
+        
+        var subscription = await _subscriptionService.GetUserSubscriptionAsync(userId);
+        if (subscription?.Plan == requirement.RequiredPlan && subscription.IsActive)
+        {
+            context.Succeed(requirement);
+        }
+        else
+        {
+            context.Fail();
+        }
+    }
+}
+```
+
+### 🛡️ Advanced Middleware Pipeline
+
+#### Custom Request/Response Middleware
+```csharp
+public class RequestResponseLoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<RequestResponseLoggingMiddleware> _logger;
+    
+    public RequestResponseLoggingMiddleware(
+        RequestDelegate next, 
+        ILogger<RequestResponseLoggingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+    
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var correlationId = context.TraceIdentifier;
+        var stopwatch = Stopwatch.StartNew();
+        
+        // Log request
+        await LogRequestAsync(context, correlationId);
+        
+        // Capture response
+        var originalBodyStream = context.Response.Body;
+        using var responseBody = new MemoryStream();
+        context.Response.Body = responseBody;
+        
+        try
+        {
+            await _next(context);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            
+            // Log response
+            await LogResponseAsync(context, correlationId, stopwatch.ElapsedMilliseconds);
+            
+            // Copy response back
+            responseBody.Seek(0, SeekOrigin.Begin);
+            await responseBody.CopyToAsync(originalBodyStream);
+        }
+    }
+    
+    private async Task LogRequestAsync(HttpContext context, string correlationId)
+    {
+        var request = context.Request;
+        var requestBody = "";
+        
+        if (request.ContentLength > 0 && request.ContentType?.Contains("application/json") == true)
+        {
+            request.EnableBuffering();
+            requestBody = await new StreamReader(request.Body).ReadToEndAsync();
+            request.Body.Position = 0;
+        }
+        
+        _logger.LogInformation(
+            "HTTP Request: {Method} {Path} | CorrelationId: {CorrelationId} | Body: {Body}",
+            request.Method, request.Path, correlationId, requestBody);
+    }
+    
+    private async Task LogResponseAsync(HttpContext context, string correlationId, long elapsed)
+    {
+        var response = context.Response;
+        response.Body.Seek(0, SeekOrigin.Begin);
+        var responseBody = await new StreamReader(response.Body).ReadToEndAsync();
+        response.Body.Seek(0, SeekOrigin.Begin);
+        
+        _logger.LogInformation(
+            "HTTP Response: {StatusCode} | CorrelationId: {CorrelationId} | Elapsed: {Elapsed}ms | Body: {Body}",
+            response.StatusCode, correlationId, elapsed, responseBody);
+    }
+}
+```
+
+### 📊 Advanced Health Checks
+
+#### Custom Health Check Implementation
+```csharp
+public class DatabaseConnectionHealthCheck : IHealthCheck
+{
+    private readonly IDbContext _dbContext;
+    private readonly ILogger<DatabaseConnectionHealthCheck> _logger;
+    
+    public DatabaseConnectionHealthCheck(IDbContext dbContext, ILogger<DatabaseConnectionHealthCheck> logger)
+    {
+        _dbContext = dbContext;
+        _logger = logger;
+    }
+    
+    public async Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Test database connectivity
+            var canConnect = await _dbContext.Database.CanConnectAsync(cancellationToken);
+            if (!canConnect)
+            {
+                return HealthCheckResult.Unhealthy("Cannot connect to database");
+            }
+            
+            // Test query performance
+            var stopwatch = Stopwatch.StartNew();
+            await _dbContext.Database.ExecuteSqlRawAsync("SELECT 1", cancellationToken);
+            stopwatch.Stop();
+            
+            var data = new Dictionary<string, object>
+            {
+                { "connection_time_ms", stopwatch.ElapsedMilliseconds },
+                { "database_provider", _dbContext.Database.ProviderName }
+            };
+            
+            return stopwatch.ElapsedMilliseconds < 1000
+                ? HealthCheckResult.Healthy("Database is healthy", data)
+                : HealthCheckResult.Degraded("Database response is slow", null, data);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database health check failed");
+            return HealthCheckResult.Unhealthy("Database health check failed", ex);
+        }
+    }
+}
+```
+
+### 💯 Advanced Validation Patterns
+
+#### Complex FluentValidation Rules
+```csharp
+public class CreateOrderValidator : AbstractValidator<CreateOrderRequest>
+{
+    private readonly IProductService _productService;
+    private readonly ICustomerService _customerService;
+    
+    public CreateOrderValidator(IProductService productService, ICustomerService customerService)
+    {
+        _productService = productService;
+        _customerService = customerService;
+        
+        RuleFor(x => x.CustomerId)
+            .NotEmpty()
+            .MustAsync(CustomerExists)
+            .WithMessage("Customer does not exist")
+            .MustAsync(CustomerIsActive)
+            .WithMessage("Customer account is inactive");
+            
+        RuleFor(x => x.Items)
+            .NotEmpty()
+            .WithMessage("Order must contain at least one item")
+            .Must(x => x.Count <= 50)
+            .WithMessage("Order cannot contain more than 50 items");
+            
+        RuleForEach(x => x.Items)
+            .SetValidator(new OrderItemValidator(_productService));
+            
+        RuleFor(x => x.ShippingAddress)
+            .NotNull()
+            .SetValidator(new AddressValidator());
+            
+        // Business rules
+        RuleFor(x => x)
+            .MustAsync(ValidateOrderTotalAsync)
+            .WithMessage("Order total calculation is invalid")
+            .MustAsync(ValidateInventoryAsync)
+            .WithMessage("Insufficient inventory for one or more items");
+    }
+    
+    private async Task<bool> CustomerExists(Guid customerId, CancellationToken cancellationToken)
+    {
+        return await _customerService.ExistsAsync(customerId, cancellationToken);
+    }
+    
+    private async Task<bool> CustomerIsActive(Guid customerId, CancellationToken cancellationToken)
+    {
+        var customer = await _customerService.GetByIdAsync(customerId, cancellationToken);
+        return customer?.IsActive == true;
+    }
+    
+    private async Task<bool> ValidateOrderTotalAsync(CreateOrderRequest request, CancellationToken cancellationToken)
+    {
+        var calculatedTotal = 0m;
+        foreach (var item in request.Items)
+        {
+            var product = await _productService.GetByIdAsync(item.ProductId, cancellationToken);
+            calculatedTotal += product.Price * item.Quantity;
+        }
+        
+        return Math.Abs(calculatedTotal - request.Total) < 0.01m;
     }
 }
 ```
