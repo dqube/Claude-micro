@@ -1,0 +1,1 @@
+// StronglyTypedIdIntegrationTests will be implemented here

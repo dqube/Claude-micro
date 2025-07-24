@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API\AuthService.API.csproj" />
+    <ProjectReference Include="..\Application\AuthService.Application.csproj" />
+    <ProjectReference Include="..\Domain\AuthService.Domain.csproj" />
+    <ProjectReference Include="..\Infrastructure\AuthService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

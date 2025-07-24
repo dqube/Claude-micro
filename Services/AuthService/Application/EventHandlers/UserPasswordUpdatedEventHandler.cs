@@ -1,0 +1,1 @@
+// UserPasswordUpdatedEventHandler will be implemented here

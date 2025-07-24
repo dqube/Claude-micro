@@ -1,0 +1,1 @@
+// RegistrationTokenDto will be implemented here

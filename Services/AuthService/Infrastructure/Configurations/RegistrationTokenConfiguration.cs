@@ -1,0 +1,1 @@
+// RegistrationTokenConfiguration will be implemented here

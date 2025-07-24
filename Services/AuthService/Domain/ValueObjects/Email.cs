@@ -1,0 +1,1 @@
+// Using BuildingBlocks.Domain.Common.Email directly - no need for a wrapper

@@ -1,0 +1,1 @@
+// RoleConfiguration will be implemented here

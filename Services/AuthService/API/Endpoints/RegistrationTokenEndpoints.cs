@@ -1,0 +1,1 @@
+// RegistrationToken endpoints will be implemented here
