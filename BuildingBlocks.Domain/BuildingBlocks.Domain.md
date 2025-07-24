@@ -1,3 +1,4 @@
+```markdown
 BuildingBlocks.Domain/
 ├── Entities/
 │   ├── Entity.cs
@@ -51,3 +52,4 @@ BuildingBlocks.Domain/
 │   └── PhoneNumber.cs
 └── Extensions/
     └── DomainExtensions.cs
+```
