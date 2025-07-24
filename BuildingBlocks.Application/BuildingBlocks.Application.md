@@ -1,4 +1,4 @@
-# BuildingBlocks.Application
+# BuildingBlocks.Application - Library Structure
 
 A comprehensive application layer building blocks library for .NET applications following Clean Architecture principles with CQRS, Event Sourcing, and Domain-Driven Design patterns.
 
@@ -6,119 +6,208 @@ A comprehensive application layer building blocks library for .NET applications 
 
 This library provides the essential application layer components for building robust, scalable applications using:
 
-- **CQRS Pattern**: Command Query Responsibility Segregation
-- **Event-Driven Architecture**: Domain and integration events
+- **CQRS Pattern**: Command Query Responsibility Segregation with mediator
+- **Event-Driven Architecture**: Domain and integration events with reliable processing
 - **Pipeline Behaviors**: Cross-cutting concerns (logging, validation, caching, etc.)
-- **Inbox/Outbox Pattern**: Reliable message processing
+- **Inbox/Outbox Pattern**: Reliable message processing with exactly-once delivery
+- **Saga Pattern**: Long-running process orchestration with compensation
 - **Clean Architecture**: Separation of concerns and dependency inversion
 
-## 📁 Project Structure
+## Directory Structure
 
 ```
 BuildingBlocks.Application/
-├── 📁 CQRS/                          # Command Query Responsibility Segregation
-│   ├── 📁 Commands/                  # Command handling components
-│   │   ├── ICommand.cs               # Command marker interface
-│   │   ├── ICommandHandler.cs        # Command handler interfaces
-│   │   └── CommandBase.cs            # Base command implementation
-│   ├── 📁 Queries/                   # Query handling components
-│   │   ├── IQuery.cs                 # Query interfaces
-│   │   ├── IQueryHandler.cs          # Query handler interfaces
-│   │   ├── QueryBase.cs              # Base query implementation
-│   │   ├── PagedQuery.cs             # Pagination support
-│   │   ├── PagedResult.cs            # Paged results
-│   │   └── SortingQuery.cs           # Sorting support
-│   ├── 📁 Events/                    # Event handling components
-│   │   ├── IEvent.cs                 # Event marker interface
-│   │   ├── IEventHandler.cs          # Event handler interfaces
-│   │   ├── IIntegrationEvent.cs      # Integration event interface
-│   │   ├── IntegrationEventBase.cs   # Base integration event
-│   │   └── DomainEventNotification.cs # Domain event notifications
-│   ├── 📁 Messages/                  # Message handling components
-│   │   ├── IMessage.cs               # Message interfaces
-│   │   ├── IStreamMessage.cs         # Stream message interface
-│   │   ├── MessageBase.cs            # Base message implementation
-│   │   └── IMessageContext.cs        # Message context interface
-│   └── 📁 Mediator/                  # Mediator pattern implementation
-│       ├── IMediator.cs              # Mediator interface
-│       └── Mediator.cs               # Mediator implementation
-├── 📁 Behaviors/                     # Pipeline behaviors for cross-cutting concerns
-│   ├── IPipelineBehavior.cs          # Pipeline behavior interface
-│   ├── LoggingBehavior.cs            # Request/response logging
-│   ├── ValidationBehavior.cs         # Request validation
-│   ├── CachingBehavior.cs            # Response caching
-│   ├── TransactionBehavior.cs        # Database transactions
-│   ├── PerformanceBehavior.cs        # Performance monitoring
-│   └── RetryBehavior.cs              # Retry policies
-├── 📁 Services/                      # Application services
-│   ├── IApplicationService.cs        # Application service interface
-│   ├── ApplicationServiceBase.cs     # Base application service
-│   ├── IDomainEventService.cs        # Domain event service interface
-│   ├── DomainEventService.cs         # Domain event service implementation
-│   ├── OutboxBackgroundService.cs   # Outbox message processing
-│   └── InboxBackgroundService.cs    # Inbox message processing
-├── 📁 Validation/                    # Validation components
-│   ├── IValidator.cs                 # Validator interface
-│   ├── IValidationRule.cs            # Validation rule interface
-│   ├── ValidationResult.cs           # Validation result
-│   ├── ValidationError.cs            # Validation error
-│   ├── CompositeValidator.cs         # Composite validation
-│   └── ValidatorBase.cs              # Base validator
-├── 📁 Caching/                       # Caching abstractions
-│   ├── ICacheService.cs              # Cache service interface
-│   ├── ICacheKey.cs                  # Cache key interface
-│   ├── CacheKey.cs                   # Cache key implementation
-│   ├── CacheSettings.cs              # Cache configuration
-│   └── CachePolicy.cs                # Cache policies
-├── 📁 Messaging/                     # Message bus and event bus
-│   ├── IMessageBus.cs                # Message bus interface
-│   ├── IEventBus.cs                  # Event bus interface
-│   ├── IMessageHandler.cs            # Message handler interface
-│   ├── IMessagePublisher.cs          # Message publisher interface
-│   └── MessageMetadata.cs            # Message metadata
-├── 📁 DTOs/                          # Data Transfer Objects
-│   ├── BaseDto.cs                    # Base DTO
-│   ├── AuditableDto.cs               # Auditable DTO
-│   └── PagedDto.cs                   # Paged DTO
-├── 📁 Mapping/                       # Object mapping abstractions
-│   ├── IMapper.cs                    # Mapper interface
-│   ├── IMappingProfile.cs            # Mapping profile interface
-│   └── MapperBase.cs                 # Base mapper
-├── 📁 Security/                      # Security and authorization
-│   ├── ICurrentUserService.cs        # Current user service
-│   ├── IPermissionService.cs         # Permission service
-│   ├── UserContext.cs                # User context
-│   └── SecurityContext.cs            # Security context
-├── 📁 Inbox/                         # Inbox pattern implementation
-│   ├── IInboxService.cs              # Inbox service interface
-│   ├── InboxMessage.cs               # Inbox message entity
-│   ├── InboxMessageStatus.cs         # Message status enum
-│   ├── IInboxProcessor.cs            # Inbox processor interface
-│   └── InboxProcessor.cs             # Inbox processor implementation
-├── 📁 Outbox/                        # Outbox pattern implementation
-│   ├── IOutboxService.cs             # Outbox service interface
-│   ├── OutboxMessage.cs              # Outbox message entity
-│   ├── OutboxMessageStatus.cs        # Message status enum
-│   ├── IOutboxProcessor.cs           # Outbox processor interface
-│   └── OutboxProcessor.cs            # Outbox processor implementation
-├── 📁 Dispatchers/                   # Message dispatchers
-│   ├── ICommandDispatcher.cs         # Command dispatcher interface
-│   ├── CommandDispatcher.cs          # Command dispatcher implementation
-│   ├── IQueryDispatcher.cs           # Query dispatcher interface
-│   ├── QueryDispatcher.cs            # Query dispatcher implementation
-│   ├── IEventDispatcher.cs           # Event dispatcher interface
-│   ├── EventDispatcher.cs            # Event dispatcher implementation
-│   ├── IMessageDispatcher.cs         # Message dispatcher interface
-│   └── MessageDispatcher.cs          # Message dispatcher implementation
-├── 📁 Sagas/                         # Saga pattern implementation
-│   ├── ISaga.cs                      # Saga interface
-│   ├── SagaBase.cs                   # Base saga implementation
-│   └── ISagaManager.cs               # Saga manager interface
-└── 📁 Extensions/                    # Dependency injection extensions
-    ├── ServiceCollectionExtensions.cs # Service collection extensions
-    ├── ApplicationExtensions.cs       # Application extensions
-    └── MediatorExtensions.cs          # Mediator registration extensions
+├── Behaviors/                                  # Pipeline behaviors for cross-cutting concerns
+│   ├── CachingBehavior.cs                     # Response caching with policy support
+│   ├── IPipelineBehavior.cs                   # Base pipeline behavior interface
+│   ├── LoggingBehavior.cs                     # Request/response logging with performance metrics
+│   ├── PerformanceBehavior.cs                 # Execution time monitoring with thresholds
+│   ├── RetryBehavior.cs                       # Configurable retry mechanisms with backoff
+│   ├── TransactionBehavior.cs                 # Automatic transaction management
+│   └── ValidationBehavior.cs                  # Request validation with error aggregation
+├── Caching/                                   # Advanced caching infrastructure
+│   ├── CacheKey.cs                            # Structured cache key implementation
+│   ├── CachePolicy.cs                         # Cache expiration and priority policies
+│   ├── CacheSettings.cs                       # Configurable cache settings
+│   ├── ICacheKey.cs                           # Cache key abstraction interface
+│   └── ICacheService.cs                       # Cache service abstraction
+├── CQRS/                                      # Command Query Responsibility Segregation
+│   ├── Commands/                              # Command handling components
+│   │   ├── CommandBase.cs                     # Base command with common properties
+│   │   ├── ICommand.cs                        # Command interfaces (void and with result)
+│   │   └── ICommandHandler.cs                 # Command handler interfaces
+│   ├── Events/                                # Event handling components
+│   │   ├── DomainEventNotification.cs         # Domain event notification wrapper
+│   │   ├── IEvent.cs                          # Event marker interface
+│   │   ├── IEventHandler.cs                   # Event handler interface
+│   │   ├── IIntegrationEvent.cs               # Integration event marker interface
+│   │   └── IntegrationEventBase.cs            # Base integration event with metadata
+│   ├── Mediator/                              # Mediator pattern implementation
+│   │   ├── IMediator.cs                       # Mediator interface for request routing
+│   │   └── Mediator.cs                        # Mediator implementation with pipeline support
+│   ├── Messages/                              # Message handling components
+│   │   ├── IMessage.cs                        # Base message interface
+│   │   ├── IMessageContext.cs                 # Message context for metadata
+│   │   ├── IStreamMessage.cs                  # Streaming message interface
+│   │   └── MessageBase.cs                     # Base message implementation
+│   └── Queries/                               # Query handling components
+│       ├── IQuery.cs                          # Query interface with required response
+│       ├── IQueryHandler.cs                   # Query handler interface
+│       ├── PagedQuery.cs                      # Base paged query with sorting
+│       ├── PagedResult.cs                     # Paged result container
+│       ├── QueryBase.cs                       # Base query with common properties
+│       └── SortingQuery.cs                    # Sorting query base with direction
+├── Dispatchers/                               # Dedicated message dispatchers
+│   ├── CommandDispatcher.cs                   # Command dispatching implementation
+│   ├── EventDispatcher.cs                     # Event dispatching implementation
+│   ├── ICommandDispatcher.cs                  # Command dispatcher interface
+│   ├── IEventDispatcher.cs                    # Event dispatcher interface
+│   ├── IMessageDispatcher.cs                  # Generic message dispatcher interface
+│   ├── IQueryDispatcher.cs                    # Query dispatcher interface
+│   ├── MessageDispatcher.cs                   # Generic message dispatching implementation
+│   └── QueryDispatcher.cs                     # Query dispatching implementation
+├── DTOs/                                      # Data Transfer Objects
+│   ├── AuditableDto.cs                        # Base DTO with audit fields
+│   ├── BaseDto.cs                             # Base DTO with common properties
+│   └── PagedDto.cs                            # Base paged DTO
+├── Extensions/                                # Dependency injection and configuration extensions
+│   ├── ApplicationExtensions.cs               # Application-wide extension methods
+│   ├── MediatorExtensions.cs                  # Mediator registration extensions
+│   └── ServiceCollectionExtensions.cs         # Service collection registration extensions
+├── Inbox/                                     # Inbox pattern for reliable message processing
+│   ├── IInboxMessageHandler.cs                # Inbox message handler interface
+│   ├── IInboxProcessor.cs                     # Inbox processor interface
+│   ├── IInboxService.cs                       # Inbox service interface
+│   ├── InboxMessage.cs                        # Inbox message entity
+│   ├── InboxMessageStatus.cs                  # Message processing status enumeration
+│   └── InboxProcessor.cs                      # Inbox processor implementation
+├── Mapping/                                   # Object mapping abstractions
+│   ├── IMapper.cs                             # Mapper interface with async support
+│   ├── IMappingProfile.cs                     # Mapping profile interface
+│   └── MapperBase.cs                          # Base mapper implementation
+├── Messaging/                                 # Message bus and event bus infrastructure
+│   ├── IEventBus.cs                           # Event bus interface for domain/integration events
+│   ├── IMessageBus.cs                         # Generic message bus interface
+│   ├── IMessageHandler.cs                     # Message handler interface
+│   ├── IMessagePublisher.cs                   # Message publisher interface
+│   └── MessageMetadata.cs                     # Message metadata container
+├── Outbox/                                    # Outbox pattern for reliable message publishing
+│   ├── IOutboxProcessor.cs                    # Outbox processor interface
+│   ├── IOutboxService.cs                      # Outbox service interface
+│   ├── OutboxMessage.cs                       # Outbox message entity
+│   ├── OutboxMessageStatus.cs                 # Message publishing status enumeration
+│   └── OutboxProcessor.cs                     # Outbox processor implementation
+├── Sagas/                                     # Saga pattern for long-running processes
+│   ├── ISaga.cs                               # Saga interface
+│   ├── ISagaOrchestrator.cs                   # Saga orchestrator interface
+│   ├── ISagaRepository.cs                     # Saga repository interface
+│   ├── SagaBase.cs                            # Base saga implementation with compensation
+│   ├── SagaExtensions.cs                      # Saga helper extensions
+│   └── SagaStep.cs                            # Individual saga step definition
+├── Security/                                  # Security and authorization components
+│   ├── ICurrentUserService.cs                 # Current user service interface
+│   ├── IPermissionService.cs                  # Permission service interface
+│   ├── SecurityContext.cs                     # Security context with multi-tenant support
+│   └── UserContext.cs                         # User context with roles and organization
+├── Services/                                  # Application services and background processing
+│   ├── ApplicationServiceBase.cs              # Base application service with common functionality
+│   ├── DomainEventService.cs                  # Domain event publishing service
+│   ├── IApplicationService.cs                 # Application service interface
+│   ├── IDomainEventService.cs                 # Domain event service interface
+│   ├── InboxBackgroundService.cs              # Hosted service for inbox processing
+│   └── OutboxBackgroundService.cs             # Hosted service for outbox processing
+├── Validation/                                # Validation framework
+│   ├── CompositeValidator.cs                  # Composite validator for multiple rules
+│   ├── IValidationRule.cs                     # Validation rule interface
+│   ├── IValidator.cs                          # Validator interface
+│   ├── ValidationResult.cs                    # Validation result with errors
+│   └── ValidatorBase.cs                       # Base validator implementation
+├── BuildingBlocks.Application.csproj          # Project file
+├── BuildingBlocks.Application.md              # This structure documentation file
+└── README.md                                  # Comprehensive usage documentation
 ```
+
+## Component Categories
+
+### 🏗️ CQRS Infrastructure
+- **Commands/**: Write operations with handlers and base classes
+- **Queries/**: Read operations with pagination, sorting, and filtering
+- **Events/**: Domain and integration event handling
+- **Messages/**: Generic message handling with streaming support
+- **Mediator/**: Central request routing with pipeline orchestration
+
+### 🔄 Cross-Cutting Concerns
+- **Behaviors/**: Pipeline behaviors for logging, validation, caching, retry, performance, transactions
+- **Validation/**: Rule-based validation framework with composite support
+- **Caching/**: Advanced caching with policies, keys, and invalidation strategies
+- **Security/**: User context, permissions, and multi-tenant security
+
+### 📨 Messaging & Reliability
+- **Inbox/**: Reliable message processing with exactly-once delivery
+- **Outbox/**: Transactional message publishing with background processing
+- **Messaging/**: Event bus and message bus abstractions
+- **Dispatchers/**: Dedicated dispatchers for different message types
+
+### 🔄 Process Orchestration
+- **Sagas/**: Long-running process management with compensation
+- **Services/**: Application services and background processing
+- **Background Services**: Continuous processing for inbox/outbox
+
+### 🔧 Infrastructure Support
+- **DTOs/**: Data transfer objects with audit support
+- **Mapping/**: Object mapping abstractions
+- **Extensions/**: Dependency injection and configuration helpers
+
+## Key Features by Directory
+
+### Behaviors/
+- **Pipeline Processing**: Cross-cutting concerns applied automatically to all requests
+- **Configurable Behaviors**: Enable/disable behaviors based on configuration
+- **Performance Monitoring**: Track execution times with configurable thresholds
+- **Intelligent Caching**: Cache responses based on query types and policies
+- **Automatic Validation**: Validate requests before processing
+- **Retry Logic**: Configurable retry with exponential backoff
+- **Transaction Management**: Automatic transaction handling for commands
+
+### CQRS/
+- **Command Handling**: Support for commands with and without results
+- **Query Processing**: Read operations with pagination and sorting
+- **Event Processing**: Domain and integration event handling
+- **Mediator Pattern**: Central request routing with pipeline support
+- **Message Abstraction**: Generic message handling framework
+
+### Caching/
+- **Policy-Based Caching**: Flexible caching policies with TTL and sliding expiration
+- **Hierarchical Keys**: Structured cache keys with tagging support
+- **Invalidation Strategies**: Tag-based and key-based cache invalidation
+- **Configuration Support**: Environment-specific cache settings
+
+### Inbox/Outbox/
+- **Exactly-Once Processing**: Ensures messages are processed only once
+- **Transactional Publishing**: Messages published as part of database transactions
+- **Background Processing**: Continuous processing with configurable intervals
+- **Error Handling**: Dead letter queues and retry mechanisms
+- **Status Tracking**: Complete message lifecycle tracking
+
+### Sagas/
+- **Process Orchestration**: Coordinate multiple services in distributed transactions
+- **Compensation Logic**: Automatic rollback of completed steps on failure
+- **State Management**: Persistent saga state with recovery support
+- **Step Definition**: Declarative step definition with execute/compensate actions
+
+### Security/
+- **User Context**: Current user information with roles and permissions
+- **Multi-Tenant Support**: Organization and tenant-aware security
+- **Permission System**: Role-based and attribute-based authorization
+- **Security Context**: Centralized security information management
+
+### Validation/
+- **Rule-Based Validation**: Composable validation rules
+- **Async Validation**: Support for async validation scenarios
+- **Error Aggregation**: Collect multiple validation errors
+- **Composite Validation**: Combine multiple validators
+
+This structure provides a comprehensive foundation for building enterprise applications with modern architectural patterns, ensuring scalability, maintainability, and reliability through proven patterns like CQRS, Event Sourcing, Saga, and Inbox/Outbox.
 
 ## 🚀 Key Features
 
