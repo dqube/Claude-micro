@@ -2,15 +2,30 @@ using BuildingBlocks.Application.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthService.Infrastructure.Configurations;
+namespace BuildingBlocks.Infrastructure.Data.Configurations;
 
 public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {
+    private readonly string? _schemaName;
+
+    public OutboxMessageConfiguration(string? schemaName = null)
+    {
+        _schemaName = schemaName;
+    }
+
     public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("OutboxMessages");
+        // Set table name with optional schema
+        if (!string.IsNullOrEmpty(_schemaName))
+        {
+            builder.ToTable("OutboxMessages", _schemaName);
+        }
+        else
+        {
+            builder.ToTable("OutboxMessages");
+        }
 
         builder.HasKey(x => x.Id);
 

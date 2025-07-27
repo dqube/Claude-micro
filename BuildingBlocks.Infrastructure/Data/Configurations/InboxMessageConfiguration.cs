@@ -2,15 +2,30 @@ using BuildingBlocks.Application.Inbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthService.Infrastructure.Configurations;
+namespace BuildingBlocks.Infrastructure.Data.Configurations;
 
 public class InboxMessageConfiguration : IEntityTypeConfiguration<InboxMessage>
 {
+    private readonly string? _schemaName;
+
+    public InboxMessageConfiguration(string? schemaName = null)
+    {
+        _schemaName = schemaName;
+    }
+
     public void Configure(EntityTypeBuilder<InboxMessage> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("InboxMessages");
+        // Set table name with optional schema
+        if (!string.IsNullOrEmpty(_schemaName))
+        {
+            builder.ToTable("InboxMessages", _schemaName);
+        }
+        else
+        {
+            builder.ToTable("InboxMessages");
+        }
 
         builder.HasKey(x => x.Id);
 

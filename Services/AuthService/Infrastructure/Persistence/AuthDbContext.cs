@@ -1,5 +1,6 @@
 using BuildingBlocks.Infrastructure.Data.Converters;
 using BuildingBlocks.Infrastructure.Data.Context;
+using BuildingBlocks.Infrastructure.Extensions;
 using BuildingBlocks.Application.Inbox;
 using BuildingBlocks.Application.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -42,9 +43,8 @@ public class AuthDbContext : DbContext, IDbContext
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationTokenConfiguration());
         
-        // Apply inbox/outbox configurations
-        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
-        modelBuilder.ApplyConfiguration(new InboxMessageConfiguration());
+        // Apply inbox/outbox configurations - use auth schema
+        modelBuilder.ConfigureInboxOutbox("auth");
 
         // Configure all strongly typed IDs automatically
         modelBuilder.ConfigureStronglyTypedIds();

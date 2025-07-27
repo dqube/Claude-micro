@@ -31,6 +31,7 @@ public static class DependencyInjection
             }
         });
 
+        // Register ContactService-specific repositories and services
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IRepository<Contact, ContactId>, ContactRepository>();
         services.AddScoped<IReadOnlyRepository<Contact, ContactId>, ContactRepository>();
