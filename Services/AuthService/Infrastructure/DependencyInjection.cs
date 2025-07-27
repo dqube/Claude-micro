@@ -1,7 +1,10 @@
 using BuildingBlocks.Domain.Repository;
 using BuildingBlocks.Infrastructure.Data.Converters;
+using BuildingBlocks.Infrastructure.Extensions;
 using BuildingBlocks.Application.Outbox;
 using BuildingBlocks.Application.Inbox;
+using BuildingBlocksInboxService = BuildingBlocks.Infrastructure.Services.InboxService;
+using BuildingBlocksOutboxService = BuildingBlocks.Infrastructure.Services.OutboxService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +38,9 @@ public static class DependencyInjection
                 options.UseInMemoryDatabase("AuthServiceDb");
             }
         });
+        
+        // Register AuthDbContext as IDbContext for BuildingBlocks services
+        services.AddScoped<BuildingBlocks.Infrastructure.Data.Context.IDbContext, AuthDbContext>();
 
         // Register User Repository
         services.AddScoped<IUserRepository, UserRepository>();
@@ -59,7 +65,12 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Register Inbox/Outbox services
+        // Register only the specific BuildingBlocks services we need
+        // (avoiding conflicts with DbContext registration)
+        services.AddScoped<IInboxService, BuildingBlocksInboxService>();
+        services.AddScoped<IOutboxService, BuildingBlocksOutboxService>();
+
+        // Override with AuthService-specific OutboxService if needed
         services.AddScoped<IOutboxService, OutboxService>();
 
         return services;

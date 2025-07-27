@@ -5,6 +5,7 @@ using BuildingBlocks.Application.Validation;
 using BuildingBlocks.Application.Sagas;
 using BuildingBlocks.Application.Inbox;
 using BuildingBlocks.Application.Outbox;
+using BuildingBlocks.Domain.DomainEvents;
 
 namespace BuildingBlocks.Application.Extensions;
 
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
 
         // Register application services
         services.AddScoped<IDomainEventService, DomainEventService>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         // Register saga support
         services.AddSagas();

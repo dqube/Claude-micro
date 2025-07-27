@@ -9,6 +9,9 @@ using BuildingBlocks.Infrastructure.Messaging.MessageBus;
 using BuildingBlocks.Infrastructure.Authentication.JWT;
 using BuildingBlocks.Infrastructure.Storage.Files;
 using BuildingBlocks.Infrastructure.Serialization.Json;
+using BuildingBlocks.Application.Inbox;
+using BuildingBlocks.Application.Outbox;
+using BuildingBlocks.Infrastructure.Services;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
@@ -31,6 +34,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(ReadOnlyRepository<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
+        // Register inbox and outbox services
+        services.AddScoped<IInboxService, InboxService>();
+        services.AddScoped<IOutboxService, OutboxService>();
         
         return services;
     }

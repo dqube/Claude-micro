@@ -2,12 +2,10 @@ using BuildingBlocks.Domain.ValueObjects;
 
 namespace BuildingBlocks.Domain.StronglyTypedIds;
 
-public abstract class StronglyTypedId<T> : IStronglyTypedId, IEquatable<StronglyTypedId<T>>
+public abstract class StronglyTypedId<T> : IStronglyTypedId<T>, IEquatable<StronglyTypedId<T>>
     where T : notnull
 {
     public T Value { get; }
-
-    object IStronglyTypedId.Value => Value;
 
     protected StronglyTypedId(T value)
     {
