@@ -1,13 +1,18 @@
 using BuildingBlocks.Domain.DomainEvents;
 using BuildingBlocks.Infrastructure.Data.Converters;
+using BuildingBlocks.Infrastructure.Data.Context;
+using BuildingBlocks.Infrastructure.Extensions;
+using BuildingBlocks.Application.Inbox;
+using BuildingBlocks.Application.Outbox;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using PatientService.Domain.Entities;
 using PatientService.Domain.ValueObjects;
 using PatientService.Infrastructure.Configurations;
 
 namespace PatientService.Infrastructure.Persistence;
 
-public class PatientDbContext : DbContext
+public class PatientDbContext : DbContext, IDbContext
 {
     public PatientDbContext(DbContextOptions<PatientDbContext> options) : base(options)
     {
@@ -15,6 +20,16 @@ public class PatientDbContext : DbContext
     }
 
     public DbSet<Patient> Patients => Set<Patient>();
+    
+    // Inbox/Outbox pattern tables
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+
+    // IDbContext implementation
+    public DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class
+    {
+        return Set<TEntity>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +37,9 @@ public class PatientDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new PatientConfiguration());
+        
+        // Apply inbox/outbox configurations - use patients schema
+        modelBuilder.ConfigureInboxOutbox("patients");
 
         // Configure all strongly typed IDs automatically
         modelBuilder.ConfigureStronglyTypedIds();
@@ -67,12 +85,20 @@ public class PatientDbContext : DbContext
 
         domainEntities.ForEach(entity => entity.ClearDomainEvents());
 
+        // Save domain events to outbox for eventual consistency
         foreach (var domainEvent in domainEvents)
         {
-            // Here you would publish the domain event using your preferred method
-            // For example, using MediatR or a service bus
-            // await _mediator.Publish(domainEvent, cancellationToken);
-            await Task.CompletedTask;
+            var eventTypeName = domainEvent.GetType().Name;
+            var eventPayload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType());
+            
+            var outboxMessage = new OutboxMessage(
+                messageType: eventTypeName,
+                payload: eventPayload,
+                destination: "PatientService.DomainEvents",
+                correlationId: domainEvent.Id.ToString()
+            );
+            
+            await OutboxMessages.AddAsync(outboxMessage, cancellationToken);
         }
     }
 }
