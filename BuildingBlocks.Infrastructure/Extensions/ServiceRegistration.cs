@@ -17,6 +17,7 @@ using BuildingBlocks.Infrastructure.Storage.Files;
 using BuildingBlocks.Infrastructure.Serialization.Json;
 using BuildingBlocks.Infrastructure.Configuration;
 using BuildingBlocks.Infrastructure.Logging;
+using BuildingBlocks.Infrastructure.OpenTelemetry;
 using BuildingBlocks.Application.Services;
 using StackExchange.Redis;
 
@@ -36,6 +37,7 @@ public static class ServiceRegistration
         services.AddSerializationServices();
         services.AddConfigurationServices();
         services.AddLoggingServices();
+        services.AddOpenTelemetryConfiguration(configuration);
 
         return services;
     }
