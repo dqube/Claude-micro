@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using BuildingBlocks.Application.Extensions;
+using FluentValidation;
 using System.Reflection;
 
 namespace AuthService.Application;
@@ -15,6 +16,9 @@ public static class DependencyInjection
         
         // Register BuildingBlocks application layer services (includes inbox/outbox support)
         services.AddApplicationLayer();
+        
+        // Register FluentValidation validators
+        services.AddValidatorsFromAssembly(assembly);
         
         return services;
     }

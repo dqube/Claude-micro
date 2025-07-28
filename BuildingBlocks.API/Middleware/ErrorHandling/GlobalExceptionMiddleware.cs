@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using BuildingBlocks.API.Responses.Base;
+using BuildingBlocks.Application.Behaviors;
+using BuildingBlocks.Domain.Exceptions;
 using System.Net;
 using System.Text.Json;
 
@@ -54,6 +56,21 @@ public class GlobalExceptionMiddleware
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleExceptionAsync(context, ex);
         }
+        catch (ValidationException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleValidationExceptionAsync(context, ex);
+        }
+        catch (FluentValidationException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleFluentValidationExceptionAsync(context, ex);
+        }
+        catch (BusinessRuleValidationException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleBusinessRuleExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
@@ -65,44 +82,100 @@ public class GlobalExceptionMiddleware
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var response = context.Response;
-        response.ContentType = "application/json";
+        response.ContentType = "application/problem+json";
 
-        var errorResponse = new ErrorResponse
+        var (statusCode, title, detail) = exception switch
         {
-            Success = false,
-            CorrelationId = context.TraceIdentifier,
-            Timestamp = DateTime.UtcNow
+            ArgumentException => ((int)HttpStatusCode.BadRequest, "Bad Request", exception.Message),
+            UnauthorizedAccessException => ((int)HttpStatusCode.Unauthorized, "Unauthorized", "Unauthorized access"),
+            NotImplementedException => ((int)HttpStatusCode.NotImplemented, "Not Implemented", "Feature not implemented"),
+            TimeoutException => ((int)HttpStatusCode.RequestTimeout, "Request Timeout", "Request timeout"),
+            _ => ((int)HttpStatusCode.InternalServerError, "Internal Server Error", "An internal server error occurred")
         };
 
-        switch (exception)
+        response.StatusCode = statusCode;
+
+        var problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+            context,
+            statusCode,
+            title,
+            detail: detail);
+
+        var jsonResponse = JsonSerializer.Serialize(problemDetails, _jsonOptions);
+        await response.WriteAsync(jsonResponse);
+    }
+
+    private static async Task HandleValidationExceptionAsync(HttpContext context, ValidationException validationException)
+    {
+        var response = context.Response;
+        response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.ContentType = "application/problem+json";
+
+        // Convert validation errors to the format expected by ValidationProblemDetails
+        var errors = validationException.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray());
+
+        var problemDetails = ProblemDetailsFactory.CreateValidationProblemDetails(
+            context,
+            errors,
+            (int)HttpStatusCode.BadRequest,
+            "One or more validation errors occurred.",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            "The request contained invalid data.");
+
+        var jsonResponse = JsonSerializer.Serialize(problemDetails, _jsonOptions);
+        await response.WriteAsync(jsonResponse);
+    }
+
+    private static async Task HandleBusinessRuleExceptionAsync(HttpContext context, BusinessRuleValidationException businessRuleException)
+    {
+        var response = context.Response;
+        response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.ContentType = "application/problem+json";
+
+        var problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+            context,
+            (int)HttpStatusCode.BadRequest,
+            "Business Rule Violation",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            businessRuleException.Message);
+
+        // Add business rule specific information
+        if (businessRuleException.BrokenRule != null)
         {
-            case ArgumentException:
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-                errorResponse.Message = exception.Message;
-                break;
-
-            case UnauthorizedAccessException:
-                response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                errorResponse.Message = "Unauthorized access";
-                break;
-
-            case NotImplementedException:
-                response.StatusCode = (int)HttpStatusCode.NotImplemented;
-                errorResponse.Message = "Feature not implemented";
-                break;
-
-            case TimeoutException:
-                response.StatusCode = (int)HttpStatusCode.RequestTimeout;
-                errorResponse.Message = "Request timeout";
-                break;
-
-            default:
-                response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                errorResponse.Message = "An internal server error occurred";
-                break;
+            problemDetails.Extensions["businessRule"] = businessRuleException.BrokenRule.GetType().Name;
+            problemDetails.Extensions["ruleMessage"] = businessRuleException.BrokenRule.Message;
         }
 
-        var jsonResponse = JsonSerializer.Serialize(errorResponse, _jsonOptions);
+        var jsonResponse = JsonSerializer.Serialize(problemDetails, _jsonOptions);
+        await response.WriteAsync(jsonResponse);
+    }
+
+    private static async Task HandleFluentValidationExceptionAsync(HttpContext context, FluentValidationException fluentValidationException)
+    {
+        var response = context.Response;
+        response.StatusCode = (int)HttpStatusCode.BadRequest;
+        response.ContentType = "application/problem+json";
+
+        // Convert FluentValidation errors to the format expected by ValidationProblemDetails
+        var errors = fluentValidationException.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray());
+
+        var problemDetails = ProblemDetailsFactory.CreateValidationProblemDetails(
+            context,
+            errors,
+            (int)HttpStatusCode.BadRequest,
+            "One or more validation errors occurred.",
+            "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            "The request contained invalid data.");
+
+        var jsonResponse = JsonSerializer.Serialize(problemDetails, _jsonOptions);
         await response.WriteAsync(jsonResponse);
     }
 }
