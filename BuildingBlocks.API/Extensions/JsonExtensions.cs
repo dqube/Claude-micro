@@ -1,4 +1,5 @@
 using BuildingBlocks.API.Converters;
+using BuildingBlocks.Domain.StronglyTypedIds.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -32,6 +33,9 @@ public static class JsonExtensions
             options.SerializerOptions.Converters.Add(new CustomGuidConverter());
             options.SerializerOptions.Converters.Add(new CustomDecimalConverter());
             options.SerializerOptions.Converters.Add(new CustomJsonStringEnumConverter());
+            
+            // Add StronglyTypedId converter factory
+            options.SerializerOptions.Converters.Add(new StronglyTypedIdJsonConverterFactory());
         });
 
         return services;
@@ -58,6 +62,9 @@ public static class JsonExtensions
         options.Converters.Add(new CustomGuidConverter());
         options.Converters.Add(new CustomDecimalConverter());
         options.Converters.Add(new CustomJsonStringEnumConverter());
+        
+        // Add StronglyTypedId converter factory
+        options.Converters.Add(new StronglyTypedIdJsonConverterFactory());
         
         return options;
     }
