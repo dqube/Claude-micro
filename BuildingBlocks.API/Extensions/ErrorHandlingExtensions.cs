@@ -96,14 +96,9 @@ public static class ErrorHandlingExtensions
     public static WebApplication UseDevelopmentErrorHandling(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
-        else
-        {
+       
             app.UseApiErrorHandling();
-        }
+        
 
         return app;
     }

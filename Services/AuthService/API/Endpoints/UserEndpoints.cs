@@ -252,7 +252,7 @@ internal static class UserEndpoints
 }
 
 // Request DTOs
-internal record GetUsersRequest(
+internal sealed record GetUsersRequest(
     [property: JsonPropertyName("page")] int Page = 1,
     [property: JsonPropertyName("pageSize")] int PageSize = 10,
     [property: JsonPropertyName("searchTerm")] string? SearchTerm = null,
@@ -260,13 +260,13 @@ internal record GetUsersRequest(
     [property: JsonPropertyName("isLocked")] bool? IsLocked = null
 );
 
-internal record CreateUserRequest(
+internal sealed record UpdatePasswordRequest(
+    [property: JsonPropertyName("newPassword")] string NewPassword
+);
+
+internal sealed record CreateUserRequest(
     [property: JsonPropertyName("username")] string Username,
     [property: JsonPropertyName("email")] string Email,
     [property: JsonPropertyName("password")] string Password,
-    [property: JsonPropertyName("isActive")] bool IsActive = true
-);
-
-internal record UpdatePasswordRequest(
-    [property: JsonPropertyName("newPassword")] string NewPassword
+    [property: JsonPropertyName("isActive")] bool IsActive
 );

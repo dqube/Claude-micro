@@ -26,7 +26,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserD
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // Check if user with email already exists
+        // At this point, FluentValidation has already validated the request
+        // So we can safely create value objects
         var email = new Email(request.Email);
         var username = Username.From(request.Username);
         

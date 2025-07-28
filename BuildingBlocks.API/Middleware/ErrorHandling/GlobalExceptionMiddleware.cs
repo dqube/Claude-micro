@@ -32,12 +32,16 @@ public class GlobalExceptionMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        Console.WriteLine($"GlobalExceptionMiddleware: Processing request to {context.Request.Path}");
         try
         {
             await _next(context);
+            Console.WriteLine($"GlobalExceptionMiddleware: Request completed successfully");
         }
+    
         catch (ArgumentException ex)
         {
+            Console.WriteLine($"GlobalExceptionMiddleware: Caught ArgumentException: {ex.Message}");
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleExceptionAsync(context, ex);
         }
@@ -56,13 +60,14 @@ public class GlobalExceptionMiddleware
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleExceptionAsync(context, ex);
         }
-        catch (ValidationException ex)
-        {
-            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
-            await HandleValidationExceptionAsync(context, ex);
-        }
+        // catch (ValidationException ex)
+        // {
+        //     _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+        //     await HandleValidationExceptionAsync(context, ex);
+        // }
         catch (FluentValidationException ex)
         {
+            Console.WriteLine($"GlobalExceptionMiddleware: Caught FluentValidationException with {ex.Errors.Count} errors");
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleFluentValidationExceptionAsync(context, ex);
         }
