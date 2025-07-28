@@ -1,59 +1,68 @@
-```markdown
+# BuildingBlocks Library Structure
+
+## BuildingBlocks.Domain
+```
 BuildingBlocks.Domain/
-├── Entities/
-│   ├── Entity.cs
-│   ├── AggregateRoot.cs
-│   ├── IAuditableEntity.cs
-│   └── ISoftDeletable.cs
-├── ValueObjects/
-│   ├── ValueObject.cs
-│   ├── SingleValueObject.cs
-│   └── Enumeration.cs
-├── StronglyTypedIds/
-│   ├── IStronglyTypedId.cs
-│   ├── StronglyTypedId.cs
-│   ├── IntId.cs
-│   ├── LongId.cs
-│   ├── GuidId.cs
-│   └── StringId.cs
-├── DomainEvents/
-│   ├── IDomainEvent.cs
-│   ├── IDomainEventDispatcher.cs
-│   ├── DomainEventDispatcher.cs
-│   ├── DomainEventBase.cs
-│   └── IDomainEventHandler.cs
-├── Repository/
-│   ├── IRepository.cs
-│   ├── IReadOnlyRepository.cs
-│   ├── IUnitOfWork.cs
-│   └── RepositoryBase.cs
-├── Specifications/
-│   ├── ISpecification.cs
-│   ├── Specification.cs
-│   ├── AndSpecification.cs
-│   ├── OrSpecification.cs
-│   ├── NotSpecification.cs
-│   └── SpecificationEvaluator.cs
-├── Exceptions/
-│   ├── DomainException.cs
-│   ├── BusinessRuleValidationException.cs
-│   ├── AggregateNotFoundException.cs
-│   ├── ConcurrencyException.cs
-│   └── InvalidOperationDomainException.cs
-├── BusinessRules/
-│   ├── IBusinessRule.cs
-│   ├── BusinessRuleBase.cs
-│   └── CompositeBusinessRule.cs
-├── Common/
-│   ├── Money.cs
-│   ├── DateRange.cs
-│   ├── Address.cs
-│   ├── Email.cs
-│   └── PhoneNumber.cs
-└── Extensions/
-    └── DomainExtensions.cs
+├── 📁 Entities/                        # Domain entities
+│   ├── Entity.cs                       # Base entity implementation
+│   ├── AggregateRoot.cs                # Aggregate root base class
+│   ├── IAuditableEntity.cs             # Auditable entity interface
+│   └── ISoftDeletable.cs               # Soft delete capability
+├── 📁 ValueObjects/                    # Value objects
+│   ├── ValueObject.cs                  # Base value object
+│   ├── SingleValueObject.cs            # Single-value value object
+│   └── Enumeration.cs                  # Enumeration base class
+├── 📁 StronglyTypedIds/                # Strongly typed identifiers
+│   ├── IStronglyTypedId.cs             # Base interface for typed IDs
+│   ├── StronglyTypedId.cs              # Base strongly typed ID
+│   ├── IntId.cs                        # Integer-based ID
+│   ├── LongId.cs                       # Long-based ID
+│   ├── GuidId.cs                       # GUID-based ID
+│   ├── StringId.cs                     # String-based ID
+│   └── 📁 Json/                        # JSON serialization support
+│       ├── StronglyTypedIdJsonConverter.cs      # JSON converter
+│       └── StronglyTypedIdJsonConverterFactory.cs  # Converter factory
+├── 📁 DomainEvents/                    # Domain event handling
+│   ├── IDomainEvent.cs                 # Domain event interface
+│   ├── IDomainEventDispatcher.cs       # Event dispatcher interface
+│   ├── DomainEventDispatcher.cs        # Event dispatcher implementation
+│   ├── DomainEventBase.cs              # Base domain event
+│   └── IDomainEventHandler.cs          # Event handler interface
+├── 📁 Repository/                      # Repository pattern
+│   ├── IRepository.cs                  # Repository interface
+│   ├── IReadOnlyRepository.cs          # Read-only repository interface
+│   ├── IUnitOfWork.cs                  # Unit of work interface
+│   └── RepositoryBase.cs               # Base repository implementation
+├── 📁 Specifications/                  # Specification pattern
+│   ├── ISpecification.cs               # Specification interface
+│   ├── Specification.cs                # Base specification
+│   ├── AndSpecification.cs             # AND specification
+│   ├── OrSpecification.cs              # OR specification
+│   ├── NotSpecification.cs             # NOT specification
+│   └── SpecificationEvaluator.cs       # Specification evaluator
+├── 📁 Exceptions/                      # Domain exceptions
+│   ├── DomainException.cs              # Base domain exception
+│   ├── BusinessRuleValidationException.cs # Business rule violation
+│   ├── AggregateNotFoundException.cs   # Aggregate not found
+│   ├── ConcurrencyException.cs         # Concurrency conflicts
+│   └── InvalidOperationDomainException.cs # Invalid domain operations
+├── 📁 BusinessRules/                   # Business rules
+│   ├── IBusinessRule.cs                # Business rule interface
+│   ├── BusinessRuleBase.cs             # Base business rule
+│   └── CompositeBusinessRule.cs        # Composite business rules
+├── 📁 Common/                          # Common value objects
+│   ├── Money.cs                        # Money value object
+│   ├── DateRange.cs                    # Date range value object
+│   ├── Address.cs                      # Address value object
+│   ├── Email.cs                        # Email value object
+│   └── PhoneNumber.cs                  # Phone number value object
+├── 📁 Guards/                          # Guard clauses
+│   └── Guard.cs                        # Guard utilities
+└── 📁 Extensions/                      # Domain extensions
+    └── DomainExtensions.cs             # Domain-specific extensions
 ```
 
+## BuildingBlocks.Application
 ```
 BuildingBlocks.Application/
 ├── 📁 CQRS/                          # Command Query Responsibility Segregation
@@ -101,7 +110,6 @@ BuildingBlocks.Application/
 │   ├── IValidator.cs                 # Validator interface
 │   ├── IValidationRule.cs            # Validation rule interface
 │   ├── ValidationResult.cs           # Validation result
-│   ├── ValidationError.cs            # Validation error
 │   ├── CompositeValidator.cs         # Composite validation
 │   └── ValidatorBase.cs              # Base validator
 ├── 📁 Caching/                       # Caching abstractions
@@ -134,7 +142,8 @@ BuildingBlocks.Application/
 │   ├── InboxMessage.cs               # Inbox message entity
 │   ├── InboxMessageStatus.cs         # Message status enum
 │   ├── IInboxProcessor.cs            # Inbox processor interface
-│   └── InboxProcessor.cs             # Inbox processor implementation
+│   ├── InboxProcessor.cs             # Inbox processor implementation
+│   └── IInboxMessageHandler.cs       # Inbox message handler interface
 ├── 📁 Outbox/                        # Outbox pattern implementation
 │   ├── IOutboxService.cs             # Outbox service interface
 │   ├── OutboxMessage.cs              # Outbox message entity
@@ -153,442 +162,280 @@ BuildingBlocks.Application/
 ├── 📁 Sagas/                         # Saga pattern implementation
 │   ├── ISaga.cs                      # Saga interface
 │   ├── SagaBase.cs                   # Base saga implementation
-│   └── ISagaManager.cs               # Saga manager interface
+│   ├── ISagaOrchestrator.cs          # Saga orchestrator interface
+│   ├── ISagaRepository.cs            # Saga repository interface
+│   ├── SagaStep.cs                   # Saga step definition
+│   └── SagaExtensions.cs             # Saga extensions
 └── 📁 Extensions/                    # Dependency injection extensions
     ├── ServiceCollectionExtensions.cs # Service collection extensions
     ├── ApplicationExtensions.cs       # Application extensions
     └── MediatorExtensions.cs          # Mediator registration extensions
 ```
-```markdown
+## BuildingBlocks.Infrastructure
+```
 BuildingBlocks.Infrastructure/
-├── Data/
-│   ├── Repositories/
-│   │   ├── IRepository.cs
-│   │   ├── Repository.cs
-│   │   ├── IReadOnlyRepository.cs
-│   │   ├── ReadOnlyRepository.cs
-│   │   └── RepositoryBase.cs
-│   ├── UnitOfWork/
-│   │   ├── IUnitOfWork.cs
-│   │   ├── UnitOfWork.cs
-│   │   └── IDbTransaction.cs
-│   ├── Context/
-│   │   ├── IDbContext.cs
-│   │   ├── ApplicationDbContext.cs
-│   │   ├── DbContextBase.cs
-│   │   └── IDbContextFactory.cs
-│   ├── Migrations/
-│   │   ├── IMigrationRunner.cs
-│   │   └── MigrationRunner.cs
-│   ├── Seeding/
-│   │   ├── IDataSeeder.cs
-│   │   ├── DataSeederBase.cs
-│   │   └── SeedDataExtensions.cs
-│   ├── Interceptors/
-│   │   ├── AuditInterceptor.cs
-│   │   ├── DomainEventInterceptor.cs
-│   │   └── SoftDeleteInterceptor.cs
-│   └── Configurations/
-│       ├── EntityConfigurationBase.cs
-│       ├── AuditableEntityConfiguration.cs
-│       └── ValueObjectConfiguration.cs
-├── Caching/
-│   ├── ICacheService.cs
-│   ├── MemoryCacheService.cs
-│   ├── DistributedCacheService.cs
-│   ├── RedisCacheService.cs
-│   ├── CacheKeyGenerator.cs
-│   └── CacheConfiguration.cs
-├── Messaging/
-│   ├── MessageBus/
-│   │   ├── IMessageBus.cs
-│   │   ├── InMemoryMessageBus.cs
-│   │   ├── ServiceBusMessageBus.cs
-│   │   └── RabbitMQMessageBus.cs
-│   ├── EventBus/
-│   │   ├── IEventBus.cs
-│   │   ├── InMemoryEventBus.cs
-│   │   ├── ServiceBusEventBus.cs
-│   │   └── RabbitMQEventBus.cs
-│   ├── Publishers/
-│   │   ├── IMessagePublisher.cs
-│   │   ├── MessagePublisherBase.cs
-│   │   ├── ServiceBusPublisher.cs
-│   │   └── RabbitMQPublisher.cs
-│   ├── Subscribers/
-│   │   ├── IMessageSubscriber.cs
-│   │   ├── MessageSubscriberBase.cs
-│   │   ├── ServiceBusSubscriber.cs
-│   │   └── RabbitMQSubscriber.cs
-│   ├── Serialization/
-│   │   ├── IMessageSerializer.cs
-│   │   ├── JsonMessageSerializer.cs
-│   │   └── BinaryMessageSerializer.cs
-│   └── Configuration/
-│       ├── MessageBusConfiguration.cs
-│       ├── ServiceBusConfiguration.cs
-│       └── RabbitMQConfiguration.cs
-├── Logging/
-│   ├── ILoggerService.cs
-│   ├── LoggerService.cs
-│   ├── Serilog/
-│   │   ├── SerilogConfiguration.cs
-│   │   ├── SerilogExtensions.cs
-│   │   └── Enrichers/
-│   │       ├── UserContextEnricher.cs
-│   │       ├── CorrelationIdEnricher.cs
-│   │       └── ApplicationEnricher.cs
-│   ├── ApplicationInsights/
-│   │   ├── ApplicationInsightsConfiguration.cs
-│   │   └── ApplicationInsightsExtensions.cs
-│   └── Structured/
-│       ├── IStructuredLogger.cs
-│       ├── StructuredLogger.cs
-│       └── LogEventExtensions.cs
-├── Authentication/
-│   ├── JWT/
-│   │   ├── IJwtTokenService.cs
-│   │   ├── JwtTokenService.cs
-│   │   ├── JwtConfiguration.cs
-│   │   └── JwtMiddleware.cs
-│   ├── OAuth/
-│   │   ├── IOAuthService.cs
-│   │   ├── OAuthService.cs
-│   │   └── OAuthConfiguration.cs
-│   ├── ApiKey/
-│   │   ├── IApiKeyService.cs
-│   │   ├── ApiKeyService.cs
-│   │   └── ApiKeyMiddleware.cs
-│   └── Identity/
-│       ├── IIdentityService.cs
-│       ├── IdentityService.cs
-│       └── IdentityConfiguration.cs
-├── Authorization/
-│   ├── IAuthorizationService.cs
-│   ├── AuthorizationService.cs
-│   ├── Policies/
-│   │   ├── IPolicyService.cs
-│   │   ├── PolicyService.cs
-│   │   └── PolicyConfiguration.cs
-│   ├── Handlers/
-│   │   ├── PermissionHandler.cs
-│   │   ├── RoleHandler.cs
-│   │   └── ResourceHandler.cs
-│   └── Requirements/
-│       ├── PermissionRequirement.cs
-│       ├── RoleRequirement.cs
-│       └── ResourceRequirement.cs
-├── Storage/
-│   ├── Files/
-│   │   ├── IFileStorageService.cs
-│   │   ├── LocalFileStorageService.cs
-│   │   ├── AzureBlobStorageService.cs
-│   │   ├── AmazonS3StorageService.cs
-│   │   └── FileStorageConfiguration.cs
-│   ├── Blobs/
-│   │   ├── IBlobStorageService.cs
-│   │   ├── BlobStorageService.cs
-│   │   └── BlobConfiguration.cs
-│   └── Documents/
-│       ├── IDocumentStorageService.cs
-│       ├── DocumentStorageService.cs
-│       └── DocumentConfiguration.cs
-├── Communication/
-│   ├── Email/
-│   │   ├── IEmailService.cs
-│   │   ├── SmtpEmailService.cs
-│   │   ├── SendGridEmailService.cs
-│   │   ├── EmailTemplate.cs
-│   │   └── EmailConfiguration.cs
-│   ├── SMS/
-│   │   ├── ISmsService.cs
-│   │   ├── TwilioSmsService.cs
-│   │   ├── SmsTemplate.cs
-│   │   └── SmsConfiguration.cs
-│   ├── Push/
-│   │   ├── IPushNotificationService.cs
-│   │   ├── FirebasePushService.cs
-│   │   ├── PushTemplate.cs
-│   │   └── PushConfiguration.cs
-│   └── Notifications/
-│       ├── INotificationService.cs
-│       ├── NotificationService.cs
-│       ├── NotificationChannel.cs
-│       └── NotificationConfiguration.cs
-├── Monitoring/
-│   ├── Health/
-│   │   ├── IHealthCheckService.cs
-│   │   ├── HealthCheckService.cs
-│   │   ├── DatabaseHealthCheck.cs
-│   │   ├── CacheHealthCheck.cs
-│   │   ├── MessageBusHealthCheck.cs
-│   │   └── HealthCheckConfiguration.cs
-│   ├── Metrics/
-│   │   ├── IMetricsService.cs
-│   │   ├── MetricsService.cs
-│   │   ├── PrometheusMetricsService.cs
-│   │   └── MetricsConfiguration.cs
-│   ├── Tracing/
-│   │   ├── ITracingService.cs
-│   │   ├── TracingService.cs
-│   │   ├── OpenTelemetryConfiguration.cs
-│   │   └── TracingMiddleware.cs
-│   └── Performance/
-│       ├── IPerformanceMonitor.cs
-│       ├── PerformanceMonitor.cs
-│       └── PerformanceConfiguration.cs
-├── BackgroundServices/
-│   ├── IBackgroundTaskService.cs
-│   ├── BackgroundTaskService.cs
-│   ├── Queues/
-│   │   ├── IBackgroundQueue.cs
-│   │   ├── BackgroundQueue.cs
-│   │   └── QueueConfiguration.cs
-│   ├── Jobs/
-│   │   ├── IJobScheduler.cs
-│   │   ├── JobScheduler.cs
-│   │   ├── HangfireJobScheduler.cs
-│   │   └── JobConfiguration.cs
-│   └── Workers/
-│       ├── IWorkerService.cs
-│       ├── WorkerServiceBase.cs
-│       └── WorkerConfiguration.cs
-├── External/
-│   ├── HttpClients/
-│   │   ├── IHttpClientService.cs
-│   │   ├── HttpClientService.cs
-│   │   ├── HttpClientConfiguration.cs
-│   │   └── HttpClientExtensions.cs
-│   ├── APIs/
-│   │   ├── IExternalApiService.cs
-│   │   ├── ExternalApiService.cs
-│   │   └── ApiConfiguration.cs
-│   └── ThirdParty/
-│       ├── IThirdPartyIntegrationService.cs
-│       ├── ThirdPartyIntegrationService.cs
-│       └── ThirdPartyConfiguration.cs
-├── Security/
-│   ├── Encryption/
-│   │   ├── IEncryptionService.cs
-│   │   ├── AesEncryptionService.cs
-│   │   ├── RsaEncryptionService.cs
-│   │   └── EncryptionConfiguration.cs
-│   ├── Hashing/
-│   │   ├── IHashingService.cs
-│   │   ├── Pbkdf2HashingService.cs
-│   │   ├── BcryptHashingService.cs
-│   │   └── HashingConfiguration.cs
-│   ├── KeyManagement/
-│   │   ├── IKeyManagementService.cs
-│   │   ├── AzureKeyVaultService.cs
-│   │   ├── AwsKmsService.cs
-│   │   └── KeyManagementConfiguration.cs
-│   └── Secrets/
-│       ├── ISecretsService.cs
-│       ├── SecretsService.cs
-│       └── SecretsConfiguration.cs
-├── Mapping/
-│   ├── AutoMapper/
-│   │   ├── AutoMapperService.cs
-│   │   ├── AutoMapperProfile.cs
-│   │   └── AutoMapperConfiguration.cs
-│   ├── Mapster/
-│   │   ├── MapsterService.cs
-│   │   ├── MapsterProfile.cs
-│   │   └── MapsterConfiguration.cs
-│   └── Manual/
-│       ├── ManualMapperService.cs
-│       └── MappingExtensions.cs
-├── Validation/
-│   ├── FluentValidation/
-│   │   ├── FluentValidationService.cs
-│   │   ├── ValidatorBase.cs
-│   │   └── FluentValidationConfiguration.cs
-│   ├── DataAnnotations/
-│   │   ├── DataAnnotationValidationService.cs
-│   │   └── ValidationAttributes.cs
-│   └── Custom/
-│       ├── CustomValidationService.cs
-│       └── ValidationRules.cs
-├── Serialization/
-│   ├── Json/
-│   │   ├── IJsonSerializer.cs
-│   │   ├── SystemTextJsonSerializer.cs
-│   │   ├── NewtonsoftJsonSerializer.cs
-│   │   └── JsonConfiguration.cs
-│   ├── Xml/
-│   │   ├── IXmlSerializer.cs
-│   │   ├── XmlSerializer.cs
-│   │   └── XmlConfiguration.cs
-│   ├── Binary/
-│   │   ├── IBinarySerializer.cs
-│   │   ├── ProtobufSerializer.cs
-│   │   ├── MessagePackSerializer.cs
-│   │   └── BinaryConfiguration.cs
-│   └── Csv/
-│       ├── ICsvSerializer.cs
-│       ├── CsvSerializer.cs
-│       └── CsvConfiguration.cs
-├── Configuration/
-│   ├── IConfigurationService.cs
-│   ├── ConfigurationService.cs
-│   ├── Settings/
-│   │   ├── ApplicationSettings.cs
-│   │   ├── DatabaseSettings.cs
-│   │   ├── CacheSettings.cs
-│   │   ├── MessageBusSettings.cs
-│   │   ├── LoggingSettings.cs
-│   │   ├── AuthenticationSettings.cs
-│   │   ├── AuthorizationSettings.cs
-│   │   ├── StorageSettings.cs
-│   │   ├── CommunicationSettings.cs
-│   │   ├── MonitoringSettings.cs
-│   │   ├── BackgroundServiceSettings.cs
-│   │   ├── ExternalSettings.cs
-│   │   ├── SecuritySettings.cs
-│   │   └── SerializationSettings.cs
-│   ├── Providers/
-│   │   ├── IConfigurationProvider.cs
-│   │   ├── JsonConfigurationProvider.cs
-│   │   ├── EnvironmentConfigurationProvider.cs
-│   │   ├── AzureConfigurationProvider.cs
-│   │   └── AwsConfigurationProvider.cs
-│   └── Validation/
-│       ├── IConfigurationValidator.cs
-│       ├── ConfigurationValidator.cs
-│       └── ConfigurationValidationExtensions.cs
-└── Extensions/
-    ├── ServiceCollectionExtensions.cs
-    ├── ApplicationBuilderExtensions.cs
-    ├── HostBuilderExtensions.cs
-    ├── ConfigurationExtensions.cs
-    ├── DatabaseExtensions.cs
-    ├── CachingExtensions.cs
-    ├── MessagingExtensions.cs
-    ├── LoggingExtensions.cs
-    ├── AuthenticationExtensions.cs
-    ├── AuthorizationExtensions.cs
-    ├── StorageExtensions.cs
-    ├── CommunicationExtensions.cs
-    ├── MonitoringExtensions.cs
-    ├── BackgroundServiceExtensions.cs
-    ├── ExternalExtensions.cs
-    ├── SecurityExtensions.cs
-    ├── MappingExtensions.cs
-    ├── ValidationExtensions.cs
-    ├── SerializationExtensions.cs
-    └── InfrastructureExtensions.cs
+├── 📁 Data/                            # Data access layer
+│   ├── 📁 Repositories/                # Repository implementations
+│   │   ├── IRepository.cs              # Repository interface
+│   │   ├── Repository.cs               # Repository implementation
+│   │   ├── IReadOnlyRepository.cs      # Read-only repository interface
+│   │   ├── ReadOnlyRepository.cs       # Read-only repository implementation
+│   │   └── RepositoryBase.cs           # Base repository
+│   ├── 📁 UnitOfWork/                  # Unit of work pattern
+│   │   ├── IUnitOfWork.cs              # Unit of work interface
+│   │   ├── UnitOfWork.cs               # Unit of work implementation
+│   │   └── IDbTransaction.cs           # Database transaction interface
+│   ├── 📁 Context/                     # Database contexts
+│   │   ├── IDbContext.cs               # Database context interface
+│   │   ├── ApplicationDbContext.cs     # Application database context
+│   │   ├── DbContextBase.cs            # Base database context
+│   │   └── IDbContextFactory.cs        # Database context factory
+│   ├── 📁 Migrations/                  # Database migrations
+│   │   ├── IMigrationRunner.cs         # Migration runner interface
+│   │   └── MigrationRunner.cs          # Migration runner implementation
+│   ├── 📁 Seeding/                     # Database seeding
+│   │   ├── IDataSeeder.cs              # Data seeder interface
+│   │   ├── DataSeederBase.cs           # Base data seeder
+│   │   └── SeedDataExtensions.cs       # Seed data extensions
+│   ├── 📁 Interceptors/                # Entity Framework interceptors
+│   │   ├── AuditInterceptor.cs         # Audit trail interceptor
+│   │   ├── DomainEventInterceptor.cs   # Domain event interceptor
+│   │   └── SoftDeleteInterceptor.cs    # Soft delete interceptor
+│   ├── 📁 Converters/                  # Value converters
+│   │   ├── StronglyTypedIdValueConverter.cs         # Strongly typed ID converter
+│   │   └── StronglyTypedIdValueConverterSelector.cs # Converter selector
+│   └── 📁 Configurations/              # Entity configurations
+│       ├── EntityConfigurationBase.cs  # Base entity configuration
+│       ├── AuditableEntityConfiguration.cs # Auditable entity configuration
+│       ├── ValueObjectConfiguration.cs # Value object configuration
+│       ├── InboxMessageConfiguration.cs # Inbox message configuration
+│       └── OutboxMessageConfiguration.cs # Outbox message configuration
+├── 📁 Caching/                         # Caching implementations
+│   ├── MemoryCacheService.cs           # In-memory cache service
+│   ├── DistributedCacheService.cs      # Distributed cache service
+│   ├── RedisCacheService.cs            # Redis cache service
+│   ├── CacheKeyGenerator.cs            # Cache key generator
+│   └── CacheConfiguration.cs           # Cache configuration
+├── 📁 Messaging/                       # Message bus implementations
+│   ├── 📁 MessageBus/                  # Message bus implementations
+│   │   ├── IMessageBus.cs              # Message bus interface
+│   │   └── InMemoryMessageBus.cs       # In-memory message bus
+│   ├── 📁 EventBus/                    # Event bus implementations
+│   │   ├── IEventBus.cs                # Event bus interface
+│   │   └── InMemoryEventBus.cs         # In-memory event bus
+│   ├── 📁 Publishers/                  # Message publishers
+│   │   └── IMessagePublisher.cs        # Message publisher interface
+│   ├── 📁 Subscribers/                 # Message subscribers
+│   │   └── IMessageSubscriber.cs       # Message subscriber interface
+│   ├── 📁 Serialization/              # Message serialization
+│   │   └── IMessageSerializer.cs       # Message serializer interface
+│   └── 📁 Configuration/               # Messaging configuration
+│       └── MessageBusConfiguration.cs  # Message bus configuration
+├── 📁 Logging/                         # Logging implementations
+│   ├── ILoggerService.cs               # Logger service interface
+│   ├── LoggerService.cs                # Logger service implementation
+│   ├── 📁 Serilog/                     # Serilog configuration
+│   │   └── 📁 Enrichers/               # Log enrichers
+│   ├── 📁 ApplicationInsights/         # Application Insights
+│   └── 📁 Structured/                  # Structured logging
+├── 📁 Authentication/                  # Authentication implementations
+│   ├── 📁 JWT/                         # JWT authentication
+│   │   ├── IJwtTokenService.cs         # JWT token service interface
+│   │   ├── JwtTokenService.cs          # JWT token service implementation
+│   │   └── JwtConfiguration.cs         # JWT configuration
+│   ├── 📁 OAuth/                       # OAuth authentication
+│   ├── 📁 ApiKey/                      # API key authentication
+│   └── 📁 Identity/                    # Identity management
+├── 📁 Authorization/                   # Authorization implementations
+│   ├── IAuthorizationService.cs        # Authorization service interface
+│   ├── 📁 Policies/                    # Authorization policies
+│   ├── 📁 Handlers/                    # Authorization handlers
+│   └── 📁 Requirements/                # Authorization requirements
+├── 📁 Storage/                         # Storage implementations
+│   ├── 📁 Files/                       # File storage
+│   │   ├── IFileStorageService.cs      # File storage interface
+│   │   └── LocalFileStorageService.cs  # Local file storage
+│   ├── 📁 Blobs/                       # Blob storage
+│   │   └── IBlobStorageService.cs      # Blob storage interface
+│   └── 📁 Documents/                   # Document storage
+├── 📁 Communication/                   # Communication services
+│   ├── 📁 Email/                       # Email services
+│   │   ├── IEmailService.cs            # Email service interface
+│   │   ├── SmtpEmailService.cs         # SMTP email service
+│   │   ├── IEmailTemplateService.cs    # Email template service interface
+│   │   ├── EmailTemplateService.cs     # Email template service
+│   │   └── EmailConfiguration.cs       # Email configuration
+│   ├── 📁 SMS/                         # SMS services
+│   ├── 📁 Push/                        # Push notifications
+│   └── 📁 Notifications/               # Notification services
+├── 📁 Monitoring/                      # Monitoring and observability
+│   ├── 📁 Health/                      # Health checks
+│   │   ├── IHealthCheckService.cs      # Health check service interface
+│   │   ├── HealthCheckConfiguration.cs # Health check configuration
+│   │   ├── HealthCheckExtensions.cs    # Health check extensions
+│   │   ├── HttpHealthCheck.cs          # HTTP health check
+│   │   ├── MemoryHealthCheck.cs        # Memory health check
+│   │   └── SmtpHealthCheck.cs          # SMTP health check
+│   ├── 📁 Metrics/                     # Metrics collection
+│   ├── 📁 Tracing/                     # Distributed tracing
+│   └── 📁 Performance/                 # Performance monitoring
+├── 📁 OpenTelemetry/                   # OpenTelemetry integration
+│   ├── OpenTelemetryConfiguration.cs   # OpenTelemetry configuration
+│   └── OpenTelemetryExtensions.cs      # OpenTelemetry extensions
+├── 📁 BackgroundServices/              # Background service implementations
+│   ├── IBackgroundTaskService.cs       # Background task service interface
+│   ├── 📁 Queues/                      # Background queues
+│   ├── 📁 Jobs/                        # Job scheduling
+│   └── 📁 Workers/                     # Worker services
+├── 📁 External/                        # External service integrations
+│   ├── 📁 HttpClients/                 # HTTP client services
+│   │   ├── IHttpClientService.cs       # HTTP client service interface
+│   │   ├── HttpClientService.cs        # HTTP client service
+│   │   └── HttpClientConfiguration.cs  # HTTP client configuration
+│   ├── 📁 APIs/                        # External API integrations
+│   └── 📁 ThirdParty/                  # Third-party integrations
+├── 📁 Security/                        # Security implementations
+│   ├── 📁 Encryption/                  # Encryption services
+│   │   └── IEncryptionService.cs       # Encryption service interface
+│   ├── 📁 Hashing/                     # Hashing services
+│   ├── 📁 KeyManagement/               # Key management
+│   └── 📁 Secrets/                     # Secret management
+├── 📁 Mapping/                         # Object mapping implementations
+│   ├── 📁 AutoMapper/                  # AutoMapper integration
+│   ├── 📁 Mapster/                     # Mapster integration
+│   └── 📁 Manual/                      # Manual mapping
+├── 📁 Validation/                      # Validation implementations
+│   ├── 📁 FluentValidation/            # FluentValidation integration
+│   │   └── FluentValidationService.cs  # FluentValidation service
+│   ├── 📁 DataAnnotations/             # Data annotations validation
+│   └── 📁 Custom/                      # Custom validation
+├── 📁 Serialization/                   # Serialization implementations
+│   ├── 📁 Json/                        # JSON serialization
+│   │   ├── IJsonSerializer.cs          # JSON serializer interface
+│   │   └── SystemTextJsonSerializer.cs # System.Text.Json serializer
+│   ├── 📁 Xml/                         # XML serialization
+│   │   └── IXmlSerializer.cs           # XML serializer interface
+│   ├── 📁 Binary/                      # Binary serialization
+│   │   └── IBinarySerializer.cs        # Binary serializer interface
+│   └── 📁 Csv/                         # CSV serialization
+├── 📁 Configuration/                   # Configuration management
+│   ├── IConfigurationService.cs        # Configuration service interface
+│   ├── ConfigurationService.cs         # Configuration service
+│   ├── 📁 Settings/                    # Configuration settings
+│   ├── 📁 Providers/                   # Configuration providers
+│   └── 📁 Validation/                  # Configuration validation
+├── 📁 Services/                        # Infrastructure services
+│   ├── InboxService.cs                 # Inbox service implementation
+│   └── OutboxService.cs                # Outbox service implementation
+└── 📁 Extensions/                      # Infrastructure extensions
+    ├── ServiceCollectionExtensions.cs  # Service registration extensions
+    ├── ApplicationBuilderExtensions.cs # Application builder extensions
+    ├── DatabaseExtensions.cs           # Database extensions
+    ├── CachingExtensions.cs             # Caching extensions
+    ├── ModelBuilderExtensions.cs       # Entity Framework model extensions
+    ├── ServiceRegistration.cs          # Service registration helper
+    └── InfrastructureExtensions.cs     # General infrastructure extensions
 ```
 
+## BuildingBlocks.API
 ```
 BuildingBlocks.API/
-├── Endpoints/
-│   ├── Base/
-│   │   ├── EndpointBase.cs
-│   │   ├── CrudEndpoints.cs
-│   │   └── QueryEndpoints.cs
-│   ├── Extensions/
-│   │   ├── EndpointRouteBuilderExtensions.cs
-│   │   └── MinimalApiExtensions.cs
-│   └── Conventions/
-│       ├── ApiEndpointConvention.cs
-│       └── VersioningEndpointConvention.cs
-├── Middleware/
-│   ├── ErrorHandling/
-│   │   ├── GlobalExceptionMiddleware.cs
-│   │   ├── ErrorResponse.cs
-│   │   └── ProblemDetailsFactory.cs
-│   ├── Logging/
-│   │   ├── RequestLoggingMiddleware.cs
-│   │   └── CorrelationIdMiddleware.cs
-│   └── Security/
-│       ├── SecurityHeadersMiddleware.cs
-│       └── RateLimitingMiddleware.cs
-├── Responses/
-│   ├── Base/
-│   │   ├── ApiResponse.cs
-│   │   ├── PagedResponse.cs
-│   │   └── ErrorResponse.cs
-│   └── Builders/
-│       ├── ApiResponseBuilder.cs
-│       └── ErrorResponseBuilder.cs
-├── Authentication/
-│   ├── JWT/
-│   │   ├── JwtAuthenticationExtensions.cs
-│   │   └── JwtBearerOptionsSetup.cs
-│   └── ApiKey/
-│       ├── ApiKeyAuthenticationExtensions.cs
-│       └── ApiKeyAuthenticationHandler.cs
-├── Validation/
-│   ├── Validators/
-│   │   ├── RequestValidator.cs
-│   │   └── PaginationValidator.cs
-│   ├── Extensions/
-│   │   ├── ValidationExtensions.cs
-│   │   └── FluentValidationExtensions.cs
-│   └── Results/
-│       ├── ValidationResult.cs
-│       └── ValidationError.cs
-├── OpenApi/
-│   ├── Configuration/
-│   │   ├── OpenApiConfiguration.cs
-│   │   ├── ScalarConfiguration.cs
-│   │   └── ApiDocumentationOptions.cs
-│   ├── Filters/
-│   │   ├── AuthorizationOperationFilter.cs
-│   │   └── DefaultResponseOperationFilter.cs
-│   └── Extensions/
-│       ├── OpenApiExtensions.cs
-│       └── ScalarExtensions.cs
-├── Versioning/
-│   ├── Extensions/
-│   │   ├── ApiVersioningExtensions.cs
-│   │   └── VersionedEndpointExtensions.cs
-│   └── Conventions/
-│       ├── VersioningConvention.cs
-│       └── EndpointVersioningConvention.cs
-├── Health/
-│   ├── Extensions/
-│   │   ├── HealthCheckExtensions.cs
-│   │   └── HealthEndpointExtensions.cs
-│   └── Reporters/
-│       ├── JsonHealthReporter.cs
-│       └── SimpleHealthReporter.cs
-├── Configuration/
-│   ├── Options/
-│   │   ├── ApiOptions.cs
-│   │   ├── CorsOptions.cs
-│   │   ├── AuthenticationOptions.cs
-│   │   └── RateLimitingOptions.cs
-│   └── Extensions/
-│       ├── ConfigurationExtensions.cs
-│       └── OptionsExtensions.cs
-├── Extensions/
-│   ├── ApiExtensions.cs
-│   ├── AuthenticationExtensions.cs
-│   ├── CorsExtensions.cs
-│   ├── OpenApiExtensions.cs
-│   ├── VersioningExtensions.cs
-│   ├── RateLimitingExtensions.cs
-│   ├── HealthCheckExtensions.cs
-│   ├── ValidationExtensions.cs
-│   ├── MiddlewareExtensions.cs
-│   ├── SecurityExtensions.cs
-│   ├── ErrorHandlingExtensions.cs
-│   ├── HttpContextExtensions.cs
-│   ├── ClaimsPrincipalExtensions.cs
-│   ├── RequestExtensions.cs
-│   └── ResponseExtensions.cs
-└── Utilities/
-    ├── Helpers/
-    │   ├── ResponseHelper.cs
-    │   ├── ValidationHelper.cs
-    │   └── CorrelationHelper.cs
-    ├── Constants/
-    │   ├── ApiConstants.cs
-    │   ├── HttpConstants.cs
-    │   └── HeaderConstants.cs
-    └── Factories/
-        ├── ResponseFactory.cs
-        └── ErrorFactory.cs
+├── 📁 Endpoints/                       # API endpoint definitions
+│   ├── 📁 Base/                        # Base endpoint classes
+│   │   ├── EndpointBase.cs             # Base endpoint implementation
+│   │   ├── CrudEndpoints.cs            # CRUD endpoint template
+│   │   └── QueryEndpoints.cs           # Query endpoint template
+│   ├── 📁 Extensions/                  # Endpoint extensions
+│   │   ├── EndpointRouteBuilderExtensions.cs # Route builder extensions
+│   │   └── MinimalApiExtensions.cs     # Minimal API extensions
+│   └── 📁 Conventions/                 # API conventions
+│       └── ApiEndpointConvention.cs    # Endpoint conventions
+├── 📁 Middleware/                      # API middleware
+│   ├── 📁 ErrorHandling/               # Error handling middleware
+│   │   ├── GlobalExceptionMiddleware.cs # Global exception handler
+│   │   └── ProblemDetailsFactory.cs    # Problem details factory
+│   ├── 📁 Logging/                     # Logging middleware
+│   │   ├── RequestLoggingMiddleware.cs # Request logging
+│   │   └── CorrelationIdMiddleware.cs  # Correlation ID tracking
+│   └── 📁 Security/                    # Security middleware
+│       ├── SecurityHeadersMiddleware.cs # Security headers
+│       └── RateLimitingMiddleware.cs   # Rate limiting
+├── 📁 Responses/                       # API response handling
+│   ├── 📁 Base/                        # Base response classes
+│   │   └── ApiResponse.cs              # Standard API response
+│   └── 📁 Builders/                    # Response builders
+│       ├── ApiResponseBuilder.cs       # API response builder
+│       └── ErrorResponseBuilder.cs     # Error response builder
+├── 📁 Authentication/                  # Authentication handling
+│   ├── 📁 JWT/                         # JWT authentication
+│   │   ├── JwtAuthenticationExtensions.cs # JWT extensions
+│   │   └── JwtBearerOptionsSetup.cs    # JWT bearer options
+│   └── 📁 ApiKey/                      # API key authentication
+│       ├── ApiKeyAuthenticationExtensions.cs # API key extensions
+│       └── ApiKeyAuthenticationHandler.cs    # API key handler
+├── 📁 Validation/                      # Request validation
+│   ├── 📁 Validators/                  # Validation classes
+│   │   ├── RequestValidator.cs         # Generic request validator
+│   │   └── PaginationValidator.cs      # Pagination validator
+│   ├── 📁 Extensions/                  # Validation extensions
+│   │   ├── ValidationExtensions.cs     # Validation extensions
+│   │   └── FluentValidationExtensions.cs # FluentValidation extensions
+│   └── 📁 Results/                     # Validation results
+│       └── ValidationResult.cs         # Validation result model
+├── 📁 OpenApi/                         # OpenAPI/Swagger configuration
+│   ├── 📁 Configuration/               # OpenAPI configuration
+│   │   └── ApiDocumentationOptions.cs # API documentation options
+│   └── 📁 Extensions/                  # OpenAPI extensions
+│       └── OpenApiExtensions.cs        # OpenAPI setup extensions
+├── 📁 Versioning/                      # API versioning
+│   ├── 📁 Extensions/                  # Versioning extensions
+│   │   └── ApiVersioningExtensions.cs  # API versioning extensions
+│   └── 📁 Conventions/                 # Versioning conventions
+│       └── VersioningConvention.cs     # Version conventions
+├── 📁 Health/                          # Health check endpoints
+│   ├── 📁 Extensions/                  # Health check extensions
+│   │   └── HealthCheckExtensions.cs    # Health check setup
+│   └── 📁 Reporters/                   # Health check reporters
+│       └── JsonHealthReporter.cs       # JSON health reporter
+├── 📁 Configuration/                   # API configuration
+│   ├── 📁 Options/                     # Configuration options
+│   │   └── ApiOptions.cs               # API configuration options
+│   ├── 📁 Examples/                    # Configuration examples
+│   │   └── appsettings.ratelimiting.example.json # Rate limiting example
+│   └── 📁 Extensions/                  # Configuration extensions
+│       └── ConfigurationExtensions.cs  # Configuration helpers
+├── 📁 Converters/                      # JSON converters
+│   ├── CustomDateTimeConverter.cs      # DateTime converter
+│   ├── CustomDateTimeOffsetConverter.cs # DateTimeOffset converter
+│   ├── CustomDecimalConverter.cs       # Decimal converter
+│   ├── CustomGuidConverter.cs          # GUID converter
+│   ├── CustomNullableDateTimeConverter.cs # Nullable DateTime converter
+│   ├── CustomPhoneNumberConverter.cs   # Phone number converter
+│   ├── FlexibleStringConverter.cs      # Flexible string converter
+│   └── JsonStringEnumConverter.cs      # String enum converter
+├── 📁 Extensions/                      # API extensions
+│   ├── ApiExtensions.cs                # General API extensions
+│   ├── ClaimsPrincipalExtensions.cs    # Claims principal extensions
+│   ├── ErrorHandlingExtensions.cs     # Error handling extensions
+│   ├── HttpContextExtensions.cs       # HTTP context extensions
+│   ├── JsonExtensions.cs               # JSON extensions
+│   ├── MiddlewareExtensions.cs         # Middleware extensions
+│   ├── RateLimitingExtensions.cs       # Rate limiting extensions
+│   ├── RequestExtensions.cs            # Request extensions
+│   ├── ResponseExtensions.cs           # Response extensions
+│   ├── SecurityExtensions.cs           # Security extensions
+│   ├── ValidationExtensions.cs         # Validation extensions
+│   └── VersioningExtensions.cs         # Versioning extensions
+└── 📁 Utilities/                       # API utilities
+    ├── 📁 Helpers/                     # Helper classes
+    │   ├── ResponseHelper.cs           # Response helpers
+    │   ├── ValidationHelper.cs         # Validation helpers
+    │   └── CorrelationHelper.cs        # Correlation helpers
+    ├── 📁 Constants/                   # API constants
+    │   ├── ApiConstants.cs             # General API constants
+    │   ├── HeaderConstants.cs          # HTTP header constants
+    │   └── HttpConstants.cs            # HTTP constants
+    └── 📁 Factories/                   # Factory classes
+        ├── ErrorFactory.cs             # Error factory
+        └── ResponseFactory.cs          # Response factory
 ```

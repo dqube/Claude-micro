@@ -88,7 +88,7 @@ public partial class InboxProcessor : IInboxProcessor
             {
                 await ProcessMessageAsync(message, cancellationToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 LogFailedToRetryInboxMessage(_logger, ex, message.Id);
             }
