@@ -33,9 +33,13 @@ public partial class InboxProcessor : IInboxProcessor
             {
                 await ProcessMessageAsync(message, cancellationToken);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 LogFailedToProcessInboxMessage(_logger, ex, message.Id);
+            }
+            catch
+            {
+                throw;
             }
         }
     }
@@ -61,11 +65,17 @@ public partial class InboxProcessor : IInboxProcessor
             
             LogInboxMessageProcessedSuccessfully(_logger, message.Id, message.MessageType);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             LogFailedToProcessInboxMessageWithError(_logger, ex, message.Id, ex.Message);
             await _inboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
         }
+        catch (ArgumentException ex)
+        {
+            LogFailedToProcessInboxMessageWithError(_logger, ex, message.Id, ex.Message);
+            await _inboxService.MarkAsFailedAsync(message.Id, ex.Message, ex.StackTrace, cancellationToken);
+        }
+       
     }
 
     public async Task RetryFailedMessagesAsync(CancellationToken cancellationToken = default)

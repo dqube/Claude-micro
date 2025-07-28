@@ -60,10 +60,6 @@ internal static class RoleEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Request timeout: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
-        {
-            var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
-        }
+        // Removed generic catch for Exception to comply with best practices and error reporting guidelines.
     }
 }

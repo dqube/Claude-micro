@@ -224,11 +224,9 @@ public class UserRepository : IUserRepository
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(searchTerm);
-        var lowerSearchTerm = searchTerm.ToLowerInvariant();
-        
         return await _context.Users
-            .Where(u => u.Username.Value.ToLower().Contains(lowerSearchTerm) ||
-                       u.Email.Value.ToLower().Contains(lowerSearchTerm))
+            .Where(u => u.Username.Value.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        u.Email.Value.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
             .OrderBy(u => u.Username)
             .ToListAsync(cancellationToken);
     }
