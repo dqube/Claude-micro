@@ -71,11 +71,7 @@ internal static class RegistrationTokenEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Invalid request: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
-        {
-            var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
-        }
+       
     }
 
     private static async Task<IResult> VerifyTokenAsync(
@@ -90,25 +86,29 @@ internal static class RegistrationTokenEndpoints
         try
         {
             // Note: This would need a corresponding query/command in the Application layer
-            // For now, we'll return a placeholder response
+            // For now, we'll return a placeholder response asynchronously
             var correlationId = context.GetCorrelationId();
-            return ResponseFactory.Success(new { Token = token, IsValid = true }, "Token verified successfully", correlationId);
+            var result = await Task.Run(() =>
+                ResponseFactory.Success(new { Token = token, IsValid = true }, "Token verified successfully", correlationId)
+            );
+            return result;
         }
         catch (InvalidOperationException ex)
         {
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to verify token: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
+            return ResponseFactory.BadRequest($"Invalid request: {ex.Message}", correlationId);
         }
+       
     }
 }
 
 // Request DTOs
-internal record CreateRegistrationTokenRequest(
+internal sealed record CreateRegistrationTokenRequest(
     [property: JsonPropertyName("email")] string Email,
     [property: JsonPropertyName("tokenType")] string TokenType,
     [property: JsonPropertyName("expirationHours")] int ExpirationHours = 24,

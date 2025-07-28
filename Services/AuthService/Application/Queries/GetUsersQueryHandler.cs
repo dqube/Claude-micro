@@ -4,6 +4,7 @@ using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Repositories;
+using System.Globalization;
 
 namespace AuthService.Application.Queries;
 
@@ -49,10 +50,10 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PagedResult<Use
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            var searchTerm = request.SearchTerm.ToLower();
+            var searchTerm = request.SearchTerm.ToUpperInvariant();
             specification = specification.And(u => 
-                u.Username.Value.ToLower().Contains(searchTerm) ||
-                u.Email.Value.ToLower().Contains(searchTerm));
+                u.Username.Value.ToUpperInvariant().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                u.Email.Value.ToUpperInvariant().Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
         }
 
         if (request.IsActive.HasValue)
@@ -107,7 +108,7 @@ internal static class ExpressionExtensions
     }
 }
 
-internal class ReplaceExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
+internal sealed class ReplaceExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
 {
     private readonly System.Linq.Expressions.Expression _oldValue;
     private readonly System.Linq.Expressions.Expression _newValue;

@@ -4,6 +4,7 @@ using AuthService.Application.DTOs;
 using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Repositories;
+using System.Globalization;
 
 namespace AuthService.Application.Queries;
 
@@ -30,10 +31,10 @@ public class GetRolesQueryHandler : IQueryHandler<GetRolesQuery, List<RoleDto>>
         else
         {
             // Use search functionality for filtering
-            var searchTerm = request.SearchTerm.ToLower();
+            var searchTerm = request.SearchTerm.ToUpperInvariant();
             System.Linq.Expressions.Expression<Func<Role, bool>> specification = r => 
-                r.Name.ToLower().Contains(searchTerm) ||
-                (r.Description != null && r.Description.ToLower().Contains(searchTerm));
+                r.Name.ToUpperInvariant().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (r.Description != null && r.Description.ToUpperInvariant().Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
             
             roles = await _roleRepository.FindAsync(specification, cancellationToken);
         }

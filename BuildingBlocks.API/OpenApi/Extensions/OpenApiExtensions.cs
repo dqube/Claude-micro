@@ -37,8 +37,14 @@ public static class ScalarExtensions
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-            // Use Scalar instead of SwaggerUI
-            app.MapScalarApiReference();
+            // Use Scalar instead of SwaggerUI with service name and version as title
+            var configuration = app.Services.GetRequiredService<IConfiguration>();
+            var apiSettings = configuration.GetSection("Api");
+            var title = apiSettings["Title"] ?? "API";
+            var version = apiSettings["Version"] ?? "v1";
+            var documentTitle = $"{title} {version}";
+            
+            app.MapScalarApiReference(opts => opts.WithTitle(documentTitle));
         }
 
         return app;

@@ -50,7 +50,7 @@ public class CreateRegistrationTokenCommandHandler : ICommandHandler<CreateRegis
         var bytes = new byte[32];
         using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
+        return Convert.ToBase64String(bytes).Replace("+", "-", StringComparison.Ordinal).Replace("/", "_", StringComparison.Ordinal).Replace("=", "", StringComparison.Ordinal);
     }
 
     private static RegistrationTokenDto MapToDto(RegistrationToken token)

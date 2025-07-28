@@ -30,7 +30,6 @@
   <!-- Build output configuration -->
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591;CA1002;CA1711;CA2225;CA1036;CA1724;CA1725;CA1805;CA2227;CA1051;CA1040;CA1819;CA2007</NoWarn>
   </PropertyGroup>
 
   <!-- Repository and licensing information -->

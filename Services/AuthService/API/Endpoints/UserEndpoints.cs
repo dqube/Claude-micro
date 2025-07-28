@@ -105,11 +105,7 @@ internal static class UserEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Request timeout: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
-        {
-            var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
-        }
+        // Remove generic catch for Exception to comply with allowed exception types.
     }
 
     private static async Task<IResult> GetUserByIdAsync(
@@ -136,10 +132,15 @@ internal static class UserEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to retrieve user: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
+        catch (TaskCanceledException ex)
         {
             var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
+            return ResponseFactory.BadRequest($"Request cancelled: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Request timeout: {ex.Message}", correlationId);
         }
     }
 
@@ -149,6 +150,7 @@ internal static class UserEndpoints
         HttpContext context,
         CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(mediator);
         ArgumentNullException.ThrowIfNull(context);
         
@@ -167,10 +169,15 @@ internal static class UserEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Failed to retrieve user: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
+        catch (TaskCanceledException ex)
         {
             var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
+            return ResponseFactory.BadRequest($"Request cancelled: {ex.Message}", correlationId);
+        }
+        catch (TimeoutException ex)
+        {
+            var correlationId = context.GetCorrelationId();
+            return ResponseFactory.BadRequest($"Request timeout: {ex.Message}", correlationId);
         }
     }
 
@@ -202,11 +209,7 @@ internal static class UserEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Invalid request: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
-        {
-            var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
-        }
+        // Removed generic catch for Exception to comply with allowed exception types.
     }
 
     private static async Task<IResult> UpdatePasswordAsync(
@@ -222,7 +225,13 @@ internal static class UserEndpoints
         
         try
         {
-            var command = new UpdatePasswordCommand(id, "", request.NewPassword, Guid.Empty);
+            // For password updates via admin endpoint, current password is not required
+            // UpdatedBy should be the current user's ID or system admin ID
+            var updatedBy = context.User.FindFirst("sub")?.Value != null && Guid.TryParse(context.User.FindFirst("sub")?.Value, out var userId) 
+                ? userId 
+                : Guid.Empty; // System user
+            
+            var command = new UpdatePasswordCommand(id, string.Empty, request.NewPassword, updatedBy);
             await mediator.SendAsync(command, cancellationToken);
             var correlationId = context.GetCorrelationId();
 
@@ -238,11 +247,7 @@ internal static class UserEndpoints
             var correlationId = context.GetCorrelationId();
             return ResponseFactory.BadRequest($"Invalid request: {ex.Message}", correlationId);
         }
-        catch (Exception ex)
-        {
-            var correlationId = context.GetCorrelationId();
-            return ResponseFactory.InternalServerError($"An unexpected error occurred: {ex.Message}", correlationId);
-        }
+        // Removed generic catch for Exception to comply with allowed exception types.
     }
 }
 

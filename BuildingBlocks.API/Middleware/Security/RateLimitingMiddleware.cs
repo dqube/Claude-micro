@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Globalization;
 using BuildingBlocks.API.Configuration.Options;
 
 namespace BuildingBlocks.API.Middleware.Security;
 
-public class RateLimitingMiddleware
+public class RateLimitingMiddleware : IDisposable
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<RateLimitingMiddleware> _logger;
@@ -29,6 +30,8 @@ public class RateLimitingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        
         var clientId = GetClientIdentifier(context);
         var now = DateTime.UtcNow;
         
@@ -52,7 +55,7 @@ public class RateLimitingMiddleware
                 clientId, clientInfo.RequestCount, _options.PermitLimit);
 
             context.Response.StatusCode = 429;
-            context.Response.Headers.TryAdd("Retry-After", _options.Window.TotalSeconds.ToString());
+            context.Response.Headers.TryAdd("Retry-After", _options.Window.TotalSeconds.ToString(CultureInfo.InvariantCulture));
             
             await context.Response.WriteAsync("Rate limit exceeded. Try again later.");
             return;
@@ -61,7 +64,7 @@ public class RateLimitingMiddleware
         await _next(context);
     }
 
-    private string GetClientIdentifier(HttpContext context)
+    private static string GetClientIdentifier(HttpContext context)
     {
         // Try to get client IP from various headers (for proxy scenarios)
         var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',').FirstOrDefault()?.Trim()
@@ -90,7 +93,16 @@ public class RateLimitingMiddleware
 
     public void Dispose()
     {
-        _cleanupTimer?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _cleanupTimer?.Dispose();
+        }
     }
 }
 

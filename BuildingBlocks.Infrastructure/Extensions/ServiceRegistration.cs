@@ -18,6 +18,9 @@ using BuildingBlocks.Infrastructure.Serialization.Json;
 using BuildingBlocks.Infrastructure.Configuration;
 using BuildingBlocks.Infrastructure.Logging;
 using BuildingBlocks.Infrastructure.OpenTelemetry;
+using BuildingBlocks.Infrastructure.Communication.Email;
+using BuildingBlocks.Infrastructure.External.HttpClients;
+using BuildingBlocks.Infrastructure.Monitoring.Health;
 using BuildingBlocks.Application.Services;
 using StackExchange.Redis;
 
@@ -38,6 +41,9 @@ public static class ServiceRegistration
         services.AddConfigurationServices();
         services.AddLoggingServices();
         services.AddOpenTelemetryConfiguration(configuration);
+        services.AddEmailServices(configuration);
+        services.AddHttpClientServices(configuration);
+        services.AddComprehensiveHealthChecks(configuration);
 
         return services;
     }
@@ -187,6 +193,44 @@ public static class ServiceRegistration
     {
         // Register logging services
         services.AddScoped<ILoggerService, LoggerService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddEmailServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+        
+        // Register email configuration
+        services.Configure<EmailConfiguration>(configuration.GetSection("Email"));
+        
+        // Register email services
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+        services.AddScoped<IEmailService, SmtpEmailService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddHttpClientServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+        
+        // Register HTTP client configuration
+        services.Configure<HttpClientConfiguration>(configuration.GetSection("HttpClient"));
+        
+        // Register HTTP client with retry policies
+        services.AddHttpClient<HttpClientService>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                UseCookies = false
+            });
+        
+        // Register the service interface
+        services.AddScoped<IHttpClientService, HttpClientService>();
 
         return services;
     }

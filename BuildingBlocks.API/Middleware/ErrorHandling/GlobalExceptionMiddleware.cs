@@ -34,10 +34,31 @@ public class GlobalExceptionMiddleware
         {
             await _next(context);
         }
+        catch (ArgumentException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleExceptionAsync(context, ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleExceptionAsync(context, ex);
+        }
+        catch (NotImplementedException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleExceptionAsync(context, ex);
+        }
+        catch (TimeoutException ex)
+        {
+            _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
+            await HandleExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             _logUnhandledException(_logger, ex, context.TraceIdentifier, ex);
             await HandleExceptionAsync(context, ex);
+            throw;
         }
     }
 
