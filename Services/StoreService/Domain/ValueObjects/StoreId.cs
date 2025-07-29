@@ -6,7 +6,7 @@ public class StoreId : StronglyTypedId<int>
 {
     public StoreId(int value) : base(value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new ArgumentException("StoreId must be a positive integer", nameof(value));
     }
     

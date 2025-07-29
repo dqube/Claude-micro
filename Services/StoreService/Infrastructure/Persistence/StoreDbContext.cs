@@ -39,8 +39,8 @@ public class StoreDbContext : DbContext, IDbContext
         modelBuilder.ApplyConfiguration(new StoreConfiguration());
         modelBuilder.ApplyConfiguration(new RegisterConfiguration());
         
-        // Apply inbox/outbox configurations - use stores schema
-        modelBuilder.ConfigureInboxOutbox("stores");
+        // Apply inbox/outbox configurations - use store schema
+        modelBuilder.ConfigureInboxOutbox("store");
 
         // Configure all strongly typed IDs automatically
         modelBuilder.ConfigureStronglyTypedIds();
