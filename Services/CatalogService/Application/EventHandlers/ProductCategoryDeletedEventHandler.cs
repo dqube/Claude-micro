@@ -19,17 +19,17 @@ public class ProductCategoryDeletedEventHandler : IEventHandler<DomainEventWrapp
 
         var domainEvent = eventWrapper.DomainEvent;
         
-        _logger.LogWarning(
-            "Product category deleted: {CategoryId} '{Name}' (Parent: {ParentCategoryId} '{ParentCategoryName}'), " +
-            "Deleted at {DeletedAt}, Products moved: {ProductsMovedCount} (to: {ProductsMovedToCategoryId}), " +
+        _logger.LogInformation(
+            "Product category deleted: {CategoryId} '{Name}', Parent: {ParentCategoryId} '{ParentCategoryName}', " +
+            "Deleted: {DeletedAt}, Products moved: {ProductsMovedCount} to category {ProductsMovedToCategoryId}, " +
             "Child categories moved: {ChildCategoriesMovedCount}",
             domainEvent.CategoryId.Value,
             domainEvent.Name,
-            domainEvent.ParentCategoryId?.Value ?? "None",
+            domainEvent.ParentCategoryId?.Value.ToString() ?? "None",
             domainEvent.ParentCategoryName ?? "None",
             domainEvent.DeletedAt,
             domainEvent.ProductsMovedCount,
-            domainEvent.ProductsMovedToCategoryId?.Value ?? "None",
+            domainEvent.ProductsMovedToCategoryId?.Value.ToString() ?? "None",
             domainEvent.ChildCategoriesMovedCount);
 
         // Business logic for category deletion:
@@ -47,7 +47,7 @@ public class ProductCategoryDeletedEventHandler : IEventHandler<DomainEventWrapp
             _logger.LogInformation(
                 "Category deletion resulted in {ProductsMovedCount} products being moved to category {TargetCategoryId}",
                 domainEvent.ProductsMovedCount,
-                domainEvent.ProductsMovedToCategoryId?.Value ?? "Unknown");
+                domainEvent.ProductsMovedToCategoryId?.Value.ToString() ?? "Unknown");
 
             // Additional processing for moved products:
             // - Verify product configurations are still valid

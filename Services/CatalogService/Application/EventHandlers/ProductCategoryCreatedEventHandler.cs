@@ -20,12 +20,12 @@ public class ProductCategoryCreatedEventHandler : IEventHandler<DomainEventWrapp
         var domainEvent = eventWrapper.DomainEvent;
         
         _logger.LogInformation(
-            "Product category created: {CategoryId} '{Name}' (Description: '{Description}'), " +
-            "Parent: {ParentCategoryId} '{ParentCategoryName}', Root Category: {IsRootCategory}, Created at {CreatedAt}",
+            "Product category created: {CategoryId} '{Name}' with description '{Description}', " +
+            "Parent: {ParentCategoryId} '{ParentCategoryName}', IsRoot: {IsRootCategory}, Created: {CreatedAt}",
             domainEvent.CategoryId.Value,
             domainEvent.Name,
             domainEvent.Description ?? "None",
-            domainEvent.ParentCategoryId?.Value ?? "None",
+            domainEvent.ParentCategoryId?.Value.ToString() ?? "None",
             domainEvent.ParentCategoryName ?? "None",
             domainEvent.IsRootCategory,
             domainEvent.CreatedAt);

@@ -47,6 +47,7 @@ public class CreateProductCategoryCommandHandler : ICommandHandler<CreateProduct
         var category = new ProductCategory(
             CategoryId.From(nextId),
             request.Name,
+            null, // No description provided in command
             parentCategoryId);
 
         await _categoryRepository.AddAsync(category, cancellationToken);

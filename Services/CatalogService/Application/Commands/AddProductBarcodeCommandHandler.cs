@@ -38,7 +38,8 @@ public class AddProductBarcodeCommandHandler : ICommandHandler<AddProductBarcode
             throw new DuplicateBarcodeException(barcodeValue);
         }
 
-        product.AddBarcode(barcodeValue, barcodeType, Guid.Empty);
+        var barcodeId = BarcodeId.New();
+        product.AddBarcode(barcodeId, barcodeValue, barcodeType, Guid.Empty);
         _productRepository.Update(product);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }

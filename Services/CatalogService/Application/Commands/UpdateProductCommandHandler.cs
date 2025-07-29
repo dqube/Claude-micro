@@ -45,7 +45,7 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
         product.UpdateBasicInfo(request.Name, request.Description, Guid.Empty);
         product.UpdatePricing(basePrice, costPrice, Guid.Empty);
-        product.UpdateCategory(categoryId, Guid.Empty);
+        product.MoveToCategory(categoryId, Guid.Empty);
         product.UpdateTaxability(request.IsTaxable, Guid.Empty);
 
         _productRepository.Update(product);
