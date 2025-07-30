@@ -9,6 +9,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics;
 using System.Reflection;
+using BuildingBlocks.Infrastructure.Logging;
 
 namespace BuildingBlocks.Infrastructure.Observability;
 
@@ -20,6 +21,11 @@ public static class OpenTelemetryExtensions
         ArgumentNullException.ThrowIfNull(environment);
 
         var openTelemetryOptions = configuration.GetSection("OpenTelemetry").Get<OpenTelemetryOptions>() ?? new OpenTelemetryOptions();
+        
+        // Configure redaction if enabled
+        var redactionOptions = configuration.GetSection("OpenTelemetry:Redaction").Get<RedactionOptions>() ?? new RedactionOptions();
+        services.AddSingleton(redactionOptions);
+        services.AddSingleton<IDataRedactionService, DataRedactionService>();
         
         // Use configured service name or fallback to assembly name
         var serviceName = !string.IsNullOrEmpty(openTelemetryOptions.ServiceName) 
@@ -104,6 +110,13 @@ public static class OpenTelemetryExtensions
                 }
                 
                 builder.SetSampler(new AlwaysOnSampler());
+
+                // Add redaction processor if enabled
+                if (redactionOptions.Enabled)
+                {
+                    builder.AddProcessor(serviceProvider => new RedactionActivityProcessor(
+                        serviceProvider.GetRequiredService<IDataRedactionService>()));
+                }
 
                 // Add exporters based on configuration
                 if (openTelemetryOptions.Exporters.Console.Enabled)
@@ -193,6 +206,13 @@ public static class OpenTelemetryExtensions
                     options.IncludeScopes = openTelemetryOptions.Logging.IncludeScopes;
                     options.ParseStateValues = openTelemetryOptions.Logging.ParseStateValues;
 
+                    // Add redaction processor if enabled
+                    if (redactionOptions.Enabled)
+                    {
+                        options.AddProcessor(serviceProvider => new RedactionLogProcessor(
+                            serviceProvider.GetRequiredService<IDataRedactionService>()));
+                    }
+
                     // Add exporters based on configuration
                     if (openTelemetryOptions.Exporters.Console.Enabled)
                     {
@@ -239,6 +259,7 @@ public class OpenTelemetryOptions
     public LoggingOptions Logging { get; set; } = new();
     public TracingOptions Tracing { get; set; } = new();
     public MetricsOptions Metrics { get; set; } = new();
+    public RedactionOptions Redaction { get; set; } = new();
 }
 
 public class ExportersOptions
