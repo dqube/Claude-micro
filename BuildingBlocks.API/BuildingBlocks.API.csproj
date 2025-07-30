@@ -1,1 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk"/>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>BuildingBlocks.API</PackageId>
+    <Description>API layer building blocks for .NET applications following Clean Architecture principles</Description>
+    <PackageTags>api;web;aspnetcore;clean-architecture;building-blocks</PackageTags>
+  </PropertyGroup>
+
+  <!-- All project references and package references are defined in Directory.Build.targets -->
+
+</Project>

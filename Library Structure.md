@@ -234,8 +234,8 @@ BuildingBlocks.Infrastructure/
 ├── 📁 Logging/                         # Logging implementations
 │   ├── ILoggerService.cs               # Logger service interface
 │   ├── LoggerService.cs                # Logger service implementation
-│   ├── 📁 Serilog/                     # Serilog configuration
-│   │   └── 📁 Enrichers/               # Log enrichers
+│   ├── 📁 OpenTelemetry/               # OpenTelemetry configuration
+│   │   └── 📁 Enrichers/               # Log enrichers and processors
 │   ├── 📁 ApplicationInsights/         # Application Insights
 │   └── 📁 Structured/                  # Structured logging
 ├── 📁 Authentication/                  # Authentication implementations

@@ -56,8 +56,8 @@ This solution follows Clean Architecture principles with clear separation of con
 - **Multi-Tenant Support**: Organization-aware data isolation
 
 ### 📊 Observability & Monitoring
-- **Structured Logging**: Serilog with enrichers and correlation IDs
-- **OpenTelemetry**: Distributed tracing and metrics
+- **OpenTelemetry**: Complete observability with logging, metrics, and distributed tracing
+- **Structured Logging**: Rich, contextualized logging with correlation IDs
 - **Health Checks**: Comprehensive system health monitoring
 - **Performance Monitoring**: Request/response time tracking
 

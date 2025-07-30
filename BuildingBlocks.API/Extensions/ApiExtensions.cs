@@ -1,10 +1,12 @@
 using BuildingBlocks.API.Authentication.ApiKey;
 using BuildingBlocks.API.Authentication.JWT;
+using BuildingBlocks.API.Configuration;
 using BuildingBlocks.API.Configuration.Extensions;
 using BuildingBlocks.API.Configuration.Options;
 using BuildingBlocks.API.Health.Extensions;
 using BuildingBlocks.API.OpenApi.Extensions;
 using BuildingBlocks.API.Versioning.Extensions;
+using BuildingBlocks.Infrastructure.Observability;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +26,16 @@ public static class ApiExtensions
     /// <param name="services">The service collection</param>
     /// <param name="configuration">Application configuration</param>
     /// <returns>The service collection for method chaining</returns>
-    public static IServiceCollection AddBuildingBlocksApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddBuildingBlocksApi(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         // Core API configuration
         services.AddApiConfiguration(configuration);
+        
+        // OpenTelemetry observability (logging, metrics, tracing)
+        services.AddOpenTelemetryObservability(configuration, environment);
+        
+        // Custom metrics service
+        services.AddCustomMetrics();
         
         // Middleware pipeline components
         services.AddApiMiddleware();
@@ -76,6 +84,22 @@ public static class ApiExtensions
         return services;
     }
     
+    /// <summary>
+    /// Registers all BuildingBlocks.API services with dependency injection (backward compatibility)
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">Application configuration</param>
+    /// <returns>The service collection for method chaining</returns>
+    public static IServiceCollection AddBuildingBlocksApi(this IServiceCollection services, IConfiguration configuration)
+    {
+        // For backward compatibility, get the environment from services
+        var serviceProvider = services.BuildServiceProvider();
+        var environment = serviceProvider.GetService<IHostEnvironment>() ?? 
+                         new DevelopmentHostEnvironment();
+        
+        return services.AddBuildingBlocksApi(configuration, environment);
+    }
+
     /// <summary>
     /// Registers BuildingBlocks.API services with custom configuration
     /// </summary>
@@ -198,9 +222,17 @@ public static class ApiExtensions
             app.UseRateLimiter();
         }
 
-        // Authentication & Authorization
-        app.UseAuthentication();
-        app.UseAuthorization();
+        // Authentication & Authorization (conditional based on configuration)
+        var authSection = configuration.GetSection("Authentication");
+        bool authEnabled = authSection.GetValue<bool>("Enabled", false) || 
+                          authSection.GetSection("Jwt").Exists() || 
+                          authSection.GetSection("ApiKey").Exists();
+        
+        if (authEnabled)
+        {
+            app.UseAuthentication();
+            app.UseAuthorization();
+        }
 
         //Request correlation and logging
         app.UseCorrelationId();

@@ -57,11 +57,11 @@ This infrastructure library implements the infrastructure layer of Clean Archite
 - **Push Notifications** (Firebase) for mobile applications
 
 ### 📝 Logging & Observability
-- **Structured Logging** with Serilog integration and enrichers
+- **OpenTelemetry** complete observability with logging, metrics, and distributed tracing
+- **Structured Logging** with enrichers and correlation IDs
 - **Application Insights** integration for telemetry
-- **Performance Monitoring** with metrics collection
+- **Performance Monitoring** with comprehensive metrics collection
 - **Health Checks** for system components and dependencies
-- **Distributed Tracing** with OpenTelemetry support
 - **Custom Log Enrichers** for correlation IDs and user context
 
 ### ⚙️ Background Processing
@@ -139,9 +139,13 @@ BuildingBlocks.Infrastructure/
 │   ├── 🔌 APIs/               # External API integrations
 │   └── 🏢 ThirdParty/         # Third-party service wrappers
 ├── 📁 Logging/                # Logging and observability
-│   ├── 📝 Serilog/            # Serilog configuration and enrichers
+│   ├── 📊 OpenTelemetry/      # OpenTelemetry configuration and instrumentation
 │   ├── 📊 ApplicationInsights/# Application Insights integration
 │   └── 🏗️ Structured/         # Structured logging utilities
+├── 📁 Observability/          # Observability infrastructure
+│   ├── 📊 OpenTelemetryExtensions.cs # Complete OpenTelemetry configuration
+│   ├── 📈 MetricsService.cs   # Custom metrics service
+│   └── 🔍 TracingService.cs   # Distributed tracing utilities
 ├── 📁 Mapping/                # Object mapping services
 │   ├── 🗺️ AutoMapper/         # AutoMapper integration
 │   ├── ⚡ Mapster/            # Mapster integration
@@ -1594,8 +1598,9 @@ This infrastructure library depends on:
 - `CsvHelper` - CSV processing
 
 ### Logging & Monitoring
-- `Serilog` - Structured logging
-- `Serilog.Extensions.Hosting` - Hosting integration
+- `OpenTelemetry` - Complete observability framework
+- `OpenTelemetry.Extensions.Hosting` - Hosting integration
+- `Microsoft.Extensions.Logging.OpenTelemetry` - OpenTelemetry logging provider
 - `Microsoft.ApplicationInsights.AspNetCore` - Application Insights
 
 ### Background Processing

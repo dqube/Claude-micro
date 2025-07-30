@@ -17,7 +17,7 @@ using BuildingBlocks.Infrastructure.Storage.Files;
 using BuildingBlocks.Infrastructure.Serialization.Json;
 using BuildingBlocks.Infrastructure.Configuration;
 using BuildingBlocks.Infrastructure.Logging;
-using BuildingBlocks.Infrastructure.OpenTelemetry;
+using BuildingBlocks.Infrastructure.Observability;
 using BuildingBlocks.Infrastructure.Communication.Email;
 using BuildingBlocks.Infrastructure.External.HttpClients;
 using BuildingBlocks.Infrastructure.Monitoring.Health;
@@ -40,7 +40,7 @@ public static class ServiceRegistration
         services.AddSerializationServices();
         services.AddConfigurationServices();
         services.AddLoggingServices();
-        services.AddOpenTelemetryConfiguration(configuration);
+        services.AddOpenTelemetryObservability(configuration, new DevelopmentHostEnvironment());
         services.AddEmailServices(configuration);
         services.AddHttpClientServices(configuration);
         services.AddComprehensiveHealthChecks(configuration);
