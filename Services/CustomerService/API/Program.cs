@@ -8,7 +8,7 @@ using CustomerService.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add BuildingBlocks.API services (includes endpoints, OpenAPI, health checks, CORS, JSON converters, etc.)
-builder.Services.AddBuildingBlocksApi(builder.Configuration);
+builder.Services.AddBuildingBlocksApi(builder.Configuration, builder.Environment);
 
 // Add domain layers
 builder.Services.AddDomain();

@@ -7,7 +7,7 @@ using ContactService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddBuildingBlocksApi(builder.Configuration);
+builder.Services.AddBuildingBlocksApi(builder.Configuration, builder.Environment);
 
 builder.Services.AddDomain();
 builder.Services.AddApplication();

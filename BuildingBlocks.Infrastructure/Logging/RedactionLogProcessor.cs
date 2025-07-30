@@ -29,60 +29,10 @@ public class RedactionLogProcessor : BaseProcessor<LogRecord>
             data.Body = _redactionService.RedactMessage(bodyString);
         }
 
-        // Redact state values if they exist
-        if (data.State is IReadOnlyList<KeyValuePair<string, object?>> stateList)
-        {
-            var redactedState = new List<KeyValuePair<string, object?>>();
-            foreach (var kvp in stateList)
-            {
-                var redactedValue = kvp.Value;
-                if (kvp.Value is string stringValue)
-                {
-                    redactedValue = _redactionService.RedactMessage(stringValue);
-                }
-                else if (kvp.Value != null)
-                {
-                    var jsonValue = _redactionService.RedactObject(kvp.Value);
-                    redactedValue = jsonValue;
-                }
-
-                redactedState.Add(new KeyValuePair<string, object?>(kvp.Key, redactedValue));
-            }
-            // Note: LogRecord.State is read-only, so we can't modify it directly
-            // This is a limitation of OpenTelemetry's current API
-        }
-
-        // Redact attributes
-        if (data.Attributes != null)
-        {
-            var attributesToUpdate = new List<KeyValuePair<string, object?>>();
-            
-            foreach (var attribute in data.Attributes)
-            {
-                if (attribute.Value is string stringValue)
-                {
-                    var redactedValue = _redactionService.RedactMessage(stringValue);
-                    if (redactedValue != stringValue)
-                    {
-                        attributesToUpdate.Add(new KeyValuePair<string, object?>(attribute.Key, redactedValue));
-                    }
-                }
-                else if (attribute.Value != null)
-                {
-                    var redactedValue = _redactionService.RedactObject(attribute.Value);
-                    if (redactedValue != attribute.Value?.ToString())
-                    {
-                        attributesToUpdate.Add(new KeyValuePair<string, object?>(attribute.Key, redactedValue));
-                    }
-                }
-            }
-
-            // Update attributes that need redaction
-            foreach (var kvp in attributesToUpdate)
-            {
-                data.Attributes?.Add(kvp);
-            }
-        }
+        // Note: Due to OpenTelemetry's API limitations, we cannot directly modify
+        // LogRecord.State and LogRecord.Attributes as they are read-only.
+        // The primary redaction happens through the formatted message above.
+        // For comprehensive redaction, use the RedactionLogger wrapper instead.
 
         base.OnEnd(data);
     }
