@@ -1,5 +1,5 @@
 using BuildingBlocks.Domain.Repository;
-using BuildingBlocks.Application.Outbox;
+using BuildingBlocks.Infrastructure.Extensions;
 using EmployeeService.Domain.Repositories;
 using EmployeeService.Infrastructure.Persistence;
 using EmployeeService.Infrastructure.Repositories;
@@ -19,7 +19,10 @@ public static class DependencyInjection
 
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IOutboxService, OutboxService>();
+        
+        // Override with EmployeeService-specific OutboxService if needed
+        // (Inbox/Outbox services are automatically registered by AddBuildingBlocksApi)
+        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, OutboxService>();
 
         return services;
     }

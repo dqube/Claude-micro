@@ -1,10 +1,6 @@
 using BuildingBlocks.Domain.Repository;
 using BuildingBlocks.Infrastructure.Data.Converters;
 using BuildingBlocks.Infrastructure.Extensions;
-using BuildingBlocks.Application.Outbox;
-using BuildingBlocks.Application.Inbox;
-using BuildingBlocksInboxService = BuildingBlocks.Infrastructure.Services.InboxService;
-using BuildingBlocksOutboxService = BuildingBlocks.Infrastructure.Services.OutboxService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,10 +45,7 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Register only the specific BuildingBlocks services we need
-        // (avoiding conflicts with DbContext registration)
-        services.AddScoped<IInboxService, BuildingBlocksInboxService>();
-        services.AddScoped<IOutboxService, BuildingBlocksOutboxService>();
+        // Inbox/Outbox services are automatically registered by AddBuildingBlocksApi
 
         return services;
     }

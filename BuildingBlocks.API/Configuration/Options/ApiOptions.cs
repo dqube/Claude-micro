@@ -63,3 +63,12 @@ public class RateLimitingOptions
     public bool Enabled { get; set; } = true;
     public string[] ExcludedPaths { get; set; } = ["/health"];
 }
+
+public class InboxOutboxOptions
+{
+    public const string SectionName = "InboxOutbox";
+
+    public bool Enabled { get; set; } = true;
+    public bool IncludeInboxService { get; set; } = true;
+    public bool IncludeOutboxService { get; set; } = true;
+}

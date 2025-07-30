@@ -6,6 +6,7 @@ using BuildingBlocks.API.Configuration.Options;
 using BuildingBlocks.API.Health.Extensions;
 using BuildingBlocks.API.OpenApi.Extensions;
 using BuildingBlocks.API.Versioning.Extensions;
+using BuildingBlocks.Infrastructure.Extensions;
 using BuildingBlocks.Infrastructure.Observability;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -80,6 +81,9 @@ public static class ApiExtensions
         
         // JSON configuration with custom converters
         services.AddApiJsonConfiguration();
+        
+        // Inbox/Outbox services (conditional based on configuration)
+        services.AddInboxOutboxServices(configuration);
         
         return services;
     }
@@ -183,6 +187,12 @@ public static class ApiExtensions
         
         // JSON configuration with custom converters (always included)
         services.AddApiJsonConfiguration();
+        
+        // Inbox/Outbox services (conditional based on options)
+        if (options.IncludeInboxOutboxServices)
+        {
+            services.AddInboxOutboxServices();
+        }
         
         return services;
     }
@@ -411,6 +421,7 @@ public class ApiRegistrationOptions
     public bool IncludeHealthChecks { get; set; } = true;
     public bool IncludeAuthentication { get; set; } = true;
     public bool IncludeDocumentation { get; set; } = true;
+    public bool IncludeInboxOutboxServices { get; set; } = true;
 }
 
 /// <summary>
