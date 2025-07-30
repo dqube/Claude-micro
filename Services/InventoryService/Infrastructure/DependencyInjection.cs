@@ -9,7 +9,6 @@ using InventoryService.Domain.ValueObjects;
 using InventoryService.Domain.Repositories;
 using InventoryService.Infrastructure.Persistence;
 using InventoryService.Infrastructure.Repositories;
-using InventoryService.Infrastructure.Services;
 
 namespace InventoryService.Infrastructure;
 
@@ -45,7 +44,8 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, OutboxService>();
+        // Register BuildingBlocks OutboxService instead of custom implementation
+        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, BuildingBlocks.Infrastructure.Services.OutboxService>();
 
         return services;
     }

@@ -9,7 +9,6 @@ using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Repositories;
 using AuthService.Infrastructure.Persistence;
 using AuthService.Infrastructure.Repositories;
-using AuthService.Infrastructure.Services;
 
 namespace AuthService.Infrastructure;
 
@@ -61,9 +60,8 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Override with AuthService-specific OutboxService if needed
-        // (Inbox/Outbox services are automatically registered by AddBuildingBlocksApi)
-        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, OutboxService>();
+        // Register BuildingBlocks OutboxService instead of custom implementation
+        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, BuildingBlocks.Infrastructure.Services.OutboxService>();
 
         return services;
     }
