@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API\ReportingService.API.csproj" />
+    <ProjectReference Include="..\Application\ReportingService.Application.csproj" />
+    <ProjectReference Include="..\Domain\ReportingService.Domain.csproj" />
+    <ProjectReference Include="..\Infrastructure\ReportingService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project> 

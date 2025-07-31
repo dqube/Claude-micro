@@ -1,0 +1,25 @@
+using Microsoft.Extensions.DependencyInjection;
+using BuildingBlocks.Application.Extensions;
+using FluentValidation;
+using System.Reflection;
+
+namespace ReportingService.Application;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        
+        // Register mediator with all handlers from this assembly
+        services.AddMediatorWithAssemblies(assembly);
+        
+        // Register BuildingBlocks application layer services (includes inbox/outbox support)
+        services.AddApplicationLayer();
+        
+        // Register FluentValidation validators
+        services.AddValidatorsFromAssembly(assembly);
+        
+        return services;
+    }
+} 
