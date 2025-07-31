@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using BuildingBlocks.Application.Inbox;
 using BuildingBlocks.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Infrastructure.Services;
 
@@ -146,7 +146,7 @@ public partial class InboxService : IInboxService
                         m.Status == InboxMessageStatus.Discarded))
             .ToListAsync(cancellationToken);
 
-        if (expiredMessages.Any())
+        if (expiredMessages.Count != 0)
         {
             _context.GetDbSet<InboxMessage>().RemoveRange(expiredMessages);
             await _context.SaveChangesAsync(cancellationToken);
