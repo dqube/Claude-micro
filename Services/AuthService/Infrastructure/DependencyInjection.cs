@@ -60,8 +60,6 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Register BuildingBlocks OutboxService instead of custom implementation
-        services.AddScoped<BuildingBlocks.Application.Outbox.IOutboxService, BuildingBlocks.Infrastructure.Services.OutboxService>();
 
         return services;
     }
