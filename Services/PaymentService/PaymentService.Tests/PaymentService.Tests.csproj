@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API\PaymentService.API.csproj" />
+    <ProjectReference Include="..\Application\PaymentService.Application.csproj" />
+    <ProjectReference Include="..\Domain\PaymentService.Domain.csproj" />
+    <ProjectReference Include="..\Infrastructure\PaymentService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project> 
