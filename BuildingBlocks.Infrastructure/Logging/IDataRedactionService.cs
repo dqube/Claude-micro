@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection;
 using System.Text.Json;
 
 namespace BuildingBlocks.Infrastructure.Logging;
@@ -8,6 +10,8 @@ public interface IDataRedactionService
     string RedactJson(string json);
     string RedactObject(object obj);
     Dictionary<string, object?> RedactProperties(Dictionary<string, object?> properties);
+    bool IsSensitiveField(string fieldName);
+    bool ContainsSensitiveData(string data);
 }
 
 public class DataRedactionService : IDataRedactionService
@@ -69,13 +73,65 @@ public class DataRedactionService : IDataRedactionService
 
         try
         {
-            var json = JsonSerializer.Serialize(obj);
-            return RedactJson(json);
+            // If it's a collection, handle each item
+            if (obj is IEnumerable enumerable && !(obj is string))
+            {
+                var items = new List<object>();
+                foreach (var item in enumerable)
+                {
+                    if (item != null)
+                    {
+                        var itemStr = item.ToString() ?? string.Empty;
+                        if (ContainsSensitiveData(itemStr) || HasSensitiveProperties(item))
+                        {
+                            var json = JsonSerializer.Serialize(item, new JsonSerializerOptions { WriteIndented = false });
+                            items.Add(RedactJson(json));
+                        }
+                        else
+                        {
+                            items.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        items.Add(item);
+                    }
+                }
+                return string.Join(", ", items);
+            }
+            
+            // For single objects, serialize to JSON and redact
+            var objStr = obj.ToString() ?? string.Empty;
+            if (ContainsSensitiveData(objStr) || HasSensitiveProperties(obj))
+            {
+                var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = false });
+                return RedactJson(json);
+            }
+            
+            return objStr;
         }
         catch
         {
             return RedactMessage(obj.ToString() ?? string.Empty);
         }
+    }
+
+    private bool HasSensitiveProperties(object obj)
+    {
+        if (obj == null) return false;
+        
+        var type = obj.GetType();
+        var properties = type.GetProperties();
+        
+        foreach (var prop in properties)
+        {
+            if (IsSensitiveField(prop.Name))
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public Dictionary<string, object?> RedactProperties(Dictionary<string, object?> properties)
@@ -200,10 +256,32 @@ public class DataRedactionService : IDataRedactionService
         return message;
     }
 
-    private bool IsSensitiveField(string fieldName)
+    public bool IsSensitiveField(string fieldName)
     {
         return _options.SensitiveFields.Any(sf => 
             string.Equals(sf, fieldName, StringComparison.OrdinalIgnoreCase) ||
             fieldName.Contains(sf, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public bool ContainsSensitiveData(string data)
+    {
+        if (string.IsNullOrEmpty(data))
+            return false;
+
+        // Check if the data contains any sensitive field patterns
+        foreach (var field in _options.SensitiveFields)
+        {
+            if (data.Contains(field, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        // Check against regex patterns if configured
+        foreach (var pattern in _options.RegexPatterns)
+        {
+            if (pattern.Value.IsMatch(data))
+                return true;
+        }
+
+        return false;
     }
 }

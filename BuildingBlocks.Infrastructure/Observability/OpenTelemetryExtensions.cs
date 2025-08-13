@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -271,10 +272,32 @@ public static class OpenTelemetryExtensions
             {
                 builder.ClearProviders();
                 
-                if (environment.IsDevelopment())
+                // Add redaction wrapper factory if enabled
+                if (redactionOptions.Enabled)
                 {
-                    builder.AddConsole();
-                    builder.AddDebug();
+                    builder.Services.AddSingleton<ILoggerFactory>(serviceProvider =>
+                    {
+                        var providers = new List<ILoggerProvider>();
+                        
+                        if (environment.IsDevelopment())
+                        {
+                            providers.Add(new Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider(
+                                serviceProvider.GetRequiredService<IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions>>()));
+                            providers.Add(new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider());
+                        }
+                        
+                        var baseFactory = new LoggerFactory(providers);
+                        var redactionService = serviceProvider.GetRequiredService<IDataRedactionService>();
+                        return new RedactionLoggerFactory(baseFactory, redactionService);
+                    });
+                }
+                else
+                {
+                    if (environment.IsDevelopment())
+                    {
+                        builder.AddConsole();
+                        builder.AddDebug();
+                    }
                 }
 
                 builder.AddOpenTelemetry(options =>
@@ -283,13 +306,6 @@ public static class OpenTelemetryExtensions
                     options.IncludeFormattedMessage = openTelemetryOptions.Logging.IncludeFormattedMessage;
                     options.IncludeScopes = openTelemetryOptions.Logging.IncludeScopes;
                     options.ParseStateValues = openTelemetryOptions.Logging.ParseStateValues;
-
-                    // Add redaction processor if enabled
-                    if (redactionOptions.Enabled)
-                    {
-                        options.AddProcessor(serviceProvider => new RedactionLogProcessor(
-                            serviceProvider.GetRequiredService<IDataRedactionService>()));
-                    }
 
                     // Add exporters based on configuration
                     if (openTelemetryOptions.Exporters.Console.Enabled)

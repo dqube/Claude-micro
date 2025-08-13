@@ -39,7 +39,7 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PagedResult<Use
             .ToList();
 
         var userDtos = users?.Select(MapToDto).ToList() ?? new List<UserDto>();
-        _logger.LogInformation("Mapped {UserCount} users to DTOs", userDtos.Count);
+        _logger.LogInformation("Mapped {UserDto} users to DTOs", userDtos);
         _logger.LogInformation("Retrieved {UserCount} users", userDtos.Count);
 
         return new PagedResult<UserDto>(
