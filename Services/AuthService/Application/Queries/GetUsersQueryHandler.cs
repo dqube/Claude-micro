@@ -5,16 +5,19 @@ using AuthService.Domain.Entities;
 using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Repositories;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 
 namespace AuthService.Application.Queries;
 
 public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PagedResult<UserDto>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<GetUsersQueryHandler> _logger;
 
-    public GetUsersQueryHandler(IUserRepository userRepository)
+    public GetUsersQueryHandler(IUserRepository userRepository, ILogger<GetUsersQueryHandler> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     public async Task<PagedResult<UserDto>> HandleAsync(GetUsersQuery request, CancellationToken cancellationToken = default)
@@ -36,6 +39,8 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PagedResult<Use
             .ToList();
 
         var userDtos = users?.Select(MapToDto).ToList() ?? new List<UserDto>();
+        _logger.LogInformation("Mapped {UserCount} users to DTOs", userDtos.Count);
+        _logger.LogInformation("Retrieved {UserCount} users", userDtos.Count);
 
         return new PagedResult<UserDto>(
             userDtos,

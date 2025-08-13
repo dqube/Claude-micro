@@ -60,7 +60,6 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-
         return services;
     }
 }

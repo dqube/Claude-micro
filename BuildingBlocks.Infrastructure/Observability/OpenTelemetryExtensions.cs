@@ -21,8 +21,87 @@ public static class OpenTelemetryExtensions
 
         var openTelemetryOptions = configuration.GetSection("OpenTelemetry").Get<OpenTelemetryOptions>() ?? new OpenTelemetryOptions();
         
-        // Configure redaction if enabled
-        var redactionOptions = configuration.GetSection("OpenTelemetry:Redaction").Get<RedactionOptions>() ?? new RedactionOptions();
+        // Configure redaction from multiple sources
+        var redactionOptions = new RedactionOptions();
+        
+        // Check if redaction is explicitly disabled in either section
+        var otelRedactionEnabled = configuration.GetValue<bool?>("OpenTelemetry:Redaction:Enabled");
+        var redactionSettingsEnabled = configuration.GetValue<bool?>("RedactionSettings:Enabled");
+        
+        // If either section explicitly disables redaction, disable it entirely
+        if (otelRedactionEnabled == false || redactionSettingsEnabled == false)
+        {
+            redactionOptions.Enabled = false;
+        }
+        else
+        {
+            // Start with a fresh set of sensitive fields to avoid conflicts with defaults
+            var configuredSensitiveFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            // First, try OpenTelemetry:Redaction section
+            var otelRedactionSection = configuration.GetSection("OpenTelemetry:Redaction");
+            if (otelRedactionSection.Exists())
+            {
+                otelRedactionSection.Bind(redactionOptions);
+                
+                // Get sensitive fields from OpenTelemetry section
+                var otelSensitiveFields = otelRedactionSection.GetSection("SensitiveFields").Get<string[]>();
+                if (otelSensitiveFields?.Length > 0)
+                {
+                    foreach (var field in otelSensitiveFields)
+                    {
+                        configuredSensitiveFields.Add(field);
+                    }
+                }
+            }
+            
+            // Then, merge settings from RedactionSettings section
+            var redactionSettingsSection = configuration.GetSection("RedactionSettings");
+            if (redactionSettingsSection.Exists())
+            {
+                // Only override enabled if not already explicitly set
+                if (redactionSettingsEnabled.HasValue && otelRedactionEnabled != true)
+                {
+                    redactionOptions.Enabled = redactionSettingsEnabled.Value;
+                }
+                
+                var redactionText = redactionSettingsSection.GetValue<string>("RedactionText");
+                if (!string.IsNullOrEmpty(redactionText))
+                {
+                    redactionOptions.RedactionText = redactionText;
+                }
+                
+                // Add sensitive fields from RedactionSettings
+                var sensitiveFields = redactionSettingsSection.GetSection("SensitiveFields").Get<string[]>();
+                if (sensitiveFields?.Length > 0)
+                {
+                    foreach (var field in sensitiveFields)
+                    {
+                        configuredSensitiveFields.Add(field);
+                    }
+                }
+                
+                // Handle redaction character
+                var redactionChar = redactionSettingsSection.GetValue<string>("RedactionCharacter");
+                if (!string.IsNullOrEmpty(redactionChar))
+                {
+                    redactionOptions.RedactionText = new string(redactionChar[0], 8);
+                }
+            }
+            
+            // If we have configured sensitive fields, use them instead of defaults
+            if (configuredSensitiveFields.Count > 0)
+            {
+                // Clear defaults and use only configured fields
+                redactionOptions.SensitiveFields.Clear();
+                foreach (var field in configuredSensitiveFields)
+                {
+                    redactionOptions.SensitiveFields.Add(field);
+                }
+            }
+            // If no configured fields, keep the defaults from RedactionOptions constructor
+        }
+        
         services.AddSingleton(redactionOptions);
         services.AddSingleton<IDataRedactionService, DataRedactionService>();
         

@@ -87,7 +87,7 @@ internal static class UserEndpoints
 
             var result = await mediator.QueryAsync<GetUsersQuery, PagedResult<UserDto>>(query, cancellationToken);
             var correlationId = context.GetCorrelationId();
-            
+
             return ResponseFactory.PagedResult(result.Items, result.TotalCount, result.Page, result.PageSize, "Users retrieved successfully", correlationId);
         }
         catch (InvalidOperationException ex)
