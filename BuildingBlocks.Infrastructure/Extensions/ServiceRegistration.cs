@@ -10,7 +10,6 @@ using BuildingBlocks.Infrastructure.Data.Migrations;
 using BuildingBlocks.Infrastructure.Data.Seeding;
 using BuildingBlocks.Infrastructure.Caching;
 using BuildingBlocks.Application.Caching;
-using BuildingBlocks.Infrastructure.Messaging.MessageBus;
 using BuildingBlocks.Infrastructure.Messaging.Kafka;
 using BuildingBlocks.Infrastructure.Messaging.Configuration;
 using BuildingBlocks.Infrastructure.Authentication.JWT;
@@ -24,6 +23,7 @@ using BuildingBlocks.Infrastructure.External.HttpClients;
 using BuildingBlocks.Infrastructure.Monitoring.Health;
 using BuildingBlocks.Application.Services;
 using StackExchange.Redis;
+using BuildingBlocks.Application.Messaging;
 
 namespace BuildingBlocks.Infrastructure.Extensions;
 
@@ -131,7 +131,7 @@ public static class ServiceRegistration
     }
 
     /// <summary>
-    /// Adds messaging services based on configuration provider (InMemory or Kafka)
+    /// Adds messaging services based on configuration provider (Kafka only)
     /// </summary>
     public static IServiceCollection AddMessagingServices(
         this IServiceCollection services,
@@ -141,7 +141,7 @@ public static class ServiceRegistration
 
         // Read the messaging provider from configuration
         var messagingSection = configuration.GetSection("Messaging");
-        var provider = messagingSection["Provider"] ?? "InMemory";
+        var provider = messagingSection["Provider"] ?? "Kafka";
 
         if (provider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
         {
@@ -149,11 +149,7 @@ public static class ServiceRegistration
             services.Configure<KafkaConfiguration>(configuration.GetSection(KafkaConfiguration.SectionName));
             
             // Register Kafka message bus for Application.Messaging.IMessageBus interface
-            services.AddSingleton<BuildingBlocks.Application.Messaging.IMessageBus, KafkaMessageBus>();
-            
-            // Register Kafka publisher and subscriber
-            services.AddSingleton<KafkaMessagePublisher>();
-            services.AddSingleton<KafkaMessageSubscriber>();
+            services.AddSingleton<IMessageBus, KafkaMessageBus>();
             
             // Register concrete implementation
             services.AddSingleton<KafkaMessageBus>();
@@ -163,8 +159,8 @@ public static class ServiceRegistration
         }
         else
         {
-            // Register InMemory message bus (default)
-            services.AddSingleton<InMemoryMessageBus>();
+            // InMemoryMessageBus is not implemented in this project
+            throw new NotImplementedException($"Messaging provider '{provider}' is not implemented. Use 'Kafka' instead.");
         }
 
         // Register domain event service
@@ -174,11 +170,13 @@ public static class ServiceRegistration
     }
 
     /// <summary>
-    /// Legacy method for backward compatibility - defaults to InMemory
+    /// Legacy method for backward compatibility - defaults to Kafka
     /// </summary>
     public static IServiceCollection AddMessagingServices(this IServiceCollection services)
     {
-        services.AddSingleton<InMemoryMessageBus>();
+        // InMemoryMessageBus is not implemented - using Kafka as default
+        services.AddSingleton<IMessageBus, KafkaMessageBus>();
+        services.AddSingleton<KafkaMessageBus>();
         services.AddScoped<IDomainEventService, DomainEventService>();
         return services;
     }
@@ -202,9 +200,8 @@ public static class ServiceRegistration
         services.Configure(configureOptions);
 
         // Register Kafka message bus
-        services.AddSingleton<BuildingBlocks.Application.Messaging.IMessageBus, KafkaMessageBus>();
-        services.AddSingleton<KafkaMessagePublisher>();
-        services.AddSingleton<KafkaMessageSubscriber>();
+        services.AddSingleton<IMessageBus, KafkaMessageBus>();
+        
         services.AddSingleton<KafkaMessageBus>();
         services.AddSingleton<KafkaMessageSubscriptionBuilder>();
 

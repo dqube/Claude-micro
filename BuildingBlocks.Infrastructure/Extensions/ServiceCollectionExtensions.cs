@@ -5,7 +5,6 @@ using BuildingBlocks.Infrastructure.Data.Repositories;
 using BuildingBlocks.Infrastructure.Data.UnitOfWork;
 using BuildingBlocks.Infrastructure.Caching;
 using BuildingBlocks.Application.Caching;
-using BuildingBlocks.Infrastructure.Messaging.MessageBus;
 using BuildingBlocks.Infrastructure.Authentication.JWT;
 using BuildingBlocks.Infrastructure.Storage.Files;
 using BuildingBlocks.Infrastructure.Serialization.Json;
@@ -18,7 +17,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddDataLayer();
         services.AddCaching();
-        services.AddMessaging();
         services.AddAuthentication();
         services.AddSerialization();
         
@@ -76,12 +74,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMessaging(this IServiceCollection services)
-    {
-        services.AddSingleton<IMessageBus, InMemoryMessageBus>();
-        
-        return services;
-    }
+ 
 
     public static IServiceCollection AddAuthentication(this IServiceCollection services)
     {
