@@ -11,7 +11,8 @@ using BuildingBlocks.Infrastructure.Data.Seeding;
 using BuildingBlocks.Infrastructure.Caching;
 using BuildingBlocks.Application.Caching;
 using BuildingBlocks.Infrastructure.Messaging.MessageBus;
-using BuildingBlocks.Application.Messaging;
+using BuildingBlocks.Infrastructure.Messaging.Kafka;
+using BuildingBlocks.Infrastructure.Messaging.Configuration;
 using BuildingBlocks.Infrastructure.Authentication.JWT;
 using BuildingBlocks.Infrastructure.Storage.Files;
 using BuildingBlocks.Infrastructure.Serialization.Json;
@@ -34,7 +35,7 @@ public static class ServiceRegistration
     {
         services.AddDataServices(configuration);
         services.AddCachingServices(configuration);
-        services.AddMessagingServices();
+        services.AddMessagingServices(configuration);
         services.AddAuthenticationServices(configuration);
         services.AddStorageServices();
         services.AddSerializationServices();
@@ -81,8 +82,6 @@ public static class ServiceRegistration
 
         // Register migration and seeding services
         services.AddScoped<IMigrationRunner, MigrationRunner>();
-        // Register a concrete implementation for IDataSeeder here, e.g. ExampleDataSeeder
-        // services.AddScoped<IDataSeeder, ExampleDataSeeder>();
 
         return services;
     }
@@ -128,18 +127,92 @@ public static class ServiceRegistration
             services.AddDistributedMemoryCache();
         }
 
-        // CacheKeyGenerator is now a static class - no registration needed
+        return services;
+    }
+
+    /// <summary>
+    /// Adds messaging services based on configuration provider (InMemory or Kafka)
+    /// </summary>
+    public static IServiceCollection AddMessagingServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        // Read the messaging provider from configuration
+        var messagingSection = configuration.GetSection("Messaging");
+        var provider = messagingSection["Provider"] ?? "InMemory";
+
+        if (provider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
+        {
+            // Register Kafka configuration
+            services.Configure<KafkaConfiguration>(configuration.GetSection(KafkaConfiguration.SectionName));
+            
+            // Register Kafka message bus for Application.Messaging.IMessageBus interface
+            services.AddSingleton<BuildingBlocks.Application.Messaging.IMessageBus, KafkaMessageBus>();
+            
+            // Register Kafka publisher and subscriber
+            services.AddSingleton<KafkaMessagePublisher>();
+            services.AddSingleton<KafkaMessageSubscriber>();
+            
+            // Register concrete implementation
+            services.AddSingleton<KafkaMessageBus>();
+            
+            // Register subscription builder
+            services.AddSingleton<KafkaMessageSubscriptionBuilder>();
+        }
+        else
+        {
+            // Register InMemory message bus (default)
+            services.AddSingleton<InMemoryMessageBus>();
+        }
+
+        // Register domain event service
+        services.AddScoped<IDomainEventService, DomainEventService>();
 
         return services;
     }
 
+    /// <summary>
+    /// Legacy method for backward compatibility - defaults to InMemory
+    /// </summary>
     public static IServiceCollection AddMessagingServices(this IServiceCollection services)
     {
-        // Register message bus concrete implementation only
         services.AddSingleton<InMemoryMessageBus>();
-
-        // Register domain event service
         services.AddScoped<IDomainEventService, DomainEventService>();
+        return services;
+    }
+
+    /// <summary>
+    /// Adds Kafka message bus with fluent configuration and subscription builder
+    /// </summary>
+    /// <param name="services">Service collection</param>
+    /// <param name="configureOptions">Action to configure Kafka options</param>
+    /// <param name="configureSubscriptions">Action to configure message subscriptions</param>
+    /// <returns>Service collection for chaining</returns>
+    public static IServiceCollection AddMessageBus(
+        this IServiceCollection services,
+        Action<KafkaConfiguration> configureOptions,
+        Action<KafkaMessageSubscriptionBuilder>? configureSubscriptions = null)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configureOptions);
+
+        // Configure Kafka
+        services.Configure(configureOptions);
+
+        // Register Kafka message bus
+        services.AddSingleton<BuildingBlocks.Application.Messaging.IMessageBus, KafkaMessageBus>();
+        services.AddSingleton<KafkaMessagePublisher>();
+        services.AddSingleton<KafkaMessageSubscriber>();
+        services.AddSingleton<KafkaMessageBus>();
+        services.AddSingleton<KafkaMessageSubscriptionBuilder>();
+
+        // If subscriptions are configured, store them for later activation
+        if (configureSubscriptions != null)
+        {
+            services.AddSingleton<Action<KafkaMessageSubscriptionBuilder>>(configureSubscriptions);
+        }
 
         return services;
     }

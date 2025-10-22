@@ -7,7 +7,7 @@ namespace BuildingBlocks.Infrastructure.Messaging.MessageBus;
 public partial class InMemoryMessageBus : IMessageBus
 {
     private readonly ILogger<InMemoryMessageBus> _logger;
-    private readonly ConcurrentDictionary<Type, List<Func<object, MessageMetadata, Task>>> _handlers = new();
+    private readonly ConcurrentDictionary<Type, List<Func<object, MessageEnvelop, Task>>> _handlers = new();
     private bool _isStarted;
 
     public InMemoryMessageBus(ILogger<InMemoryMessageBus> logger)
@@ -17,7 +17,7 @@ public partial class InMemoryMessageBus : IMessageBus
 
     public async Task PublishAsync<T>(T message, CancellationToken cancellationToken = default) where T : class
     {
-        var metadata = new MessageMetadata
+        var metadata = new MessageEnvelop
         {
             MessageType = typeof(T).Name,
             Source = "InMemoryMessageBus"
@@ -27,7 +27,7 @@ public partial class InMemoryMessageBus : IMessageBus
 
     public async Task PublishAsync<T>(T message, string destination, CancellationToken cancellationToken = default) where T : class
     {
-        var metadata = new MessageMetadata
+        var metadata = new MessageEnvelop
         {
             MessageType = typeof(T).Name,
             Source = "InMemoryMessageBus",
@@ -36,7 +36,7 @@ public partial class InMemoryMessageBus : IMessageBus
         await PublishAsync(message, metadata, cancellationToken);
     }
 
-    public async Task PublishAsync<T>(T message, MessageMetadata metadata, CancellationToken cancellationToken = default) where T : class
+    public async Task PublishAsync<T>(T message, MessageEnvelop metadata, CancellationToken cancellationToken = default) where T : class
     {
         ArgumentNullException.ThrowIfNull(metadata);
         
@@ -56,13 +56,13 @@ public partial class InMemoryMessageBus : IMessageBus
         LogMessagePublished(_logger, messageType.Name, metadata.MessageId);
     }
 
-    public Task SubscribeAsync<T>(Func<T, MessageMetadata, Task> handler, CancellationToken cancellationToken = default) where T : class
+    public Task SubscribeAsync<T>(Func<T, MessageEnvelop, Task> handler, CancellationToken cancellationToken = default) where T : class
     {
         var messageType = typeof(T);
-        var wrappedHandler = new Func<object, MessageMetadata, Task>((msg, metadata) => handler((T)msg, metadata));
+        var wrappedHandler = new Func<object, MessageEnvelop, Task>((msg, metadata) => handler((T)msg, metadata));
         
         _handlers.AddOrUpdate(messageType,
-            new List<Func<object, MessageMetadata, Task>> { wrappedHandler },
+            new List<Func<object, MessageEnvelop, Task>> { wrappedHandler },
             (key, existing) =>
             {
                 existing.Add(wrappedHandler);
@@ -96,7 +96,7 @@ public partial class InMemoryMessageBus : IMessageBus
         return Task.CompletedTask;
     }
 
-    private async Task ExecuteHandler(Func<object, MessageMetadata, Task> handler, object message, MessageMetadata metadata)
+    private async Task ExecuteHandler(Func<object, MessageEnvelop, Task> handler, object message, MessageEnvelop metadata)
     {
         try
         {

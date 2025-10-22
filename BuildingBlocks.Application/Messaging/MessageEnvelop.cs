@@ -1,8 +1,8 @@
 namespace BuildingBlocks.Application.Messaging;
 
-public class MessageMetadata
+public class MessageEnvelop
 {
-    public MessageMetadata()
+    public MessageEnvelop()
     {
         Headers = new Dictionary<string, string>();
         Properties = new Dictionary<string, object>();

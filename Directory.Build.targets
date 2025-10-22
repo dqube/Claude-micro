@@ -80,6 +80,7 @@
     <PackageReference Include="Scrutor" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <!-- Infrastructure layer specific package references -->
@@ -93,6 +94,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="Confluent.Kafka" />
+
     
     <!-- OpenTelemetry -->
     <PackageReference Include="OpenTelemetry" />

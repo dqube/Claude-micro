@@ -22,7 +22,7 @@ public class MessageDispatcher : IMessageDispatcher
         await Task.WhenAll(tasks);
     }
 
-    public async Task DispatchAsync<TMessage>(TMessage message, MessageMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task DispatchAsync<TMessage>(TMessage message, MessageEnvelop metadata, CancellationToken cancellationToken = default)
         where TMessage : class, IMessage
     {
         var handlers = _serviceProvider.GetServices<IMessageHandler<TMessage>>();
@@ -40,7 +40,7 @@ public class MessageDispatcher : IMessageDispatcher
         await Task.WhenAll(tasks);
     }
 
-    public async Task DispatchAsync(object message, MessageMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task DispatchAsync(object message, MessageEnvelop metadata, CancellationToken cancellationToken = default)
     {
         var handlers = _serviceProvider.GetServices<IMessageHandler>()
             .Where(h => h.CanHandle(message.GetType()));

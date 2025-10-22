@@ -62,7 +62,7 @@ public class Mediator : IMediator
         await _messageDispatcher.DispatchAsync(message, cancellationToken);
     }
 
-    public async Task DispatchAsync<TMessage>(TMessage message, MessageMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task DispatchAsync<TMessage>(TMessage message, MessageEnvelop metadata, CancellationToken cancellationToken = default)
         where TMessage : class, IMessage
     {
         await _messageDispatcher.DispatchAsync(message, metadata, cancellationToken);
@@ -73,7 +73,7 @@ public class Mediator : IMediator
         await _messageDispatcher.DispatchAsync(message, cancellationToken);
     }
 
-    public async Task DispatchAsync(object message, MessageMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task DispatchAsync(object message, MessageEnvelop metadata, CancellationToken cancellationToken = default)
     {
         await _messageDispatcher.DispatchAsync(message, metadata, cancellationToken);
     }
