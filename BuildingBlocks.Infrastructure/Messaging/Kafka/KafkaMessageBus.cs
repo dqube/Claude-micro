@@ -131,7 +131,7 @@ public sealed class KafkaMessageBus : IMessageBus, IDisposable
 
             var kafkaMessage = new Message<string, byte[]>
             {
-                Key = message.Id.ToString(),
+                Key = metadata.MessageId, // Use metadata.MessageId as the Kafka message key
                 Value = messageBytes,
                 Headers = new Headers
                 {
@@ -485,6 +485,8 @@ public sealed class KafkaMessageBus : IMessageBus, IDisposable
                     _logger.LogDebug(
                         "Consuming message from topic {Topic}, partition {Partition}, offset {Offset}, MessageId: {MessageId}",
                         consumeResult.Topic, consumeResult.Partition.Value, consumeResult.Offset.Value, message.Id);
+
+
 
                     try
                     {

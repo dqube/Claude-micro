@@ -11,6 +11,7 @@ using BuildingBlocks.Infrastructure.Data.Seeding;
 using BuildingBlocks.Infrastructure.Caching;
 using BuildingBlocks.Application.Caching;
 using BuildingBlocks.Infrastructure.Messaging.Kafka;
+using BuildingBlocks.Infrastructure.Messaging.InMemory;
 using BuildingBlocks.Infrastructure.Messaging.Configuration;
 using BuildingBlocks.Infrastructure.Authentication.JWT;
 using BuildingBlocks.Infrastructure.Storage.Files;
@@ -131,7 +132,7 @@ public static class ServiceRegistration
     }
 
     /// <summary>
-    /// Adds messaging services based on configuration provider (Kafka only)
+    /// Adds messaging services based on configuration provider (Kafka or InMemory)
     /// </summary>
     public static IServiceCollection AddMessagingServices(
         this IServiceCollection services,
@@ -141,7 +142,7 @@ public static class ServiceRegistration
 
         // Read the messaging provider from configuration
         var messagingSection = configuration.GetSection("Messaging");
-        var provider = messagingSection["Provider"] ?? "Kafka";
+        var provider = messagingSection["Provider"] ?? "InMemory";
 
         if (provider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
         {
@@ -157,10 +158,17 @@ public static class ServiceRegistration
             // Register subscription builder
             services.AddSingleton<KafkaMessageSubscriptionBuilder>();
         }
+        else if (provider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+        {
+            // Register InMemory message bus for development and testing
+            services.AddSingleton<IMessageBus, InMemoryMessageBus>();
+            
+            // Register concrete implementation
+            services.AddSingleton<InMemoryMessageBus>();
+        }
         else
         {
-            // InMemoryMessageBus is not implemented in this project
-            throw new NotImplementedException($"Messaging provider '{provider}' is not implemented. Use 'Kafka' instead.");
+            throw new NotImplementedException($"Messaging provider '{provider}' is not implemented. Use 'Kafka' or 'InMemory' instead.");
         }
 
         // Register domain event service
@@ -170,13 +178,13 @@ public static class ServiceRegistration
     }
 
     /// <summary>
-    /// Legacy method for backward compatibility - defaults to Kafka
+    /// Legacy method for backward compatibility - defaults to InMemory
     /// </summary>
     public static IServiceCollection AddMessagingServices(this IServiceCollection services)
     {
-        // InMemoryMessageBus is not implemented - using Kafka as default
-        services.AddSingleton<IMessageBus, KafkaMessageBus>();
-        services.AddSingleton<KafkaMessageBus>();
+        // Default to InMemory for backward compatibility
+        services.AddSingleton<IMessageBus, InMemoryMessageBus>();
+        services.AddSingleton<InMemoryMessageBus>();
         services.AddScoped<IDomainEventService, DomainEventService>();
         return services;
     }
